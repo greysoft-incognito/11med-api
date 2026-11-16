@@ -17,7 +17,7 @@ deploys. Two deploys to the same server never overlap: a second one waits for th
 ## Setting up a server (once per server)
 
 1. **Software**: PHP 8.4 (CI tests on 8.4) with `pdo_pgsql`, `pgsql`, `intl`, `zip`, `gd`, `exif`, `bcmath`
-   and `mbstring`; Composer 2; Git; PostgreSQL 16 or later; a web server (nginx or Apache) with PHP-FPM;
+   and `mbstring`; Composer 2; Git; PostgreSQL 14 or later; a web server (nginx or Apache) with PHP-FPM;
    Redis for the queue and cache in production.
 2. **Database**: create the database and a user that owns it.
 3. **Clone the repository** to the path you will use as `DEPLOY_PATH`, e.g.

@@ -19,4 +19,4 @@ Things only the owner can do or decide. Each says whether it blocks and what.
 - [ ] **HT-007 · Paystack.** Test and live secret keys, and the webhook URL set on the dashboard. **Blocks:** M9 going live.
 - [ ] **HT-008 · Call provider.** A Daily.co (recommended) or Agora account and API key. **Blocks:** M10.4 going live.
 - [ ] **HT-009 · Allergy classes.** A clinician to review the drug class seed. **Blocks:** nothing; M10.3 ships the seed marked unreviewed.
-- [ ] **HT-010 · Test server database.** Confirm `11med-api.greysoft.com.ng` runs PostgreSQL 16 or later (this environment has no SSH client to check). **Blocks:** the first staging deploy.
+- [x] **HT-010 · Test server database.** Answered 2026-11-17: PHP 8.4.27, PostgreSQL 14.23 client; CI now matches. **Blocks:** the first staging deploy.
