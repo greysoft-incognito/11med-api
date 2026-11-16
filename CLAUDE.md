@@ -36,7 +36,7 @@ The approved proposal, with the domain model and the milestone order, is the Cla
 | Layer | Choice |
 | --- | --- |
 | Framework | Laravel 13 from the `toneflix/laravel-op` starter kit, version in `app/Constants/Op.php` |
-| PHP | 8.3 or later (CI runs 8.3) |
+| PHP | 8.4 on the servers and in CI (8.3 is the floor) |
 | Database | PostgreSQL only (16 locally and in CI). `php artisan test` runs on `elevenmed_test` |
 | Auth | Sanctum personal access tokens (15 minutes) plus our own rotating refresh tokens |
 | Roles | `spatie/laravel-permission`: `patient`, `doctor`, `pharmacy`, `laboratory`, `admin` |
