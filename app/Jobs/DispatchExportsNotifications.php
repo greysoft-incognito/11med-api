@@ -4,9 +4,12 @@ namespace App\Jobs;
 
 use App\Mail\ReportGenerated;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Stringable;
 
 class DispatchExportsNotifications implements ShouldQueue
 {
@@ -15,14 +18,11 @@ class DispatchExportsNotifications implements ShouldQueue
     /**
      * Create a new job instance.
      *
-     * @param \Illuminate\Database\Eloquent\Model $dataset
-     * @param \Illuminate\Support\Collection<int, \Illuminate\Support\Stringable> $data_emails
-     * @param string $title
-     * @param integer $batch
+     * @param  Collection<int, Stringable>  $data_emails
      */
     public function __construct(
-        protected \Illuminate\Database\Eloquent\Model $dataset,
-        protected \Illuminate\Support\Collection $data_emails,
+        protected Model $dataset,
+        protected Collection $data_emails,
         protected string $title,
         protected int $batch = 1,
     ) {}

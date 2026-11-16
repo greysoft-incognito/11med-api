@@ -11,7 +11,7 @@ class ConfigTest extends TestCase
 {
     use InteractsWithConsole;
 
-    public function testCanLoadConfig(): void
+    public function test_can_load_config(): void
     {
         $user = User::first();
 
@@ -29,7 +29,7 @@ class ConfigTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testCanLoadAParticularConfig(): void
+    public function test_can_load_a_particular_config(): void
     {
         $user = User::first();
 
@@ -47,7 +47,7 @@ class ConfigTest extends TestCase
         $response->assertStatus(200);
     }
 
-    public function testCanSaveConfig(): void
+    public function test_can_save_config(): void
     {
         $user = User::first();
 

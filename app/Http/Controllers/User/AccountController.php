@@ -6,7 +6,10 @@ use App\Enums\HttpStatus;
 use App\Helpers\Provider;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -57,7 +60,7 @@ class AccountController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function index()
     {
@@ -72,11 +75,11 @@ class AccountController extends Controller
      * Update the specified resource in storage.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function update(Request $request, $identifier = null)
     {
-        /** @var \App\Models\User */
+        /** @var User */
         $user = $request->user();
 
         $filled = collect($request->all());
@@ -240,7 +243,7 @@ class AccountController extends Controller
      * Update the user profile picture.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function updateProfilePicture(Request $request)
     {
@@ -252,8 +255,8 @@ class AccountController extends Controller
             'image.required' => 'You did not select an image for upload',
         ]);
 
-        $user->image = (new Media())->save('avatar', 'image', $user->image);
-        $user->updated_at = \Carbon\Carbon::now();
+        $user->image = (new Media)->save('avatar', 'image', $user->image);
+        $user->updated_at = Carbon::now();
         $user->saveQuietly();
 
         return (new UserResource($user))->additional([
@@ -267,7 +270,7 @@ class AccountController extends Controller
      * Update the user password.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function updatePassword(Request $request)
     {
@@ -301,7 +304,7 @@ class AccountController extends Controller
     /**
      * Mark the user for deletion.
      *
-     * @return \Illuminate\Http\Response
+     * @return Response
      */
     public function destroy(Request $request)
     {
@@ -311,7 +314,7 @@ class AccountController extends Controller
             'reason.required' => 'We would really love to know why you are leaving.',
         ]);
 
-        /** @var \App\Models\User */
+        /** @var User */
         $user = $request->user('sanctum');
         $user->deleting_at = now();
         $user->save();

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Enums\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\NotificationCollection;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -15,7 +16,7 @@ class NotificationController extends Controller
      */
     public function index(Request $request)
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         $query = $user->notifications()->getQuery();

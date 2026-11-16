@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\HttpStatus;
+use App\Enums\Permission;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\NotificationTemplateCollection;
 use App\Http\Resources\NotificationTemplateResource;
@@ -14,9 +15,9 @@ class NotificationTemplateController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(/*Request $request*/)
+    public function index(/* Request $request */)
     {
-        \App\Enums\Permission::NOTIFICATIONS_TEMPS->authorize();
+        Permission::NOTIFICATIONS_TEMPS->authorize();
 
         $query = NotificationTemplate::query();
 
@@ -38,7 +39,7 @@ class NotificationTemplateController extends Controller
      */
     public function show(NotificationTemplate $template)
     {
-        \App\Enums\Permission::NOTIFICATIONS_TEMPS->authorize();
+        Permission::NOTIFICATIONS_TEMPS->authorize();
 
         return (new NotificationTemplateResource($template))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -52,7 +53,7 @@ class NotificationTemplateController extends Controller
      */
     public function update(Request $request, NotificationTemplate $template)
     {
-        \App\Enums\Permission::NOTIFICATIONS_TEMPS->authorize();
+        Permission::NOTIFICATIONS_TEMPS->authorize();
 
         if ($template->id === -1) {
             unset($template->id);

@@ -6,6 +6,8 @@ use App\Helpers\Provider;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\Twilio\TwilioSmsMessage;
+use Toneflix\KudiSmsNotification\KudiSmsMessage;
 
 class AccountVerified extends Notification
 {
@@ -97,12 +99,12 @@ class AccountVerified extends Notification
         return SmsProvider::getMessage($message->toPlain());
     }
 
-    public function toTwilio($n): \NotificationChannels\Twilio\TwilioSmsMessage
+    public function toTwilio($n): TwilioSmsMessage
     {
         return $this->toSms($n);
     }
 
-    public function toKudiSms($n): \Toneflix\KudiSmsNotification\KudiSmsMessage
+    public function toKudiSms($n): KudiSmsMessage
     {
         return $this->toSms($n);
     }

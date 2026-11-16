@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Mail\ReportGenerated;
 use App\Models\User;
 use App\Services\SimpleDataExporter;
-use Illuminate\Support\Facades\Storage;
-use Tests\TestCase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
+use Tests\TestCase;
 
 class ExportTest extends TestCase
 {
@@ -15,13 +17,12 @@ class ExportTest extends TestCase
     {
         $users = User::factory(3)->create();
 
-        (new SimpleDataExporter())->export();
+        (new SimpleDataExporter)->export();
 
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $reader = new Xlsx;
         $file = collect(Storage::disk('protected')->allFiles())->last();
 
         $spreadsheet = $reader->setReadDataOnly(true)->load(Storage::disk('protected')->path($file));
-
 
         $this->assertSame(
             $users[0]->firstname,
@@ -41,7 +42,7 @@ class ExportTest extends TestCase
 
         $file = collect(Storage::disk('protected')->allFiles())->last();
 
-        Mail::assertSent(\App\Mail\ReportGenerated::class, 'user@example.com');
+        Mail::assertSent(ReportGenerated::class, 'user@example.com');
 
         Storage::disk('protected')->delete($file);
     }
@@ -52,7 +53,7 @@ class ExportTest extends TestCase
 
         (new SimpleDataExporter(dataset: ['users']))->export();
 
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $reader = new Xlsx;
         $file = collect(Storage::disk('protected')->allFiles())->last();
 
         $spreadsheet = $reader->setReadDataOnly(true)->load(Storage::disk('protected')->path($file));
@@ -73,7 +74,7 @@ class ExportTest extends TestCase
 
         (new SimpleDataExporter(50))->exportModel($users[0])->export(noMails: true);
 
-        $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+        $reader = new Xlsx;
         $file = collect(Storage::disk('protected')->allFiles())->last();
 
         $spreadsheet = $reader->setReadDataOnly(true)->load(Storage::disk('protected')->path($file));

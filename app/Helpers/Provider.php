@@ -5,6 +5,7 @@ namespace App\Helpers;
 use App\Enums\HttpStatus;
 use App\Models\PasswordCodeResets;
 use App\Services\MessageParser;
+use Carbon\Carbon;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Eloquent\Model;
@@ -140,8 +141,8 @@ class Provider
      * Parses a message in the messages config and returns
      * It in the required format
      *
-     * @param  string  $configKey — The corresponding message key from the [messages] config
-     * @param  mixed[]  ...$params — Exra parameters to pass to the config $name
+     * @param  string  $configKey  — The corresponding message key from the [messages] config
+     * @param  mixed[]  ...$params  — Exra parameters to pass to the config $name
      */
     public static function messageParser(string $configKey, ...$params): MessageParser
     {
@@ -159,14 +160,14 @@ class Provider
 
                 $action = 'activate your account';
 
-                /** @var \Carbon\Carbon */
+                /** @var Carbon */
                 $datetime = $check->last_attempt;
             } else {
                 $check = PasswordCodeResets::whereEmail($request?->email)->first();
 
                 $action = 'reset your password';
 
-                /** @var \Carbon\Carbon */
+                /** @var Carbon */
                 $datetime = $check->created_at ?? null;
             }
 
@@ -195,7 +196,7 @@ class Provider
             return [
                 'data' => count(static::$responseKeys)
                     ? collect($data->items())
-                    ->map(fn($e) => collect($e)->filter(fn($k, $v) => in_array($v, static::$responseKeys)))
+                        ->map(fn($e) => collect($e)->filter(fn($k, $v) => in_array($v, static::$responseKeys)))
                     : $data->items(),
                 'meta' => [
                     'current_page' => $data->currentPage(),

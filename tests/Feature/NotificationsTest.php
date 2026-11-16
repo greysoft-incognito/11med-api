@@ -10,6 +10,7 @@ use App\Notifications\SendCode;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Notification;
+use Tests\Notifications\TestNotifications;
 use Tests\TestCase;
 
 class NotificationsTest extends TestCase
@@ -19,7 +20,7 @@ class NotificationsTest extends TestCase
     /**
      * A basic feature test example.
      */
-    public function testCanSendVerificationCode(): void
+    public function test_can_send_verification_code(): void
     {
         Notification::fake();
 
@@ -35,7 +36,7 @@ class NotificationsTest extends TestCase
         );
     }
 
-    public function testCanSendVerifiedNotification(): void
+    public function test_can_send_verified_notification(): void
     {
         Notification::fake();
 
@@ -54,7 +55,7 @@ class NotificationsTest extends TestCase
         );
     }
 
-    public function testDispatchesVerifiedEvent(): void
+    public function test_dispatches_verified_event(): void
     {
         Event::fake();
 
@@ -72,7 +73,7 @@ class NotificationsTest extends TestCase
         });
     }
 
-    public function testDispatchesVerifiedEventFromToken(): void
+    public function test_dispatches_verified_event_from_token(): void
     {
         Event::fake();
 
@@ -82,7 +83,7 @@ class NotificationsTest extends TestCase
 
         $this->actingAs($user)->put(
             'api/verify/with-code/email',
-            ['code' => Url::base64urlEncode($user->email_verify_code.'|'.md5(time()))]
+            ['code' => Url::base64urlEncode($user->email_verify_code . '|' . md5(time()))]
         );
 
         Event::assertDispatched(function (Verified $event) use ($user) {
@@ -90,28 +91,28 @@ class NotificationsTest extends TestCase
         });
     }
 
-    public function testCanLoadDatabaseNotifications(): void
+    public function test_can_load_database_notifications(): void
     {
         Notification::fake();
 
         $user = User::factory()->unverified()->create();
 
-        $user->notify(new \Tests\Notifications\TestNotifications());
+        $user->notify(new TestNotifications);
 
         $response = $this->actingAs($user)->get('api/account/notifications');
 
         $response->assertOk();
-        Notification::assertSentTo($user, \Tests\Notifications\TestNotifications::class);
+        Notification::assertSentTo($user, TestNotifications::class);
     }
 
-    public function testCanDeleteDatabaseNotifications(): void
+    public function test_can_delete_database_notifications(): void
     {
         $user = User::factory()->unverified()->create();
 
-        $user->notify(new \Tests\Notifications\TestNotifications());
+        $user->notify(new TestNotifications);
 
         $id = $user->notifications()->first()->id;
-        $response = $this->actingAs($user)->delete('api/account/notifications/'.$id);
+        $response = $this->actingAs($user)->delete('api/account/notifications/' . $id);
 
         $response->assertAccepted();
     }

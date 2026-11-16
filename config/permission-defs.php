@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 return [
     /*
     |--------------------------------------------------------------------------
@@ -10,7 +12,7 @@ return [
     | model will be considered as the user model and used to associte roles and
     | permissions to the indicated users.
     */
-    'user-model' => \App\Models\User::class,
+    'user-model' => User::class,
     /*
     |--------------------------------------------------------------------------
     | Super Admin Role

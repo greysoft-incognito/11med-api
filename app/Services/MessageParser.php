@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\NotificationTemplate;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\HtmlString;
 
 class MessageParser
 {
@@ -84,8 +85,8 @@ class MessageParser
     /**
      * Initialize the class
      *
-     * @param  string  $configKey The corresponding message key from the [messages] config
-     * @param  mixed[]  $params Exra parameters to pass to the config
+     * @param  string  $configKey  The corresponding message key from the [messages] config
+     * @param  mixed[]  $params  Exra parameters to pass to the config
      */
     public function __construct(
         string $configKey,
@@ -165,17 +166,17 @@ class MessageParser
 
     public function toMail(): MailMessage
     {
-        $template = (new NotificationTemplate())->resolveRouteBinding($this->configKey);
+        $template = (new NotificationTemplate)->resolveRouteBinding($this->configKey);
 
         $this->subject = trans($template->subject, $this->params);
         $this->caption = trans($template->caption ?? '', $this->params);
 
         $this->htmlMessage = $template && $template->active
-            ? new \Illuminate\Support\HtmlString((string) trans($template->html, $this->params))
+            ? new HtmlString((string) trans($template->html, $this->params))
             : 'email';
 
         $this->plainMessage = $template && $template->active
-            ? new \Illuminate\Support\HtmlString((string) trans($template->plain, $this->params))
+            ? new HtmlString((string) trans($template->plain, $this->params))
             : 'email-plain';
 
         $this->meta['footnote'] = trans($template->footnote ?: config('messages.footnote'), ['year' => date('Y'), ...$this->params]);
@@ -198,7 +199,7 @@ class MessageParser
             }
         }
 
-        return (new MailMessage())
+        return (new MailMessage)
             ->subject($this->subject)
             ->view([$this->htmlMessage, $this->plainMessage], [
                 'meta' => $this->meta,
@@ -210,7 +211,7 @@ class MessageParser
 
     public function toPlain(): string
     {
-        $template = (new NotificationTemplate())->resolveRouteBinding($this->configKey);
+        $template = (new NotificationTemplate)->resolveRouteBinding($this->configKey);
 
         $this->plainMessage = $template && $template->active
             ? (string) trans($template->plain, $this->params)
@@ -221,7 +222,7 @@ class MessageParser
 
     public function toSms(): string
     {
-        $template = (new NotificationTemplate())->resolveRouteBinding($this->configKey);
+        $template = (new NotificationTemplate)->resolveRouteBinding($this->configKey);
 
         $smsMessage = $template && $template->active && $template->sms
             ? (string) trans($template->sms, $this->params)
@@ -232,17 +233,17 @@ class MessageParser
 
     public function build(): self
     {
-        $template = (new NotificationTemplate())->resolveRouteBinding($this->configKey);
+        $template = (new NotificationTemplate)->resolveRouteBinding($this->configKey);
 
         $this->subject = $template->subject;
         $this->caption = $template->caption;
 
         $this->htmlMessage = $template && $template->active
-            ? new \Illuminate\Support\HtmlString((string) trans($template->html, $this->params))
+            ? new HtmlString((string) trans($template->html, $this->params))
             : 'email';
 
         $this->plainMessage = $template && $template->active
-            ? new \Illuminate\Support\HtmlString((string) trans($template->plain, $this->params))
+            ? new HtmlString((string) trans($template->plain, $this->params))
             : 'email-plain';
 
         if ($template->lines && count((array) $template->lines) > 0) {

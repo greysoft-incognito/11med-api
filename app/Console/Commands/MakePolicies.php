@@ -37,15 +37,15 @@ class MakePolicies extends Command
         ));
 
         $fileList = $files
-            ->map(fn ($path) => str($path)
+            ->map(fn($path) => str($path)
                 ->afterLast('app')
                 ->prepend('App')
                 ->replace('/', '\\')
                 ->remove('.php')
                 ->toString())
-            ->filter(fn ($name) => new $name() instanceof Model)
+            ->filter(fn($name) => new $name instanceof Model)
             ->map(
-                fn ($path) => str($path)
+                fn($path) => str($path)
                     ->afterLast('Models\\')
                     ->replace('\\', '/')
                     ->toString()
@@ -63,7 +63,7 @@ class MakePolicies extends Command
         ];
 
         if (! count($exclude) && app()->runningInConsole()) {
-            $defModels = $fileList->where(fn ($name) => in_array($name, $defaultExcludes))->keys()->join(', ');
+            $defModels = $fileList->where(fn($name) => in_array($name, $defaultExcludes))->keys()->join(', ');
             $exclude = $this->choice('Choose models to exclude', $fileList->toArray(), $defModels, null, true);
             $exclude = array_merge($exclude, $defaultExcludes);
         } else {

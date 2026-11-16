@@ -3,6 +3,7 @@
 namespace App\Exports\Sheets;
 
 use App\Helpers\Transformer;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Enumerable;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -23,14 +24,13 @@ class DataSheets implements FromCollection, ShouldAutoSize, WithHeadings, WithMa
     /**
      * The sheets constructor
      *
-     * @param array{id:string,model:class-string<TModel>,model_id:string|int|null,keywords:string,name:string,columns:array<int,string>} $exportable
-     * @param int $page
-     * @param  \Illuminate\Database\Eloquent\Collection<int, TModel>  $submisions
+     * @param  array{id:string,model:class-string<TModel>,model_id:string|int|null,keywords:string,name:string,columns:array<int,string>}  $exportable
+     * @param  Collection<int, TModel>  $submisions
      */
     public function __construct(
         protected array $exportable,
         protected int $page,
-        protected \Illuminate\Database\Eloquent\Collection $submisions
+        protected Collection $submisions
     ) {}
 
     public function headings(): array
@@ -68,9 +68,10 @@ class DataSheets implements FromCollection, ShouldAutoSize, WithHeadings, WithMa
 
             if (config("exports.transformers.$key.0") && method_exists(Transformer::class, config("exports.transformers.$key.0"))) {
                 $transformed = call_user_func_array(
-                    array(Transformer::class, config("exports.transformers.$key.0")),
+                    [Transformer::class, config("exports.transformers.$key.0")],
                     [$value, ...config("exports.transformers.$key.1")]
                 );
+
                 return [$valueKey => $transformed];
             }
 

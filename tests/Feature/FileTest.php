@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class FileTest extends TestCase
 {
-    public function testFileUpload(): void
+    public function test_file_upload(): void
     {
         Route::post('/test/file/upload', function (Request $request) {
             $file = File::make();

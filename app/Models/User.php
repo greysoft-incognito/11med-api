@@ -8,8 +8,10 @@ use App\Models\Scopes\NotDeletingUserScope;
 use App\Notifications\SendCode;
 use App\Traits\ModelCanExtend;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -94,8 +96,8 @@ class User extends Authenticatable implements WalletOperations
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-            'data' => \Illuminate\Database\Eloquent\Casts\AsCollection::class,
-            'access_data' => \Illuminate\Database\Eloquent\Casts\AsCollection::class,
+            'data' => AsCollection::class,
+            'access_data' => AsCollection::class,
             'last_seen' => 'datetime',
             'deleting_at' => 'datetime',
             'last_attempt' => 'datetime',
@@ -122,12 +124,16 @@ class User extends Authenticatable implements WalletOperations
      * Retrieve the model for a bound value.
      *
      * @param  string|null  $field
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * @return Model|null
      */
     public function resolveRouteBinding($value, $field = null)
     {
-        return $this->where('id', $value)
-            ->orWhere('username', $value)
+        return $this
+            ->when(
+                is_numeric($value),
+                fn($q) => $q->where('id', $value)->orWhere('username', $value),
+                fn($q) => $q->where('username', $value)
+            )
             ->firstOrFail();
     }
 

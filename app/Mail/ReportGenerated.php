@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Helpers\Provider;
 use App\Helpers\Url;
+use App\Services\MessageParser;
 use Carbon\CarbonImmutable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Model;
@@ -16,7 +17,7 @@ class ReportGenerated extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public \App\Services\MessageParser $message;
+    public MessageParser $message;
 
     /**
      * Create a new message instance.

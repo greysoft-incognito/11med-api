@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\RegisterErrorViewPaths;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Validation\ValidationException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -46,23 +47,23 @@ class ExceptionHandler // extends Handler
             return match (true) {
                 $e instanceof NotFoundHttpException ||
                     $e instanceof ModelNotFoundException => static::renderException(
-                    str(str($msg)->contains('The route')
-                        ? str($msg)->before('.')->append('.')
-                        : HttpStatus::message(HttpStatus::NOT_FOUND))->replace('resource', $prefix ?: 'resource'),
-                    HttpStatus::NOT_FOUND
-                ),
-                $e instanceof \Spatie\Permission\Exceptions\UnauthorizedException ||
+                        str(str($msg)->contains('The route')
+                            ? str($msg)->before('.')->append('.')
+                            : HttpStatus::message(HttpStatus::NOT_FOUND))->replace('resource', $prefix ?: 'resource'),
+                        HttpStatus::NOT_FOUND
+                    ),
+                $e instanceof UnauthorizedException ||
                     $e instanceof AuthorizationException ||
                     $e instanceof AccessDeniedHttpException ||
                     $e->getCode() === HttpStatus::FORBIDDEN => static::renderException(
-                    $plainMessage ? $plainMessage : HttpStatus::message(HttpStatus::FORBIDDEN),
-                    HttpStatus::FORBIDDEN
-                ),
+                        $plainMessage ? $plainMessage : HttpStatus::message(HttpStatus::FORBIDDEN),
+                        HttpStatus::FORBIDDEN
+                    ),
                 $e instanceof AuthenticationException ||
                     $e instanceof UnauthorizedHttpException => static::renderException(
-                    HttpStatus::message(HttpStatus::UNAUTHORIZED),
-                    HttpStatus::UNAUTHORIZED
-                ),
+                        HttpStatus::message(HttpStatus::UNAUTHORIZED),
+                        HttpStatus::UNAUTHORIZED
+                    ),
                 $e instanceof MethodNotAllowedHttpException => static::renderException(
                     HttpStatus::message(HttpStatus::METHOD_NOT_ALLOWED),
                     HttpStatus::METHOD_NOT_ALLOWED
@@ -121,6 +122,6 @@ class ExceptionHandler // extends Handler
      */
     protected static function registerErrorViewPaths()
     {
-        (new RegisterErrorViewPaths())();
+        (new RegisterErrorViewPaths)();
     }
 }

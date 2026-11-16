@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class AllCollectionTest extends TestCase
 {
-    public function testCanLoadCollection()
+    public function test_can_load_collection()
     {
         User::factory(10)->create();
 
@@ -26,7 +26,7 @@ class AllCollectionTest extends TestCase
         $this->assertArrayHasKey('data', $response->collect());
     }
 
-    public function testCanLoadCollectionWithMetaAsConfigured()
+    public function test_can_load_collection_with_meta_as_configured()
     {
         config([
             'resource-modifier.paginated_response_meta' => [
@@ -57,7 +57,7 @@ class AllCollectionTest extends TestCase
         $this->assertArrayHasKey('perPage', $response->collect('meta'));
     }
 
-    public function testCanLoadCollectionWithLinksAsConfigured()
+    public function test_can_load_collection_with_links_as_configured()
     {
         config([
             'resource-modifier.paginated_response_links' => [
@@ -84,7 +84,7 @@ class AllCollectionTest extends TestCase
         $this->assertArrayHasKey('nextItem', $response->collect('links'));
     }
 
-    public function testCanLoadCollectionWithoutLinksAsConfigured()
+    public function test_can_load_collection_without_links_as_configured()
     {
         config([
             'resource-modifier.paginated_response_extra' => ['meta'],
@@ -103,7 +103,7 @@ class AllCollectionTest extends TestCase
         $this->assertArrayNotHasKey('links', $response->collect());
     }
 
-    public function testCanLoadCollectionWithoutMetaAsConfigured()
+    public function test_can_load_collection_without_meta_as_configured()
     {
         config([
             'resource-modifier.paginated_response_extra' => ['links'],
@@ -122,7 +122,7 @@ class AllCollectionTest extends TestCase
         $this->assertArrayNotHasKey('meta', $response->collect());
     }
 
-    public function testCanLoadCollectionWithoutMetaAndLinksAsConfigured()
+    public function test_can_load_collection_without_meta_and_links_as_configured()
     {
         config([
             'resource-modifier.paginated_response_extra' => [],
