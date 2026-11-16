@@ -1,0 +1,90 @@
+name: Deploy
+
+# A push to `staging` or `production` deploys that branch to its server; a manual run
+# deploys the chosen ref to the chosen server. Each server is a GitHub environment.
+on:
+  push:
+    branches: [staging, production]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Server to deploy the selected ref to
+        type: choice
+        options: [staging, production]
+        default: staging
+
+jobs:
+  test:
+    uses: ./.github/workflows/ci.yml
+
+  staging:
+    name: Deploy to staging
+    needs: test
+    if: (github.event_name == 'push' && github.ref_name == 'staging') || inputs.environment == 'staging'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: deploy-staging
+      cancel-in-progress: false
+    environment:
+      name: staging
+      url: ${{ vars.APP_URL }}
+
+    # Environment secrets override repository secrets of the same name, so shared values
+    # live on the repository and each server sets only what differs.
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      PHP_BIN: ${{ vars.PHP_BIN }}
+      COMPOSER_CMD: ${{ vars.COMPOSER_CMD }}
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Deploy
+        run: scripts/deploy.sh staging "${{ github.ref_name }}" "${{ github.sha }}"
+
+      - name: Check the API answers
+        if: vars.APP_URL != ''
+        run: curl -fsS --retry 5 --retry-delay 3 "${{ vars.APP_URL }}/api/v1/health"
+
+  production:
+    name: Deploy to production
+    needs: test
+    if: (github.event_name == 'push' && github.ref_name == 'production') || inputs.environment == 'production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    environment:
+      name: production
+      url: ${{ vars.APP_URL }}
+
+    env:
+      SSH_HOST: ${{ secrets.SSH_HOST }}
+      SSH_PORT: ${{ secrets.SSH_PORT }}
+      SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+      SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      PHP_BIN: ${{ vars.PHP_BIN }}
+      COMPOSER_CMD: ${{ vars.COMPOSER_CMD }}
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Deploy
+        run: scripts/deploy.sh production "${{ github.ref_name }}" "${{ github.sha }}"
+
+      - name: Check the API answers
+        if: vars.APP_URL != ''
+        run: curl -fsS --retry 5 --retry-delay 3 "${{ vars.APP_URL }}/api/v1/health"
