@@ -7,7 +7,9 @@ use App\Helpers\Provider;
 use App\Http\Controllers\Controller;
 use App\Models\PasswordCodeResets;
 use App\Notifications\SendCode;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Valorin\Random\Random;
 
 class PasswordResetLinkController extends Controller
@@ -15,9 +17,9 @@ class PasswordResetLinkController extends Controller
     /**
      * Handle an incoming password reset link request.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      *
-     * @throws \Illuminate\Validation\ValidationException
+     * @throws ValidationException
      */
     public function store(Request $request)
     {
@@ -31,11 +33,11 @@ class PasswordResetLinkController extends Controller
         PasswordCodeResets::whereEmail($request->email)->delete();
 
         // // generate the new code
-        $reset = new PasswordCodeResets();
+        $reset = new PasswordCodeResets;
         $reset->email = $request->email;
         $reset->code = Random::otp(6);
         $reset->save();
-        $reset->notify(new SendCode());
+        $reset->notify(new SendCode);
 
         // And finally return a response
         return Provider::response()->success([

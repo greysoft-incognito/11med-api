@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Exports\Sheets\DataSheets;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
@@ -17,9 +18,7 @@ class DataExports implements Export, WithMultipleSheets, WithProperties
     use Exportable;
 
     /**
-     * @param array{id:string,model:class-string<TModel>,model_id:string|int|null,keywords:string,name:string,columns:array<int,string>} $exportable
-     * @param int $perPage
-     *
+     * @param  array{id:string,model:class-string<TModel>,model_id:string|int|null,keywords:string,name:string,columns:array<int,string>}  $exportable
      */
     public function __construct(
         protected array $exportable,
@@ -37,10 +36,10 @@ class DataExports implements Export, WithMultipleSheets, WithProperties
 
     public function sheets(): array
     {
-        /** @var \Illuminate\Database\Eloquent\Builder $dataQuery */
+        /** @var Builder $dataQuery */
         $dataQuery = $this->exportable['model']::query();
 
-        if (!empty($this->exportable['model_id'])) {
+        if (! empty($this->exportable['model_id'])) {
             $keyName = (new $this->exportable['model'])->getKeyName();
 
             $key = is_array($this->exportable['model_id'])

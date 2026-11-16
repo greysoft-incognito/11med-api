@@ -7,9 +7,9 @@ class Strings
     /**
      * Validates a JSON string.
      *
-     * @param  string  $json The JSON string to validate.
-     * @param  int  $depth Maximum depth. Must be greater than zero.
-     * @param  int  $flags Bitmask of JSON decode options.
+     * @param  string  $json  The JSON string to validate.
+     * @param  int  $depth  Maximum depth. Must be greater than zero.
+     * @param  int  $flags  Bitmask of JSON decode options.
      * @return bool Returns true if the string is a valid JSON, otherwise false.
      */
     public static function jsonValidate($json, $depth = 512, $flags = 0)
@@ -48,6 +48,6 @@ class Strings
         $bytes /= pow(1024, $pow);
         // $bytes /= (1 << (10 * $pow));
 
-        return round($bytes, $precision).$units[$pow];
+        return round($bytes, $precision) . $units[$pow];
     }
 }

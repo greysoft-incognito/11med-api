@@ -1,31 +1,42 @@
 <?php
 
+use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\EnsureEmailIsVerified;
+use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Services\ExceptionHandler;
+use Faker\Factory;
+use Faker\Generator;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
+use Illuminate\Routing\Middleware\ThrottleRequests;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
+use Toneflix\FakerPicTwo\FakerPicTwoProvider;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withSingletons([
-        \Faker\Generator::class => function () {
-            $faker = \Faker\Factory::create();
-            $faker->addProvider(new \Toneflix\FakerPicTwo\FakerPicTwoProvider($faker));
+        Generator::class => function () {
+            $faker = Factory::create();
+            $faker->addProvider(new FakerPicTwoProvider($faker));
 
             return $faker;
         },
     ])
     ->withBindings(
         [
-            \Faker\Generator::class.':en_NG' => \Faker\Generator::class,
-            \Faker\Generator::class.':en_GB' => \Faker\Generator::class,
-            \Faker\Generator::class.':en_US' => \Faker\Generator::class,
+            Generator::class . ':en_NG' => Generator::class,
+            Generator::class . ':en_GB' => Generator::class,
+            Generator::class . ':en_US' => Generator::class,
         ]
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -58,23 +69,23 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->api(append: [
-            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
-            \Illuminate\Routing\Middleware\ThrottleRequests::class.':api',
-            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            EnsureFrontendRequestsAreStateful::class,
+            ThrottleRequests::class . ':api',
+            SubstituteBindings::class,
         ]);
 
         $middleware->alias([
-            'auth' => \App\Http\Middleware\Authenticate::class,
-            'verified' => \App\Http\Middleware\EnsureEmailIsVerified::class,
-            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'auth' => Authenticate::class,
+            'verified' => EnsureEmailIsVerified::class,
+            'guest' => RedirectIfAuthenticated::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         if (config('app.testing', false) === false) {
             $exceptions->render(function (Throwable $e, Request $request) {
-                return (new ExceptionHandler())->render($request, $e);
+                return (new ExceptionHandler)->render($request, $e);
             });
         }
     })->create();

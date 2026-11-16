@@ -2,15 +2,16 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Carbon;
+
 final class Transformer
 {
     /**
      * Format date
      *
-     * @param \Illuminate\Support\Carbon $date
      * @return void
      */
-    public static function formatDate(\Illuminate\Support\Carbon $date, string $format = 'MMM DD, YYYY')
+    public static function formatDate(Carbon $date, string $format = 'MMM DD, YYYY')
     {
         return $date->isoFormat($format);
     }

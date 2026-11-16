@@ -24,12 +24,12 @@ enum SmsProvider: string
         $type = Provider::config('prefered_sms_channel', 'TWILLIO');
 
         if ($type === self::KUDISMS->name) {
-            return (new KudiSmsMessage())->message($message);
+            return (new KudiSmsMessage)->message($message);
         }
 
         // Return Twillio as Default
 
-        return (new TwilioSmsMessage())->content($message);
+        return (new TwilioSmsMessage)->content($message);
     }
 
     /**

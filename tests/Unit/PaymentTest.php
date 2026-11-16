@@ -19,10 +19,10 @@ class PaymentTest extends TestCase
         $this->markTestSkipped('all tests in this file are invactive for this server configuration!');
     }
 
-    public function testAPaymentTransactionCanRecievePaymentRequestData(): void
+    public function test_a_payment_transaction_can_recieve_payment_request_data(): void
     {
         $request_data = ['random' => 'accepted'];
-        $request = new FormRequest();
+        $request = new FormRequest;
         $request->merge($request_data);
 
         $user = User::factory()->create();

@@ -39,10 +39,10 @@ class UserResource extends JsonResource
             'state' => $this->state,
             'city' => $this->city,
             'email_verified_at' => $this->email_verified_at,
-            'phone_verified_at' => $this->phone_verified_at, 
+            'phone_verified_at' => $this->phone_verified_at,
             'deleting_at' => $this->whenNotNull($this->deleting_at),
             'last_attempt' => $this->last_attempt,
-            $this->mergeWhen($previleged, fn () => [
+            $this->mergeWhen($previleged, fn() => [
                 'roles' => $this->getRoleNames(),
                 'permissions' => $permissions,
             ]),

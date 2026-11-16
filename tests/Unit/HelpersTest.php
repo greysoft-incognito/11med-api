@@ -12,12 +12,12 @@ class HelpersTest extends TestCase
 {
     use InteractsWithConsole;
 
-    public function testCanValidateJson(): void
+    public function test_can_validate_json(): void
     {
         $this->assertTrue(Strings::jsonValidate('{"name": "Doe"}'));
     }
 
-    public function testMessageParserWorks(): void
+    public function test_message_parser_works(): void
     {
         $user = User::factory()->create();
 

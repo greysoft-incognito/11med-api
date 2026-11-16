@@ -4,12 +4,14 @@ namespace App\Traits;
 
 use App\Enums\HttpStatus;
 use App\Models\TempUser;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Services\Payment\PaystackProcessor;
 use App\Services\Payment\StripeProcessor;
 use App\Services\Payment\WalletProcessor;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Validation\ValidationException;
 
 trait ControllerCanExtend
@@ -45,7 +47,7 @@ trait ControllerCanExtend
         int $amount,
         ?Model $transactable = null,
         int $discount = 0,
-    ): \Illuminate\Support\Collection {
+    ): Collection {
         $fees = 0;
 
         if ($this->paymentProcessor === 'paystack') {
@@ -66,7 +68,7 @@ trait ControllerCanExtend
         }
 
         // Create transaction
-        /** @var \App\Models\Transaction */
+        /** @var Transaction */
         $transaction = $user->transactions()->make([
             'request_data' => $request->all(),
             'reference' => $paymentIntent['reference'] ?? $paymentIntent['id'],
@@ -97,7 +99,7 @@ trait ControllerCanExtend
         Request $request,
         User|TempUser $user,
         string $reference,
-    ): \Illuminate\Support\Collection {
+    ): Collection {
 
         if ($this->paymentProcessor === 'paystack') {
             $paymentIntent = (new PaystackProcessor($request, $user))->verify($reference);
@@ -111,7 +113,7 @@ trait ControllerCanExtend
             ]);
         }
 
-        /** @var \App\Models\Transaction */
+        /** @var Transaction */
         $transaction = $user->transactions()->where('reference', $reference)->first();
 
         if (isset($paymentIntent['error'])) {

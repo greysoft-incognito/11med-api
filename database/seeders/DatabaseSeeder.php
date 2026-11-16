@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        if (!User::whereEmail('admin@example.com')->exists()) {
+        if (! User::whereEmail('admin@example.com')->exists()) {
             $admin = User::factory()->create([
                 'firstname' => 'Default',
                 'lastname' => 'Admin',
@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
                 'users' => [$admin->id],
                 '--supes' => true,
                 '--silent' => true,
-                '--no-interaction' => true
+                '--no-interaction' => true,
             ]);
         }
     }

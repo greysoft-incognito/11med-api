@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Helpers\Provider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -23,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \App\Helpers\Provider::buildResponseMacros();
+        Provider::buildResponseMacros();
 
         // Force https
         if (config('app.env') === 'production' || config('app.force_https')) {
@@ -34,7 +35,7 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
-        \App\Helpers\Provider::rateLimitCodeRequests();
-        \App\Helpers\Provider::startLogger();
+        Provider::rateLimitCodeRequests();
+        Provider::startLogger();
     }
 }

@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use App\Enums\HttpStatus;
 use App\Models\TempUser;
 use App\Models\User;
+use App\Services\CustomObject;
 use Illuminate\Http\Request;
 use Toneflix\LaravelPayPocket\Exceptions\InsufficientBalanceException;
 use Toneflix\LaravelPayPocket\Models\Wallet;
@@ -32,11 +33,11 @@ final class WalletProcessor implements PaymentInterface
     /**
      * Pay for a service/order out of the user's wallets.
      *
-     * @param  int|float  $amount     The amount to initialize the transaction with
-     * @param  callable  $successCallback     The callback function to call when the transaction is initialized
-     * @param  callable  $errorCallback    The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
-     * @return array|object|\App\Services\CustomObject
+     * @param  int|float  $amount  The amount to initialize the transaction with
+     * @param  callable  $successCallback  The callback function to call when the transaction is initialized
+     * @param  callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
+     * @return array|object|CustomObject
      */
     public function intent(
         int|float $amount,
@@ -50,7 +51,7 @@ final class WalletProcessor implements PaymentInterface
             $logs = $this->user->pay($amount, [], 'Payment for service/order.');
             $tranx = $logs->first();
 
-            $intent = new \App\Services\CustomObject([
+            $intent = new CustomObject([
                 'id' => $tranx->id,
                 'code' => HttpStatus::OK,
                 'status_code' => HttpStatus::OK,
@@ -70,7 +71,7 @@ final class WalletProcessor implements PaymentInterface
                 return $intent;
             }
         } catch (InsufficientBalanceException $e) {
-            $error = new \App\Services\CustomObject([
+            $error = new CustomObject([
                 'code' => HttpStatus::BAD_REQUEST,
                 'status_code' => HttpStatus::BAD_REQUEST,
                 'error' => HttpStatus::BAD_REQUEST->value,
@@ -91,9 +92,9 @@ final class WalletProcessor implements PaymentInterface
     /**
      * Verify a payment intent
      *
-     * @param  callable  $errorCallback   The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
-     * @return array|object|\App\Services\CustomObject
+     * @param  callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
+     * @return array|object|CustomObject
      */
     public function verify(
         string $reference,
@@ -109,7 +110,7 @@ final class WalletProcessor implements PaymentInterface
             ->first();
 
         if ($tranx) {
-            $response = new \App\Services\CustomObject([
+            $response = new CustomObject([
                 'code' => HttpStatus::OK,
                 'status_code' => HttpStatus::OK,
                 'amount' => $tranx->value,
@@ -143,7 +144,7 @@ final class WalletProcessor implements PaymentInterface
                 'message' => __('Transaction not found.'),
             ];
 
-            $response = new \App\Services\CustomObject($response);
+            $response = new CustomObject($response);
             if ($errorCallback) {
                 $response = $errorCallback($response);
             }
@@ -159,7 +160,7 @@ final class WalletProcessor implements PaymentInterface
      *
      * @param  callable  $successCallback
      * @param  callable  $errorCallback
-     * @param  bool  $respond Wether to return a response or not.
+     * @param  bool  $respond  Wether to return a response or not.
      */
     public function deauthorize(
         string $authorization_code,
@@ -171,11 +172,9 @@ final class WalletProcessor implements PaymentInterface
     /**
      * Do transfter to the specified user
      *
-     * @param  ?string  $reason
-     * @param  ?callable  $successCallback
-     * @param  ?callable  $errorCallback   The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
-     * @return array|object|\App\Services\CustomObject
+     * @param  ?callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
+     * @return array|object|CustomObject
      */
     public function transfer(
         int|float $amount,

@@ -5,6 +5,7 @@ namespace App\Services\Payment;
 use App\Helpers\Provider;
 use App\Models\TempUser;
 use App\Models\User;
+use App\Services\CustomObject;
 use Illuminate\Http\Request;
 use Stripe\Exception\ApiErrorException;
 use Stripe\StripeClient;
@@ -31,11 +32,11 @@ final class StripeProcessor implements PaymentInterface
     /**
      * Generate a payment intent
      *
-     * @param  int|float  $amount     The amount to initialize the transaction with
-     * @param  callable  $successCallback     The callback function to call when the transaction is initialized
-     * @param  callable  $errorCallback    The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
-     * @return array|object|\App\Services\CustomObject
+     * @param  int|float  $amount  The amount to initialize the transaction with
+     * @param  callable  $successCallback  The callback function to call when the transaction is initialized
+     * @param  callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
+     * @return array|object|CustomObject
      */
     public function intent(
         int|float $amount,
@@ -57,7 +58,7 @@ final class StripeProcessor implements PaymentInterface
 
         // Try to create the payment intent
         try {
-            $intent = new \App\Services\CustomObject($this->stripe->paymentIntents->create($params)->toArray());
+            $intent = new CustomObject($this->stripe->paymentIntents->create($params)->toArray());
             if (isset($intent['status']) && $intent['status'] === 'succeeded') {
                 $intent['status'] = 'success';
             }
@@ -74,7 +75,7 @@ final class StripeProcessor implements PaymentInterface
                 ]);
             }
 
-            return new \App\Services\CustomObject([
+            return new CustomObject([
                 'error' => $th->getCode(),
                 'message' => $th->getMessage(),
             ]);
@@ -84,9 +85,9 @@ final class StripeProcessor implements PaymentInterface
     /**
      * Verify a payment intent
      *
-     * @param  callable  $errorCallback   The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
-     * @return array|object|\App\Services\CustomObject
+     * @param  callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
+     * @return array|object|CustomObject
      */
     public function verify(
         string $reference,
@@ -103,14 +104,14 @@ final class StripeProcessor implements PaymentInterface
                 $ref['payment_approved'] = true;
             }
 
-            $ref = new \App\Services\CustomObject($ref);
+            $ref = new CustomObject($ref);
             if ($successCallback) {
                 $successCallback($ref);
             }
 
             return $ref;
         } catch (ApiErrorException $th) {
-            $error = new \App\Services\CustomObject([
+            $error = new CustomObject([
                 'code' => $th->getCode(),
                 'error' => $th->getCode(),
                 'message' => $th->getMessage(),
@@ -129,7 +130,7 @@ final class StripeProcessor implements PaymentInterface
      *
      * @param  callable  $successCallback
      * @param  callable  $errorCallback
-     * @param  bool  $respond Wether to return a response or not.
+     * @param  bool  $respond  Wether to return a response or not.
      */
     public function deauthorize(
         string $authorization_code,
@@ -141,11 +142,9 @@ final class StripeProcessor implements PaymentInterface
     /**
      * Do transfter to the specified user
      *
-     * @param  ?string  $reason
-     * @param  ?callable  $successCallback
-     * @param  ?callable  $errorCallback   The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
-     * @return array|object|\App\Services\CustomObject
+     * @param  ?callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
+     * @return array|object|CustomObject
      */
     public function transfer(
         int|float $amount,

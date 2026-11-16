@@ -12,7 +12,7 @@ class NotificationTemplatesTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function testCanListNotificationTemplates(): void
+    public function test_can_list_notification_templates(): void
     {
         $admin = User::factory()->unverified()->create();
 
@@ -26,7 +26,7 @@ class NotificationTemplatesTest extends TestCase
         $response->assertJsonIsArray('data');
     }
 
-    public function testCanGetNotificationTemplate(): void
+    public function test_can_get_notification_template(): void
     {
         $admin = User::factory()->unverified()->create();
 
@@ -39,7 +39,7 @@ class NotificationTemplatesTest extends TestCase
         $response->assertOk();
     }
 
-    public function testCanParseNotificationTemplate(): void
+    public function test_can_parse_notification_template(): void
     {
         $admin = User::factory()->unverified()->create();
 

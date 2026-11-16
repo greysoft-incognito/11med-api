@@ -20,27 +20,27 @@ class PaymentTest extends TestCase
         $this->markTestSkipped('all tests in this file are invactive for this server configuration!');
     }
 
-    public function testTempUserCanInitializePayment(): void
+    public function test_temp_user_can_initialize_payment(): void
     {
-        $request = new FormRequest();
+        $request = new FormRequest;
         $user = TempUser::factory()->create();
 
         $pay = $this->payWith('paystack')->makePayment($request, $user, 1000);
         $this->assertEquals(HttpStatus::OK, $pay['status_code'] ?? null);
     }
 
-    public function testUserCanInitializePayment(): void
+    public function test_user_can_initialize_payment(): void
     {
-        $request = new FormRequest();
+        $request = new FormRequest;
         $user = User::factory()->create();
 
         $pay = $this->payWith('paystack')->makePayment($request, $user, 1000);
         $this->assertEquals(HttpStatus::OK, $pay['status_code'] ?? null);
     }
 
-    public function testUserCanInitializeAndVerifyPayment(): void
+    public function test_user_can_initialize_and_verify_payment(): void
     {
-        $request = new FormRequest();
+        $request = new FormRequest;
         $user = User::factory()->create();
 
         $pay = $this->payWith('paystack')->makePayment($request, $user, 1000);
@@ -48,9 +48,9 @@ class PaymentTest extends TestCase
         $this->assertEquals(HttpStatus::OK, $verify['status_code'] ?? null);
     }
 
-    public function testTempUserCanInitializeAndVerifyPayment(): void
+    public function test_temp_user_can_initialize_and_verify_payment(): void
     {
-        $request = new FormRequest();
+        $request = new FormRequest;
         $user = TempUser::factory()->create();
 
         $pay = $this->payWith('paystack')->makePayment($request, $user, 1000);

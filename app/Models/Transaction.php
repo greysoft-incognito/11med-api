@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,9 +51,9 @@ class Transaction extends Model
             'due' => 'float',
             'fees' => 'float',
             'amount' => 'float',
-            'webhook' => \Illuminate\Database\Eloquent\Casts\AsCollection::class,
+            'webhook' => AsCollection::class,
             'discount' => 'float',
-            'request_data' => \Illuminate\Database\Eloquent\Casts\AsCollection::class,
+            'request_data' => AsCollection::class,
         ];
     }
 
@@ -67,14 +68,14 @@ class Transaction extends Model
     public function content(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->transactable()->get(),
+            get: fn() => $this->transactable()->get(),
         );
     }
 
     public function type(): Attribute
     {
         return new Attribute(
-            get: fn () => str($this->transactable_type)->afterLast('\\'),
+            get: fn() => str($this->transactable_type)->afterLast('\\'),
         );
     }
 

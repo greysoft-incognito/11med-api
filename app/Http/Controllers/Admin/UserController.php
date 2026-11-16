@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\HttpStatus;
+use App\Enums\Permission;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserCollection;
 use App\Http\Resources\UserResource;
@@ -18,7 +19,7 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        \App\Enums\Permission::USERS_LIST->authorize();
+        Permission::USERS_LIST->authorize();
 
         $query = User::query();
 
@@ -48,9 +49,9 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        \App\Enums\Permission::USERS_CREATE->authorize();
+        Permission::USERS_CREATE->authorize();
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = $request->user();
 
         $valid = $this->validate($request, [
@@ -72,7 +73,7 @@ class UserController extends Controller
         $valid['firstname'] = str($request->get('name'))->explode(' ')->first(null, $request->firstname);
         $valid['lastname'] = str($request->get('name'))->explode(' ')->last(fn($n) => $n !== $valid['firstname'], $request->lastname);
 
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = User::create($valid);
 
         if (isset($valid['roles'])) {
@@ -95,7 +96,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        \App\Enums\Permission::USERS_USER->authorize();
+        Permission::USERS_USER->authorize();
 
         return (new UserResource($user))->additional([
             'message' => HttpStatus::message(HttpStatus::OK),
@@ -109,7 +110,7 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        \App\Enums\Permission::USERS_UPDATE->authorize();
+        Permission::USERS_UPDATE->authorize();
 
         $valid = $this->validate($request, [
             'image' => ['nullable', 'image'],
@@ -150,7 +151,7 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        \App\Enums\Permission::USERS_DELETE->authorize();
+        Permission::USERS_DELETE->authorize();
 
         $user->delete();
 

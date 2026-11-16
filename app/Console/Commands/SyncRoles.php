@@ -3,10 +3,11 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Collection;
 
 class SyncRoles extends Command
 {
@@ -36,7 +37,7 @@ class SyncRoles extends Command
      */
     protected $description = 'Command description';
 
-    protected string|null $guard = null;
+    protected ?string $guard = null;
 
     /**
      * Execute the console command.
@@ -262,7 +263,7 @@ class SyncRoles extends Command
 
     public function show(): void
     {
-        /** @var \Illuminate\Database\Eloquent\Builder<\App\Models\User> */
+        /** @var Builder<\App\Models\User> */
         $query = app(config('permission-defs.user-model', []))->query();
 
         $admins = $query

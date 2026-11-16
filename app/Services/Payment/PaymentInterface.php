@@ -2,23 +2,28 @@
 
 namespace App\Services\Payment;
 
+use App\Models\TempUser;
+use App\Models\User;
+use App\Services\CustomObject;
+use Illuminate\Http\Request;
+
 interface PaymentInterface
 {
     /**
-     * @param  \App\Models\User  $user
+     * @param  User  $user
      */
     public function __construct(
-        \Illuminate\Http\Request $request,
-        \App\Models\User|\App\Models\TempUser|null $user = null
+        Request $request,
+        User|TempUser|null $user = null
     );
 
     /**
      * Generate a payment intent
      *
-     * @param  int|float  $amount     The amount to initialize the transaction with
-     * @param  callable  $successCallback     The callback function to call when the transaction is initialized
-     * @param  callable  $errorCallback    The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
+     * @param  int|float  $amount  The amount to initialize the transaction with
+     * @param  callable  $successCallback  The callback function to call when the transaction is initialized
+     * @param  callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
      * @return array|object
      */
     public function intent(
@@ -31,8 +36,8 @@ interface PaymentInterface
     /**
      * Verify a payment intent
      *
-     * @param  callable  $errorCallback   The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
+     * @param  callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
      * @return array|object
      */
     public function verify(
@@ -45,8 +50,8 @@ interface PaymentInterface
     /**
      * Deauthorize a payment intent
      *
-     * @param  callable  $errorCallback   The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
+     * @param  callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
      * @return array|object
      */
     public function deauthorize(
@@ -59,11 +64,9 @@ interface PaymentInterface
     /**
      * Do transfter to the specified user
      *
-     * @param  ?string  $reason
-     * @param  ?callable  $successCallback
-     * @param  ?callable  $errorCallback   The callback function to call when an error occurs
-     * @param  bool  $respond     Wether to return a response or not.
-     * @return array|object|\App\Services\CustomObject
+     * @param  ?callable  $errorCallback  The callback function to call when an error occurs
+     * @param  bool  $respond  Wether to return a response or not.
+     * @return array|object|CustomObject
      */
     public function transfer(
         int|float $amount,

@@ -5,9 +5,13 @@ namespace App\Notifications;
 use App\Enums\SmsProvider;
 use App\Helpers\Provider;
 use App\Helpers\Url;
+use Carbon\Carbon;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use NotificationChannels\Twilio\TwilioSmsMessage;
+use Toneflix\KudiSmsNotification\KudiSmsMessage;
 
 class SendCode extends Notification implements ShouldQueue
 {
@@ -47,7 +51,7 @@ class SendCode extends Notification implements ShouldQueue
     /**
      * Get the mail representation of the notification.
      *
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
@@ -55,7 +59,7 @@ class SendCode extends Notification implements ShouldQueue
         $this->token ??= $notifiable->token ?? Url::base64urlEncode($this->code . '|' . md5(time()));
         $notifiable = $notifiable->user ?? $notifiable;
 
-        /** @var \Carbon\Carbon */
+        /** @var Carbon */
         $datetime = $notifiable->last_attempt;
 
         $dateAdd = $datetime?->addSeconds(Provider::config('token_lifespan', 30));
@@ -88,7 +92,7 @@ class SendCode extends Notification implements ShouldQueue
         $this->token ??= $n->token;
         $n ??= $n->user ?? $n;
 
-        /** @var \Carbon\Carbon */
+        /** @var Carbon */
         $datetime = $n->last_attempt;
         $dateAdd = $datetime?->addSeconds(Provider::config('token_lifespan', 30));
 
@@ -109,12 +113,12 @@ class SendCode extends Notification implements ShouldQueue
         return SmsProvider::getMessage($message->toPlain());
     }
 
-    public function toTwilio($n): \NotificationChannels\Twilio\TwilioSmsMessage
+    public function toTwilio($n): TwilioSmsMessage
     {
         return $this->toSms($n);
     }
 
-    public function toKudiSms($n): \Toneflix\KudiSmsNotification\KudiSmsMessage
+    public function toKudiSms($n): KudiSmsMessage
     {
         return $this->toSms($n);
     }

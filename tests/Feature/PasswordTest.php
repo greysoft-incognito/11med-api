@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class PasswordTest extends TestCase
 {
-    public function testCanRequestPasswordReset(): void
+    public function test_can_request_password_reset(): void
     {
         $user = User::factory()->unverified()->create();
 
@@ -21,7 +21,7 @@ class PasswordTest extends TestCase
         $response->assertCreated();
     }
 
-    public function testCanCheckPasswordResetCode(): void
+    public function test_can_check_password_reset_code(): void
     {
         $user = User::factory()->unverified()->create();
 
@@ -40,7 +40,7 @@ class PasswordTest extends TestCase
         $response->assertAccepted();
     }
 
-    public function testCanResetPassword(): void
+    public function test_can_reset_password(): void
     {
         $user = User::factory()->unverified()->create();
 
@@ -63,7 +63,7 @@ class PasswordTest extends TestCase
         $response->assertAccepted();
     }
 
-    public function testCanResetPasswordWithToken(): void
+    public function test_can_reset_password_with_token(): void
     {
         $user = User::factory()->unverified()->create();
 
@@ -77,7 +77,7 @@ class PasswordTest extends TestCase
         $response = $this->post(
             'api/auth/reset-password/check-code',
             [
-                'code' => Url::base64urlEncode($code->code.'|'.md5(time())),
+                'code' => Url::base64urlEncode($code->code . '|' . md5(time())),
                 'password' => 'password',
                 'password_confirmation' => 'password',
             ]

@@ -1,0 +1,7 @@
+{
+    "preset": "laravel",
+    "rules": {
+        "concat_space": { "spacing": "one" },
+        "function_declaration": { "closure_fn_spacing": "none" }
+    }
+}

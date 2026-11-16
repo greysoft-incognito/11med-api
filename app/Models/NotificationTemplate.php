@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Helpers\Provider;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,8 +20,8 @@ use Illuminate\Notifications\Messages\MailMessage;
  * @property string $html The message html content;
  * @property array<string, string> $args;
  * @property bool $active If the template is active;
- * @property \Carbon\Carbon $created_at;
- * @property \Carbon\Carbon $updated_at;
+ * @property Carbon $created_at;
+ * @property Carbon $updated_at;
  */
 class NotificationTemplate extends Model
 {
@@ -60,8 +62,8 @@ class NotificationTemplate extends Model
     protected function casts()
     {
         return [
-            'args' => \Illuminate\Database\Eloquent\Casts\AsCollection::class,
-            'allowed' => \Illuminate\Database\Eloquent\Casts\AsCollection::class,
+            'args' => AsCollection::class,
+            'allowed' => AsCollection::class,
             'active' => 'boolean',
         ];
     }
@@ -75,10 +77,14 @@ class NotificationTemplate extends Model
     public function resolveRouteBinding($value, $field = null)
     {
         try {
-            return $this->where('id', $value)
-                ->orWhere('key', $value)
+            return $this
+                ->when(
+                    is_numeric($value),
+                    fn($q) => $q->where('id', $value)->orWhere('key', $value),
+                    fn($q) => $q->where('key', $value)
+                )
                 ->firstOrFail();
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $th) {
+        } catch (ModelNotFoundException $th) {
             return self::buildDefault($value, true);
         }
     }
@@ -106,12 +112,12 @@ class NotificationTemplate extends Model
         $allowed = config("messages.$key.allowed", ['html', 'plain']);
 
         if ($parsed->notFound && $strict) {
-            throw (new ModelNotFoundException('Error Processing Request', 1))->setModel(new static());
+            throw (new ModelNotFoundException('Error Processing Request', 1))->setModel(new static);
         }
 
         preg_match_all('/:(\w+)/', $parsed->plainBody, $args);
 
-        $html = (new MailMessage())
+        $html = (new MailMessage)
             ->view(['email', 'email-plain'], [
                 'lines' => $parsed->lines,
                 'subject' => $parsed->subject,

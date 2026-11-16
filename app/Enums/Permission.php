@@ -2,6 +2,8 @@
 
 namespace App\Enums;
 
+use App\Helpers\Access;
+
 /**
  * Admin Permissions.
  */
@@ -29,7 +31,7 @@ enum Permission: string
      */
     public function authorize()
     {
-        \App\Helpers\Access::authorize($this);
+        Access::authorize($this);
     }
 
     /**
@@ -40,6 +42,6 @@ enum Permission: string
      */
     public static function authorizeAll(self|array $permission)
     {
-        \App\Helpers\Access::authorize($permission);
+        Access::authorize($permission);
     }
 }

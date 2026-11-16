@@ -7,15 +7,16 @@ use App\Models\Transaction;
 use App\Models\User;
 use App\Traits\ControllerCanExtend;
 use Illuminate\Foundation\Http\FormRequest;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Tests\TestCase;
 
 class WalletPaymentTest extends TestCase
 {
     use ControllerCanExtend;
 
-    public function testUserCanInitializeAndVerifyWalletPayment(): void
+    public function test_user_can_initialize_and_verify_wallet_payment(): void
     {
-        $request = new FormRequest();
+        $request = new FormRequest;
         $user = User::factory()->create();
         $user->deposit('wallet_main', 100, 'seed balance');
 
@@ -40,13 +41,13 @@ class WalletPaymentTest extends TestCase
         $this->assertEquals(70, $user->walletBalance);
     }
 
-    public function testWalletPaymentFailsWithInsufficientBalance(): void
+    public function test_wallet_payment_fails_with_insufficient_balance(): void
     {
-        $request = new FormRequest();
+        $request = new FormRequest;
         $user = User::factory()->create();
         $user->deposit('wallet_main', 10, 'seed balance');
 
-        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $this->expectException(HttpException::class);
 
         $this->payWith('wallet')->makePayment($request, $user, 1000);
     }

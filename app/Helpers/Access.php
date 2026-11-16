@@ -14,7 +14,6 @@ class Access
      * Check and authorise the admin
      *
      * @param  Permission|array<int,Permission>  $permission
-     * @param  ?User  $admin
      * @param  mixed  ...$params
      * @return void
      */
@@ -33,7 +32,6 @@ class Access
      * Check and authorise the admin
      *
      * @param  Permission|array<int,Permission>  $permission
-     * @param  ?User  $admin
      * @param  mixed  ...$params
      * @return void
      */
@@ -82,7 +80,7 @@ class Access
             ?User $admin,
             array $permissions = []
         ) use ($canReadOnly) {
-            /** @var \App\Enums\Permission[] $permissions */
+            /** @var Permission[] $permissions */
             if (! dbconfig('enable_admin_permission_middleware') || (app()->runningInConsole() && ! app()->isProduction())) {
                 return Response::allow();
             }

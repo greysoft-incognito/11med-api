@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\User;
+
 return [
 
     /*
@@ -16,7 +18,7 @@ return [
     'set' => [
         [
             'id' => 'users', // String
-            'model' => \App\Models\User::class, // class-string
+            'model' => User::class, // class-string
             'model_id' => null, // integer|string|null
             'name' => 'User Data', // string
             'keywords' => 'data,user data,exports,laravel op', // string
@@ -26,8 +28,8 @@ return [
                 'lastname',
                 'email',
                 'created_at',
-            ] // string[]
-        ]
+            ], // string[]
+        ],
     ],
 
     /*
@@ -45,6 +47,6 @@ return [
     'transformers' => [
         'created_at' => ['formatDate', ['MMM DD, YYYY']],
         'phone' => ['stringReplace', ['+', ' +']],
-    ]
+    ],
 
 ];

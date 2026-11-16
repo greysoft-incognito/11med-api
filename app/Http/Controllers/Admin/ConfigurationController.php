@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\HttpStatus;
+use App\Enums\Permission;
 use App\Helpers\Provider;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class ConfigurationController extends Controller
      */
     public function index(Request $request)
     {
-        \App\Enums\Permission::CONFIGURATION->authorize();
+        Permission::CONFIGURATION->authorize();
 
         return Provider::response()->success([
             'data' => Configuration::notSecret()->get()
@@ -28,7 +29,7 @@ class ConfigurationController extends Controller
      */
     public function show(string|int $id)
     {
-        \App\Enums\Permission::CONFIGURATION->authorize();
+        Permission::CONFIGURATION->authorize();
 
         $data = Configuration::where('key', $id)
             ->when(filter_var($id, FILTER_VALIDATE_INT), fn($q) => $q->orWhere('id', $id))
@@ -44,7 +45,7 @@ class ConfigurationController extends Controller
      */
     public function store(Request $request)
     {
-        \App\Enums\Permission::MANAGE_CONFIGURATION->authorize();
+        Permission::MANAGE_CONFIGURATION->authorize();
 
         $rules = Configuration::all()->mapWithKeys(function ($conf) {
             return [$conf->key => ['nullable', $conf->type]];

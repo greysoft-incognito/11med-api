@@ -4,10 +4,9 @@ namespace App\Services;
 
 use App\Exports\DataExports;
 use App\Jobs\DispatchExportsNotifications;
-use App\Mail\ReportGenerated;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Stringable;
 
 /**
  * @template TModel
@@ -17,24 +16,22 @@ class SimpleDataExporter
     /**
      * Default collection of email addresses to share exported items with
      *
-     * @var \Illuminate\Support\Collection<int, \Illuminate\Support\Stringable>
+     * @var Collection<int, Stringable>
      */
-    protected \Illuminate\Support\Collection $data_emails;
+    protected Collection $data_emails;
 
     protected array $processing = [];
 
     protected array $valid_ids = [];
 
     /**
-     * @var \Illuminate\Support\Collection<int,array{id:string,model:class-string<TModel>,keywords:string,name:string,columns:array<int,string>}>
+     * @var Collection<int,array{id:string,model:class-string<TModel>,keywords:string,name:string,columns:array<int,string>}>
      */
-    protected \Illuminate\Support\Collection $exportables;
+    protected Collection $exportables;
 
     /**
-     * @param  int  $perPage
      * @param  array<int, string>  $emails
      * @param  array<int, string>  $dataset
-     * @param  bool  $queue
      */
     public function __construct(
         protected int $perPage = 50,
@@ -45,7 +42,7 @@ class SimpleDataExporter
         $this->data_emails = collect($emails)->map(fn($e) => str($e));
         $this->exportables = collect(config('exports.set', []));
         $this->valid_ids = $this->exportables->pluck('id')->toArray();
-        //dbconfig('notifiable_emails', collect([]))->map(fn($e) => str($e));
+        // dbconfig('notifiable_emails', collect([]))->map(fn($e) => str($e));
     }
 
     /**
@@ -69,7 +66,7 @@ class SimpleDataExporter
                             $this->data_emails,
                             $exportable['name'],
                             0
-                        )
+                        ),
                     ] : []);
                 } else {
                     (new DataExports($exportable, $this->perPage))->store($path);

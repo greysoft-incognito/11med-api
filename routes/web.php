@@ -2,6 +2,7 @@
 
 use App\Enums\HttpStatus;
 use App\Helpers\Url;
+use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Storage;
 Route::get('/', function () {
     return [
         'api' => dbconfig('app_name'),
-        'version' => OP_VERSION
+        'version' => OP_VERSION,
     ];
 });
 
@@ -26,7 +27,7 @@ Route::get('download/formdata/{timestamp}/{form}/{batch?}', function ($timestamp
     // public Form|Company|Appointment|User $form,
     $id = str(Url::base64urlDecode($data))->explode('/')->last();
 
-    /** @var \App\Models\User $class */
+    /** @var User $class */
     $model = app(str(str(Url::base64urlDecode($data))->explode('/')->first())->replace('.', '\\')->toString());
 
     // if ($model instanceof Form) {
@@ -52,6 +53,7 @@ Route::get('download/formdata/{timestamp}/{form}/{batch?}', function ($timestamp
             break;
         } else {
             $batch++;
+
             continue;
         }
     } while ($batch <= $i);
