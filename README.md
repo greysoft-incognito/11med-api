@@ -14,4 +14,5 @@ php artisan contract:routes        # refresh the route inventory from ../11med a
 ```
 
 Deploys: `.github/workflows/deploy.yml`. A push to `staging` or `production`, or a manual run,
-deploys to that environment's server once CI passes. See `human_todo.md` HT-001 for the secrets.
+deploys to that environment's server once CI passes. Server setup, secrets and rollback:
+[docs/DEPLOY.md](docs/DEPLOY.md).
