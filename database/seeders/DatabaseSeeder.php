@@ -15,6 +15,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        Artisan::call(SyncRoles::class);
+
+        if (! app()->environment(['local', 'testing'])) {
+            return;
+        }
+
         if (! User::whereEmail('admin@example.com')->exists()) {
             $admin = User::factory()->create([
                 'firstname' => 'Default',
@@ -22,7 +28,6 @@ class DatabaseSeeder extends Seeder
                 'email' => 'admin@example.com',
             ]);
 
-            Artisan::call(SyncRoles::class);
             Artisan::call(SyncRoles::class, [
                 'users' => [$admin->id],
                 '--supes' => true,

@@ -42,6 +42,16 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Sign-up and sign-in, per address; the code budgets and lockouts are per number.
+        RateLimiter::for('auth', function (Request $request) {
+            return Limit::perMinute(30)->by($request->ip());
+        });
+
+        // Portal sign-in and reset emails, per address and email.
+        RateLimiter::for('portal-auth', function (Request $request) {
+            return Limit::perMinute(5)->by($request->ip() . '|' . mb_strtolower((string) $request->input('email')));
+        });
+
         Provider::rateLimitCodeRequests();
         Provider::startLogger();
     }

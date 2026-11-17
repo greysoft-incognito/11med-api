@@ -10,10 +10,14 @@ Things only the owner can do or decide. Each says whether it blocks and what.
   `DEPLOY_PATH` with its `.env`, PostgreSQL, a queue worker and the scheduler's cron. Step by step in
   `docs/DEPLOY.md`. **Blocks:** deploys only.
 - [ ] **HT-002 · SMS and email.** KudiSMS API key and sender id; SMTP credentials and the from address.
-  **Blocks:** nothing until M2 goes live (OTP and links are logged until then).
-- [ ] **HT-003 · Social sign-in ids.** Apple bundle id; the Google web client id. **Blocks:** M2.5 going live.
+  Then `SMS_ENABLED=true` in each server's `.env`. Until then codes go to the log; staging can set
+  `OTP_FIXED_CODE=123456` so testers can sign up. **Blocks:** M2 going live.
+- [ ] **HT-003 · Social sign-in ids.** Apple bundle id (`APPLE_BUNDLE_ID`); the Google web client id
+  (`GOOGLE_WEB_CLIENT_ID`, the `563169425212-…` id in the app's environment). Until set, social
+  sign-in answers 422 `SOCIAL_UNAVAILABLE`. **Blocks:** M2.5 going live.
 - [ ] **HT-004 · What survives account deletion, and for how long.** A legal answer (app spec item 19).
-  **Blocks:** nothing; erasure ships with a placeholder the confirmation screen names.
+  The placeholder is `elevenmed.erasure` in `config/elevenmed.php`: consent records and the erasure
+  record itself, severed from the person, for six years. **Blocks:** nothing; erasure ships with it.
 - [ ] **HT-005 · Object storage.** An S3-compatible bucket and keys. **Blocks:** M3 going live (local disk until then).
 - [ ] **HT-006 · Push credentials.** The APNs key (`.p8`), key id and team id; an FCM service account. **Blocks:** M7 going live.
 - [ ] **HT-007 · Paystack.** Test and live secret keys, and the webhook URL set on the dashboard. **Blocks:** M9 going live.

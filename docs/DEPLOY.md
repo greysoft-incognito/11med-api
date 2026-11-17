@@ -26,7 +26,10 @@ deploys. Two deploys to the same server never overlap: a second one waits for th
 4. **`.env`**: copy `.env.example` to `.env` in that folder and fill it in: `APP_ENV`
    (`staging` or `production`), `APP_KEY` (run `php artisan key:generate` once), `APP_DEBUG=false`,
    `APP_URL`, the `DB_*` values, `QUEUE_CONNECTION=redis` and `CACHE_STORE=redis` with the `REDIS_*`
-   values, and mail. The deploy never writes `.env`, and stops if it is missing.
+   values, and mail. For sign-in also set `SMS_ENABLED` (with the kit's SMS settings) or, on staging
+   only, `OTP_FIXED_CODE`; `GOOGLE_WEB_CLIENT_ID` and `APPLE_BUNDLE_ID` for social sign-in; and
+   `PORTALS_URL`, where portal reset emails link to. The deploy never writes `.env`, and stops if it
+   is missing.
 5. **Web server**: point the document root at `DEPLOY_PATH/public`. Give the PHP-FPM user write
    access to `storage/` and `bootstrap/cache/`.
 6. **Scheduler**: the consultation deadlines, missed doses and abandoned payments run on Laravel's
@@ -41,6 +44,8 @@ deploys. Two deploys to the same server never overlap: a second one waits for th
    program for it. Each deploy runs `queue:restart`, so workers pick up the new code.
 8. **First run**: `composer install --no-dev`, `php artisan migrate --force` and
    `php artisan app:sync-roles`, or just run the workflow, which does all of it.
+9. **First team account**: `php artisan app:create-admin you@example.com "Your Name"` opens an admin
+   account and emails a first-password link, which it also prints.
 
 ## GitHub settings
 

@@ -2,6 +2,96 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.8 Account erasure, M2 done
+
+- `DELETE auth/account` confirms with the password (422 `PASSWORD_INCORRECT` on `password`), then
+  in one transaction writes an `account_erasures` row, dispatches `AccountErasing`, deletes tokens,
+  notifications, roles, codes and the lockout, and removes the user for real. Devices, social
+  identities, refresh tokens and password links cascade; consent records survive with `user_id`
+  null. The phone number is free at once.
+- The retained set lives in `config/elevenmed.php` pending a legal answer (HT-004).
+- M2 Identity is done: 24 of 154 contract routes built, 130 pending. Next: M3 Media, on the owner's go-ahead.
+
+## 2026-11-17: M2.7 Portal sign-in
+
+- `POST portal/auth/sign-in` (201), `GET session`, `POST sign-out`, `refresh`, `forgot`,
+  `set-password` through `PortalAccounts`. Only pharmacy, laboratory and admin accounts sign in;
+  wrong details are 401 `INVALID_CREDENTIALS`, five tries a minute per address and email.
+- Sign-out ends the pair even with an expired access token. A refresh answers the full session; a
+  reused refresh token is 401 `INVALID_REFRESH` and ends the family.
+- `forgot` emails a one-hour link to `PORTALS_URL/set-password?token=…` and answers
+  `{ sent: true, dev_link: null }` for any address. `set-password` (422 `RESET_INVALID` on
+  `token`) sets the password, confirms the email, ends other sessions and signs in.
+- `php artisan app:create-admin <email> <name>` opens a team account and emails (and prints) a
+  week-long first-password link; M11 reuses `PortalAccounts::welcome()` for approved partners.
+- `organisation_id` and `organisation_name` are null until M11 links accounts to organisations.
+
+## 2026-11-17: M2.6 Devices
+
+- `PUT devices/{installId}` upserts with the row locked and answers 200 every time; an install
+  another account holds moves to the caller. `DELETE devices/{installId}` removes only the
+  caller's own and answers `{ install_id }` either way.
+- `ForgetEndedDevices` listens to `SessionsEnded`, so a sign-out, a revoked family, a reset or a
+  password change drops the installs of the sessions it ended (app handover §8.1).
+- Removing a token APNs or FCM reports invalid is M7's, with the senders.
+
+## 2026-11-17: M2.5 Google and Apple sign-in
+
+- `POST auth/social` verifies the ID token against the provider's published keys (cached an hour):
+  signature, issuer, audience (`GOOGLE_WEB_CLIENT_ID`, `APPLE_BUNDLE_ID`, HT-003) and expiry. A
+  confirmed identity gets a session; a new one gets a link token (15 minutes, single use, held in the
+  cache by its hash). Without a configured audience the provider answers 422 `SOCIAL_UNAVAILABLE`; a
+  token that fails is 401 `SOCIAL_TOKEN_INVALID`.
+- `POST auth/social/phone` creates the account as registration does (no password, consent context
+  `social-link`), copies the token's email with its own `email_verified` claim unless another
+  account holds it, and binds the identity unconfirmed. The phone code confirms it.
+- New dependency: `firebase/php-jwt` ^7.0, to verify RS256 tokens against a JWKS (6.x carries
+  CVE-2025-45769).
+
+## 2026-11-17: M2.4 Passwords and email
+
+- `forgot-password` and `reset-password` over the phone code (`Passwords`): forgot shares the
+  resend budget and answers alike for any number; reset refuses an unknown number as a wrong code,
+  clears the lockout, confirms the phone and ends every session.
+- `change-password` needs the current password (422 `PASSWORD_INCORRECT`, `PASSWORD_UNCHANGED`)
+  and ends every session but the one making the change.
+- `PATCH auth/email`, `email/verify`, `email/resend` (`EmailAddresses`): a new address is
+  unconfirmed until its emailed code returns; the same address in any case sends nothing; 409
+  `EMAIL_TAKEN`, 422 `NO_EMAIL`, 422 `EMAIL_VERIFIED`; the phone code's budget.
+
+## 2026-11-17: M2.3 App sign-up and sign-in
+
+- `POST auth/register`, `verify-otp`, `resend-otp`, `login`, `refresh`, `logout` and
+  `GET auth/session`, through `AppAccounts`, `OneTimeCodes` and `LoginGuard`. Phones are stored in
+  the local `0…` form, as the app's mock compares them.
+- Codes: six digits, ten minutes, five tries, three resends in thirty minutes with `retry_after_ms`.
+  `OTP_FIXED_CODE` lets staging run before SMS is enabled; production ignores it. SMS go through the
+  kit's gateway when `SMS_ENABLED` is on and to the log otherwise (HT-002).
+- Lockouts per number: 401 with `attempts_remaining`, 423 with `locked_for_ms` after five, 423 with
+  `requires_email_unlock` after ten, cleared by a reset (FE-007).
+- A number held by an account that never verified it is released to a new sign-up, so an abandoned
+  registration cannot block its owner. Registration records consent (FE-006).
+- Departure: `POST auth/refresh` was in no sub-section's list; it is built here with the rest.
+
+## 2026-11-17: M2.2 Token pairs
+
+- `SessionTokens` issues a pair (Sanctum access token, 15 minutes; refresh token, 30 days), rotates
+  it with the row locked, treats a reused refresh token as theft and revokes the family, and
+  revokes by refresh token, by access token or for a whole account. Ending a family dispatches
+  `SessionsEnded` with its installs, for the device cleanup in 2.6.
+- A 401 says `TOKEN_EXPIRED` when the bearer token exists and has expired (`BearerToken`).
+- `HttpStatus::LOCKED` (423) and `ApiException::locked()` for the login lockout in 2.3.
+
+## 2026-11-17: M2.1 Roles, users, devices, consent
+
+- `Role` enum (patient, doctor, pharmacy, laboratory, admin) drives `permission-defs.php`; the kit's
+  admin permissions are excluded from every role but admin. The seeder syncs roles everywhere and
+  creates the demo admin only in local and testing.
+- `users` gains `uuid`, `full_name` and soft deletes; phone and email are unique among live rows;
+  email and password are nullable. The kit's `fullname()` accessor now reads `full_name` first,
+  because PHP method names ignore case and it had shadowed the new column.
+- `devices` and `consent_records` with their models. Factory states `app()` and `portal()`.
+
 ## 2026-11-16: M1 Foundation
 
 - Scaffolded from `toneflix/laravel-op` 4.0.2 (Laravel 13.42). The kit's suite runs green on

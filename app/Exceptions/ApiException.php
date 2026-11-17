@@ -37,9 +37,12 @@ class ApiException extends RuntimeException
         return new static(HttpStatus::BAD_REQUEST, $code, $message, $field);
     }
 
-    public static function unauthorized(string $code = 'UNAUTHENTICATED'): static
+    /**
+     * @param  array<string, mixed>|null  $meta
+     */
+    public static function unauthorized(string $code = 'UNAUTHENTICATED', ?array $meta = null): static
     {
-        return new static(HttpStatus::UNAUTHORIZED, $code);
+        return new static(HttpStatus::UNAUTHORIZED, $code, null, null, $meta);
     }
 
     public static function forbidden(string $code = 'FORBIDDEN'): static
@@ -50,6 +53,14 @@ class ApiException extends RuntimeException
     public static function notFound(string $code = 'NOT_FOUND', ?string $field = null): static
     {
         return new static(HttpStatus::NOT_FOUND, $code, null, $field);
+    }
+
+    /**
+     * @param  array<string, mixed>  $meta
+     */
+    public static function locked(string $code, array $meta = []): static
+    {
+        return new static(HttpStatus::LOCKED, $code, null, null, $meta);
     }
 
     public static function conflict(string $code, ?string $field = null): static

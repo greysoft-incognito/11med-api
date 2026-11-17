@@ -14,6 +14,15 @@ return [
     |
     */
 
+    // Social sign-in: the audience each provider's ID token must carry (app handover §9.1, HT-003).
+    'google' => [
+        'client_id' => env('GOOGLE_WEB_CLIENT_ID'),
+    ],
+
+    'apple' => [
+        'client_id' => env('APPLE_BUNDLE_ID'),
+    ],
+
     'postmark' => [
         'token' => env('POSTMARK_TOKEN'),
     ],

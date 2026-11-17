@@ -12,16 +12,16 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 1.4 `CLAUDE.md` and the coordination files
 - [x] 1.5 CI, and `deploy.yml` with staging and production
 
-## M2 Identity `[ ]`
+## M2 Identity `[x]`
 
-- [ ] 2.1 Roles, the user model's app and portal fields, `Device`, `ConsentRecord`
-- [ ] 2.2 Access tokens (15 minutes) and rotating refresh tokens, `TOKEN_EXPIRED`
-- [ ] 2.3 App registration, OTP verify and resend budget, login with lockouts, logout, session
-- [ ] 2.4 Forgot and reset password, change password, email change and verification
-- [ ] 2.5 Apple and Google sign-in, linking a phone
-- [ ] 2.6 Devices (`PUT`/`DELETE devices/:installId`)
-- [ ] 2.7 Portal sign-in, refresh, sign-out, forgot, set-password
-- [ ] 2.8 Account erasure
+- [x] 2.1 Roles, the user model's app and portal fields, `Device`, `ConsentRecord`
+- [x] 2.2 Access tokens (15 minutes) and rotating refresh tokens, `TOKEN_EXPIRED`
+- [x] 2.3 App registration, OTP verify and resend budget, login with lockouts, logout, session
+- [x] 2.4 Forgot and reset password, change password, email change and verification
+- [x] 2.5 Apple and Google sign-in, linking a phone
+- [x] 2.6 Devices (`PUT`/`DELETE devices/:installId`)
+- [x] 2.7 Portal sign-in, refresh, sign-out, forgot, set-password
+- [x] 2.8 Account erasure
 
 ## M3 Media `[ ]`
 
