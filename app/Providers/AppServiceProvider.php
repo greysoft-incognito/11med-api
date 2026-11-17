@@ -73,6 +73,10 @@ class AppServiceProvider extends ServiceProvider
             ];
         });
 
+        // Each invitation is a paid SMS to someone else's phone; each accept attempt guesses a code.
+        RateLimiter::for('caregiver-invite', fn(Request $request) => Limit::perDay(config('elevenmed.caregivers.invites_per_day'))->by('caregiver-invite|' . $request->user()?->id));
+        RateLimiter::for('caregiver-accept', fn(Request $request) => Limit::perHour(config('elevenmed.caregivers.accept_attempts_per_hour'))->by('caregiver-accept|' . $request->user()?->id));
+
         Provider::rateLimitCodeRequests();
         Provider::startLogger();
     }
