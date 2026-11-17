@@ -48,4 +48,7 @@ return [
     'DOCTOR_APPROVED' => 'An approved doctor is suspended, not rejected or resubmitted.',
     'DOCTOR_NOT_APPROVED' => 'Only an approved doctor can be suspended.',
     'DOCTOR_NOT_SUSPENDED' => 'Only a suspended doctor can be reinstated.',
+
+    // Subscriptions
+    'PREMIUM_REQUIRED' => 'This is part of premium.',
 ];
