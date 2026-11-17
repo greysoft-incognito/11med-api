@@ -2,9 +2,12 @@
 
 namespace Tests\Feature\Doctors;
 
+use App\Enums\NotificationCategory;
 use App\Enums\Role;
 use App\Events\Doctors\DoctorDocumentReviewed;
 use App\Events\Doctors\DoctorReviewed;
+use App\Models\User;
+use App\Services\Notifications\Notifier;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
@@ -206,5 +209,45 @@ class DoctorReviewTest extends TestCase
             ->assertJsonPath('data.verification_notes', null);
 
         Event::assertDispatched(DoctorReviewed::class, fn(DoctorReviewed $event) => $event->previous->value === 'suspended');
+    }
+
+    public function test_the_doctor_is_told_of_each_decision_and_each_rejected_document(): void
+    {
+        $sent = new class implements Notifier
+        {
+            /** @var list<array{int, string, string}> */
+            public array $sent = [];
+
+            public function send(User $to, NotificationCategory $category, string $title, string $body, array $data = []): ?string
+            {
+                $this->sent[] = [$to->id, $category->value, $title];
+
+                return null;
+            }
+        };
+
+        $this->app->instance(Notifier::class, $sent);
+
+        $doctor = $this->approvedDoctor();
+        $admin = $this->user(Role::Admin);
+
+        $this->actingAs($admin)
+            ->postJson("api/v1/portal/admin/doctors/{$doctor->uuid}/documents/review", ['kind' => 'government_id', 'decision' => 'rejected', 'reason' => 'The NIN slip has expired; upload a current one.'])
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->postJson("api/v1/portal/admin/doctors/{$doctor->uuid}/review", ['decision' => 'suspended', 'notes' => 'Identity document has expired.'])
+            ->assertOk();
+
+        $this->actingAs($admin)
+            ->postJson("api/v1/portal/admin/doctors/{$doctor->uuid}/review", ['decision' => 'reinstated'])
+            ->assertOk();
+
+        $this->assertSame([
+            [$doctor->id, 'account', __('notifications.doctor_review.approved.title')],
+            [$doctor->id, 'account', __('notifications.doctor_document_rejected.title')],
+            [$doctor->id, 'account', __('notifications.doctor_review.suspended.title')],
+            [$doctor->id, 'account', __('notifications.doctor_review.reinstated.title')],
+        ], $sent->sent);
     }
 }

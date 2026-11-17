@@ -25,6 +25,8 @@ Newest first. Never edit an old entry.
   unavailable through the `EngagedDoctors` seam. Slots come from `DoctorSlots`, in Africa/Lagos,
   less the `HeldSlots` seam. `DoctorDirectory::bookable()`, `DoctorSlots::offers()` and
   `DoctorRatings::record()` are what M10 calls.
+- With M7 merged, `NotifyDoctorOfReview` tells the doctor of each decision and each rejected
+  document through the `Notifier` (ISS-080, doctor side).
 - `POST doctor/profile/review` was added to the mock-only list, so the inventory is 153 routes.
 - No new service or variable. `APP_KEY` now also protects payout account numbers (SETUP §3).
 - M8 is done: its 11 routes have left `pending-routes.json` (95 pending with M5, M7 and M9 merged).
