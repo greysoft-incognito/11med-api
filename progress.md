@@ -2,6 +2,16 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.1 Roles, users, devices, consent
+
+- `Role` enum (patient, doctor, pharmacy, laboratory, admin) drives `permission-defs.php`; the kit's
+  admin permissions are excluded from every role but admin. The seeder syncs roles everywhere and
+  creates the demo admin only in local and testing.
+- `users` gains `uuid`, `full_name` and soft deletes; phone and email are unique among live rows;
+  email and password are nullable. The kit's `fullname()` accessor now reads `full_name` first,
+  because PHP method names ignore case and it had shadowed the new column.
+- `devices` and `consent_records` with their models. Factory states `app()` and `portal()`.
+
 ## 2026-11-16: M1 Foundation
 
 - Scaffolded from `toneflix/laravel-op` 4.0.2 (Laravel 13.42). The kit's suite runs green on

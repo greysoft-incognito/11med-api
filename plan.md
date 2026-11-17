@@ -12,9 +12,9 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 1.4 `CLAUDE.md` and the coordination files
 - [x] 1.5 CI, and `deploy.yml` with staging and production
 
-## M2 Identity `[ ]`
+## M2 Identity `[~]`
 
-- [ ] 2.1 Roles, the user model's app and portal fields, `Device`, `ConsentRecord`
+- [x] 2.1 Roles, the user model's app and portal fields, `Device`, `ConsentRecord`
 - [ ] 2.2 Access tokens (15 minutes) and rotating refresh tokens, `TOKEN_EXPIRED`
 - [ ] 2.3 App registration, OTP verify and resend budget, login with lockouts, logout, session
 - [ ] 2.4 Forgot and reset password, change password, email change and verification

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -33,6 +34,37 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'username' => fake()->userName(),
         ];
+    }
+
+    /**
+     * An app account: a verified Nigerian phone, no email, password `Password1`.
+     */
+    public function app(Role $role = Role::Patient): static
+    {
+        return $this
+            ->state(fn() => [
+                'full_name' => fake()->name(),
+                'phone' => '080' . fake()->unique()->numerify('########'),
+                'phone_verified_at' => now(),
+                'email' => null,
+                'email_verified_at' => null,
+                'password' => Hash::make('Password1'),
+            ])
+            ->afterCreating(fn(User $user) => $user->assignRole($role->value));
+    }
+
+    /**
+     * A portal account: an email, no phone, password `Password1`.
+     */
+    public function portal(Role $role = Role::Admin): static
+    {
+        return $this
+            ->state(fn() => [
+                'full_name' => fake()->name(),
+                'phone' => null,
+                'password' => Hash::make('Password1'),
+            ])
+            ->afterCreating(fn(User $user) => $user->assignRole($role->value));
     }
 
     /**

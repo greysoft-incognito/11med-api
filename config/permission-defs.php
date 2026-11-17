@@ -1,6 +1,25 @@
 <?php
 
+use App\Enums\Role;
 use App\Models\User;
+
+// The kit's admin permissions. Only the team holds them.
+$permissions = [
+    'dashboard',
+    'transactions',
+    'manage-users',
+    'manage-admins',
+    'configuration',
+    'manage-configuration',
+
+    'users.user',
+    'users.list',
+    'users.create',
+    'users.update',
+    'users.delete',
+
+    'notifications-temps',
+];
 
 return [
     /*
@@ -20,7 +39,7 @@ return [
     |
     | This is the role that would be considered as the super admin role.
     */
-    'super-admin-role' => 'super-admin',
+    'super-admin-role' => 'admin',
     /*
     |--------------------------------------------------------------------------
     | Role List
@@ -29,11 +48,7 @@ return [
     | These are roles that will be made available  to the user.
     | Feel free to add or remove as per your requirements.
     */
-    'roles' => [
-        'admin',
-        'manager',
-        'super-admin',
-    ],
+    'roles' => Role::values(),
     /*
     |--------------------------------------------------------------------------
     | Elevated Role List
@@ -44,7 +59,6 @@ return [
     */
     'elevated-roles' => [
         'admin',
-        'super-admin',
     ],
     /*
     |--------------------------------------------------------------------------
@@ -55,22 +69,7 @@ return [
     | the exclusionlist.
     | Feel free to add or remove as per your requirements.
     */
-    'permissions' => [
-        'dashboard',
-        'transactions',
-        'manage-users',
-        'manage-admins',
-        'configuration',
-        'manage-configuration',
-
-        'users.user',
-        'users.list',
-        'users.create',
-        'users.update',
-        'users.delete',
-
-        'notifications-temps',
-    ],
+    'permissions' => $permissions,
     /*
     |--------------------------------------------------------------------------
     | Exclusion List
@@ -80,8 +79,10 @@ return [
     | you can add them here using the role name as key.
     */
     'exclusions' => [
-        'admin' => ['manage-admins'],
-        'manager' => ['manage-admins'],
+        'patient' => $permissions,
+        'doctor' => $permissions,
+        'pharmacy' => $permissions,
+        'laboratory' => $permissions,
     ],
     /*
     |--------------------------------------------------------------------------
@@ -91,10 +92,6 @@ return [
     | Users with any of the following roles are considered admins in general contexts.
     */
     'admin_roles' => [
-        'super-admin',
         'admin',
-        'manager',
-        'support',
-        'user',
     ],
 ];

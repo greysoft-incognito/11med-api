@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
+use App\Enums\Role;
+use App\Models\Concerns\HasPublicId;
 use App\Models\Scopes\NotDeletingUserScope;
 use App\Notifications\SendCode;
 use App\Traits\ModelCanExtend;
@@ -14,6 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -29,10 +32,14 @@ class User extends Authenticatable implements WalletOperations
     use Fileable;
     use HasApiTokens;
     use HasFactory;
+    use HasPublicId;
     use HasRoles;
     use ManagesWallet;
     use ModelCanExtend;
     use Notifiable;
+    use SoftDeletes;
+
+    public const NOT_FOUND = 'USER_NOT_FOUND';
 
     /**
      * The attributes that are mass assignable.
@@ -51,6 +58,7 @@ class User extends Authenticatable implements WalletOperations
         'username',
         'password',
         'last_seen',
+        'full_name',
     ];
 
     /**
@@ -116,7 +124,8 @@ class User extends Authenticatable implements WalletOperations
     public static function registerEvents()
     {
         static::creating(function (User $model) {
-            $model->username ??= $model->generateUsername($model->firstname);
+            $model->firstname ??= str((string) $model->full_name)->before(' ')->toString();
+            $model->username ??= $model->generateUsername($model->full_name ?? $model->firstname ?? 'user');
         });
     }
 
@@ -138,14 +147,15 @@ class User extends Authenticatable implements WalletOperations
     }
 
     /**
-     * Get the user's fullname.
-     *
-     * @return string
+     * The `full_name` column; the kit's first and last name for accounts made before it.
+     * PHP method names ignore case, so this one accessor serves `fullname` and `full_name`.
      */
     protected function fullname(): Attribute
     {
         return Attribute::make(
-            get: fn() => collect([$this->firstname, $this->lastname])->join(' '),
+            get: fn(?string $value) => $value ?? collect([$this->firstname, $this->lastname])
+                ->filter()
+                ->join(' '),
         );
     }
 
@@ -204,6 +214,28 @@ class User extends Authenticatable implements WalletOperations
         }
 
         return false;
+    }
+
+    /**
+     * The user's one role.
+     */
+    public function role(): ?Role
+    {
+        $name = $this->relationLoaded('roles')
+            ? $this->roles->first()?->name
+            : $this->getRoleNames()->first();
+
+        return $name === null ? null : Role::tryFrom($name);
+    }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(Device::class);
+    }
+
+    public function consents(): HasMany
+    {
+        return $this->hasMany(ConsentRecord::class);
     }
 
     /**
