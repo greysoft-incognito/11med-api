@@ -46,11 +46,11 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [ ] 6.3 History, compliance, the PDF report
 - [ ] 6.4 Readings and insights
 
-## M7 Notifications and push `[ ]`
+## M7 Notifications and push `[x]`
 
-- [ ] 7.1 History, read, read-all, preferences
-- [ ] 7.2 The `Notifier`, APNs and FCM senders, invalid-token cleanup
-- [ ] 7.3 The missed-dose job with dedupe
+- [x] 7.1 History, read, read-all, preferences
+- [x] 7.2 The `Notifier`, APNs and FCM senders, invalid-token cleanup
+- [x] 7.3 The missed-dose notification with dedupe (fires when M6's auto-miss dispatches `DoseMissed`)
 
 ## M8 Doctors `[ ]`
 
