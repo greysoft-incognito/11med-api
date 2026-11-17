@@ -48,4 +48,29 @@ return [
 
     // Subscriptions
     'PREMIUM_REQUIRED' => 'This is part of premium.',
+
+    // Laboratories
+    'TEST_NOT_FOUND' => 'There is no test with that code.',
+    'DUPLICATE_CODE' => 'A test with this code is already in the catalogue.',
+    'CODE_IMMUTABLE' => 'A code cannot change once it exists. Add a new test instead.',
+    'LAB_NOT_FOUND' => 'That laboratory is no longer listed.',
+    'CLOSES_BEFORE_OPENS' => 'Closing time must be after opening time.',
+    'UNKNOWN_TEST' => 'That test is not in the platform catalogue. Ask the team to add it.',
+    'TEST_NOT_LISTED' => 'That test is not on your list.',
+    'TEST_IN_OPEN_BOOKING' => 'A booking in progress includes this test. Mark it unavailable instead, and remove it once the booking is done.',
+    'TEST_NOT_OFFERED' => 'This laboratory does not offer one of those tests.',
+    'TEST_UNAVAILABLE' => 'This laboratory cannot run one of those tests at the moment.',
+    'HOME_COLLECTION_UNAVAILABLE' => 'This laboratory does not collect samples at home.',
+    'ADDRESS_REQUIRED' => 'Say where the sample should be collected.',
+    'SCHEDULE_PAST' => 'That time has already passed.',
+    'REQUEST_ALREADY_BOOKED' => 'These tests are already booked.',
+    'LAB_REQUEST_NOT_FOUND' => 'That request no longer exists.',
+    'LAB_REQUEST_EXISTS' => 'Tests have already been requested for this consultation.',
+    'NO_LAB_REQUEST' => 'No tests were requested for this consultation.',
+    'LAB_BOOKING_NOT_FOUND' => 'That booking is not yours, or no longer exists.',
+    'BOOKING_STARTED' => 'The sample has been taken. The booking can no longer be cancelled.',
+    'BOOKING_CANCELLED' => 'This booking was cancelled.',
+    'BOOKING_FINAL' => 'This booking cannot move any further.',
+    'PAYMENT_PENDING' => 'This booking has not been paid for.',
+    'RESULTS_REQUIRED' => 'Upload the results document before marking results ready.',
 ];
