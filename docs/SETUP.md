@@ -21,9 +21,10 @@ by id in [human_todo.md](../human_todo.md).
 | S3-compatible bucket and keys | Uploaded files | M3 | Files stay on the server's own disk | HT-005 |
 | A malware scanner (ClamAV or a service) | PDFs | M3 | PDFs with scripts or embedded files are refused; others stored as sent | HT-011, optional |
 | The real store link and emergency page address | Caregiver SMS, QR codes | M4 | The defaults below are used | HT-012 |
+| Apple Push Notifications key (`.p8`), its key id and the team id | Push to iPhones | M7 | Pushes are written to the log (ids only) | HT-006 |
+| Firebase project service account JSON (role Firebase Cloud Messaging API Admin, with the FCM HTTP v1 API enabled) | Push to Android | M7 | Pushes are written to the log (ids only) | HT-006 |
 
-Not needed yet, listed so they are not a surprise: APNs key and FCM service account (M7, HT-006),
-Paystack keys and webhook (M9, HT-007), a Daily.co or Agora key (M10, HT-008).
+Not needed yet, listed so they are not a surprise: Paystack keys and webhook (M9, HT-007), a Daily.co or Agora key (M10, HT-008).
 
 ## 2. Server
 
@@ -39,7 +40,7 @@ Paystack keys and webhook (M9, HT-007), a Daily.co or Agora key (M10, HT-008).
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
   ```
 
-- **Queue worker** (M2 onwards): every SMS and email is queued, so without a worker nothing is sent.
+- **Queue worker** (M2 onwards): every SMS, email and push (M7) is queued, so without a worker nothing is sent.
   Run `php artisan queue:work` under Supervisor or systemd;
   `scripts/generate-supervisor-config.sh <user> [processes] [driver]` writes the Supervisor program.
 
@@ -75,6 +76,12 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `PUSH_ENABLED` | `false` | `true` sends pushes through APNs and FCM for each provider whose credentials are set; otherwise ids are logged | M7 |
+| `APNS_KEY_PATH` | none | Absolute path to the `.p8` key file, outside `public/`, readable by the PHP-FPM and queue user (HT-006) | M7 |
+| `APNS_KEY_ID`, `APNS_TEAM_ID` | none | The key's 10-character id and the Apple team id (HT-006) | M7 |
+| `APNS_BUNDLE_ID` | `ng.elevenmed.app` | The app's bundle id, sent as `apns-topic` | M7 |
+| `APNS_PRODUCTION` | `false` | `false` on staging, whose phones run development builds with sandbox tokens; `true` on production for App Store and TestFlight builds. The wrong value makes Apple refuse every token, and refused tokens are deleted | M7 |
+| `FCM_CREDENTIALS_PATH` | none | Absolute path to the Firebase service account JSON, outside `public/` (HT-006). The project id is read from it | M7 |
 
 Development only: `ELEVENMED_APP_PATH` and `ELEVENMED_PORTALS_PATH` point at the client checkouts
 (default `../11med` and `../11med-web`) for `php artisan contract:routes`.
