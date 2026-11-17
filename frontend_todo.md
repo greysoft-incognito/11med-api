@@ -56,6 +56,16 @@ milestone that introduced it. The clients tick them; never delete.
 - [ ] **FE-014 · Caregiver lists are paged.** `GET /medications/caregivers` and
   `GET /medications/caregiving` answer `{ items, next_cursor, total }` (FE-003). (M4.3)
 
+- [ ] **FE-070 · The notification list is paged.** `GET /notifications/:userId` answers
+  `{ items, next_cursor, total, unread_count, has_more }` and takes `cursor` and `limit` (FE-003).
+  `unread_count` counts every unread notification, not only the page; `has_more` is
+  `next_cursor !== null`. The bell and history screen should page with the cursor. (M7.1)
+- [ ] **FE-071 · Android push data arrives as strings.** FCM data values must be strings, so on
+  Android `zPushPayload` comes as string fields with `target_id` left out when null, and the whole
+  payload again as JSON under `body`. iOS sends it at the top level and under `body` as JSON
+  objects. `readPushPayload` should parse `data.body` when it is a JSON string, else accept an
+  absent `target_id` as null. To confirm on a device once HT-006 is cleared. (M7.2)
+
 ## Both
 
 - [ ] **FE-005 · Routes no contract has yet.** Consent records (registration: FE-006 adds it to the body; profile sharing),

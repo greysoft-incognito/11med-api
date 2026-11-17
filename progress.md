@@ -2,6 +2,34 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-21: M7 Notifications and push
+
+- 7.1: `GET notifications/{userId}` pages the history newest first (FE-003) and adds the contract's
+  `unread_count` (all unread, not the page's) and `has_more` (FE-070). `PATCH read/{id}` keeps the
+  first read time; `PATCH read-all` is one `UPDATE`. `GET` and `PATCH preferences` answer every
+  category in the contract's order, saved or defaulted (push and in-app on, SMS off), so a category
+  added later appears for a user who saved before it existed (app handover §8.3); a PATCH saves only
+  the categories it names. Patient and doctor accounts; another account's id is 404. Tables
+  `app_notifications` (the kit already has `notifications`) and `notification_preferences`.
+- 7.2: `DeliveringNotifier` replaces `SilentNotifier` as the `Notifier` binding. It reads the
+  category's preference, writes the history row when in-app is on (a repeated `dedupe_key` writes
+  and pushes nothing, by a partial unique index and `ON CONFLICT DO NOTHING`), and queues
+  `DeliverPush` after commit when push is on and the caller did not pass `push: false`. With in-app
+  off the push carries a fresh id, as the mock does. `DeliverPush` reads the user's devices in
+  batches through `Devices::eachOf()` and sends with `ApnsSender` (HTTP/2, ES256 provider token
+  cached 40 minutes, sandbox or production host) or `FcmSender` (HTTP v1, service-account OAuth
+  token cached 50 minutes, Android channel `updates`). A token the provider reports unregistered
+  or malformed is dropped by `Devices::dropInvalidToken()`, unless the install registered a new one
+  meanwhile. Until `PUSH_ENABLED` and a provider's credentials are set, `LogPushSender` logs ids
+  only (HT-006). Payload `zPushPayload`; FCM data values are strings, so a null `target_id` is left
+  out and the payload is repeated as JSON under `body` (FE-071). Uses `firebase/php-jwt`, already a
+  dependency. `SilentNotifier` stays for contexts that must notify nobody.
+- 7.3: `NotifyMissedDose` listens for `App\Events\Medications\DoseMissed`, which M6's auto-miss job
+  dispatches once per dose (agreed with M6; the event file is identical on both branches). History
+  only, never pushed, keyed `missed_dose:<medication>:<scheduled_for>`, wording in
+  `lang/en/notifications.php` as the mock's. Push copy is English only (ISS-070).
+- Next: Obi's review. Callers (M6, M8, M10, M11, M12) send through `Notifier` unchanged.
+
 ## 2026-11-19: The seams between M5 to M13
 
 So the remaining milestones can be built in parallel, each interface one module owns and others call

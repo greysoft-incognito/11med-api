@@ -35,6 +35,23 @@ return [
         'enabled' => (bool) env('SMS_ENABLED', false),
     ],
 
+    // Notifications (M7): remote push through APNs and FCM directly, with native tokens (app handover §8).
+    // Logged until PUSH_ENABLED is true and a provider's credentials are set (HT-006).
+    'push' => [
+        'enabled' => (bool) env('PUSH_ENABLED', false),
+        'android_channel' => 'updates',
+        'apns' => [
+            'key_path' => env('APNS_KEY_PATH'),
+            'key_id' => env('APNS_KEY_ID'),
+            'team_id' => env('APNS_TEAM_ID'),
+            'bundle_id' => env('APNS_BUNDLE_ID', 'ng.elevenmed.app'),
+            'production' => (bool) env('APNS_PRODUCTION', false),
+        ],
+        'fcm' => [
+            'credentials_path' => env('FCM_CREDENTIALS_PATH'),
+        ],
+    ],
+
     // Account erasure (NDPR, app handover §3.1). What survives, severed from the person, pending a legal answer (HT-004).
     'erasure' => [
         'retained' => [

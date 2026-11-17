@@ -45,4 +45,11 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `qr_accesses` | Not soft deleted. One row per open of the emergency page: `qr_token_id`, `opened_at`, and nothing about the reader |
 | `caregivers` | A patient's invitation (`patient_id`, `phone` local form, `invite_code`, both unique among live rows) and, once accepted, `caregiver_user_id`, `status` `active`, `accepted_at`. Revoking soft deletes; erasing either account removes the row |
 
+### Notifications (M7)
+
+| Table | Notes |
+| --- | --- |
+| `app_notifications` | A user's notification history (`zNotification`): `category`, `title`, `body`, `target_id` (the record a tap opens), `read_at` (the first read), an optional `dedupe_key` unique per user among live rows, so a repeated event writes nothing. Indexed `(user_id, created_at, id)` for the newest-first page and partially on unread rows for the count. Missed-dose titles name the medicine: never logged. Erasure removes the rows with the user |
+| `notification_preferences` | A saved choice per category: `push`, `sms`, `in_app`, `(user_id, category)` unique among live rows. A category with no row is on, SMS off |
+
 Domain tables are added here as each milestone lands.
