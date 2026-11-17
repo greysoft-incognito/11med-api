@@ -36,6 +36,7 @@ return [
         'retained' => [
             'consent_records' => 'Records of the consents you gave, without your name or number',
             'account_erasures' => 'That an account was deleted, its role, when, and the reason you gave',
+            'payments' => 'Payments you made: the amount, what for and when, without your name or number',
         ],
         'retention_years' => 6,
     ],
@@ -75,6 +76,17 @@ return [
     // The policy version consent is recorded against when a client does not name one.
     'consent' => [
         'policy_version' => env('CONSENT_POLICY_VERSION', '2026-07-01'),
+    ],
+
+    // Payments (app handover §16). Paystack's keys are in config/services.php. The callback is the app's pay
+    // screen; accounts with no email are given one at this domain for Paystack's sake.
+    'payments' => [
+        'callback_url' => env('PAYSTACK_CALLBACK_URL', 'elevenmed://pay'),
+        'email_domain' => env('PAYMENTS_EMAIL_DOMAIN', 'customers.11med.ng'),
+        'reference_prefix' => '11M-',
+        'abandon_after_minutes' => (int) env('PAYMENTS_ABANDON_AFTER_MINUTES', 60),
+        'check_every_seconds' => 15,
+        'initialise_per_minute' => 10,
     ],
 
     // The client checkouts the route inventory is read from (`php artisan contract:routes`).
