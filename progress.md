@@ -30,6 +30,34 @@ Newest first. Never edit an old entry.
   `lang/en/notifications.php` as the mock's. Push copy is English only (ISS-070).
 - Next: Obi's review. Callers (M6, M8, M10, M11, M12) send through `Notifier` unchanged.
 
+## 2026-11-19: M5.2 Entitlements, M5 done
+
+- `App\Services\Subscriptions\Entitlements` holds every free-tier gate, reading premium from the
+  record: `caregiverLimit()` (1 or 5), `medicationLimit()` (3 or null), `ensureCanAddMedication()`
+  (422 `MEDICATION_LIMIT_REACHED`, `meta.limit` and `meta.active` as the mock sends them; a
+  prescribed medication is exempt), `historyDays()` and `readingsDays()` (7 or null),
+  `historyFrom()` and `readingsFrom()` (the first Lagos day a free account may read), and
+  `requirePremium()` (403 `PREMIUM_REQUIRED`) for the report and insights. M6 calls these; no
+  route of its own. The free numbers are `config('elevenmed.free_tier')`.
+- M5 is done: 39 of 154 contract routes built, 115 pending.
+
+## 2026-11-19: M5.1 Subscriptions
+
+- `GET subscriptions/{userId}` for patients and doctors, their own only (404 otherwise): `none`
+  without a current record; `active`, `plan_id: 'premium'`, `current_period_end` the start of the
+  day after `premium_until` in Lagos, and `cancels_at_period_end: true`, since a recorded premium
+  does not renew (FE-050).
+- `User::isPremium()` reads the `subscription` relation: premium while `premium_until` is today or
+  later in Lagos. It lapses on its own with nothing written, so no job runs.
+- `GET portal/admin/subscriptions` is paged, newest change first, with `q` over the patient's name,
+  phone (either spelling) and the reference, in SQL. `POST` records `{ phone, premium_until,
+  reference }` (200): 400 `VALIDATION_FAILED` on `premium_until` unless after today in Lagos, 404
+  `PATIENT_NOT_FOUND` on `phone` (a verified patient account only), 409 `REFERENCE_USED` on
+  `reference` for any reference ever recorded. Recording again replaces the end date (FE-051).
+- Two tables: `subscriptions` (one per patient, the current state) and `subscription_payments`
+  (every recording, by reference, with the admin who recorded it). Erasure removes the first and
+  keeps the second without the person, so a reference can never be recorded twice.
+- `Subscriptions::activeCount()` is the premium count M13's admin summary will read.
 ## 2026-11-19: The seams between M5 to M13
 
 So the remaining milestones can be built in parallel, each interface one module owns and others call

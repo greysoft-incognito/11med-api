@@ -34,10 +34,10 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 4.2 QR tokens, revocation, the public emergency page with its access log and rate limit
 - [x] 4.3 Caregiver invites (SMS, deferred link), accept, remove, read-only access
 
-## M5 Subscriptions and entitlements `[ ]`
+## M5 Subscriptions and entitlements `[x]`
 
-- [ ] 5.1 `subscriptions/:userId`, `is_premium`, the admin record and list
-- [ ] 5.2 The `Entitlements` service with every free-tier gate
+- [x] 5.1 `subscriptions/:userId`, `is_premium`, the admin record and list
+- [x] 5.2 The `Entitlements` service with every free-tier gate
 
 ## M6 Medications and readings `[ ]`
 

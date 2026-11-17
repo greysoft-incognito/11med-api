@@ -94,6 +94,10 @@ Kept in the database (`laravel-dbconfig`), changed with Artisan, no deploy neede
 | --- | --- | --- |
 | `prefered_sms_channel` | `KUDISMS` (the kit's default is Twilio) | `php artisan dbconfig:set prefered_sms_channel KUDISMS` |
 
+The free tier's limits (3 medications, 1 caregiver, 7 days of history and readings) are code
+config in `config/elevenmed.php` (`free_tier`, `caregivers`), changed by a deploy, not here. Premium
+needs no service or credential: the team records it in the admin portal (M5).
+
 ## 5. Commands, once per server
 
 Run in `DEPLOY_PATH` after the first deploy (the deploy itself runs migrations, role sync and
