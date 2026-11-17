@@ -164,6 +164,7 @@ The clients enforce these in the UI; the server is the authority against a clien
 | `human_todo.md` | Something needs the owner (`HT-nnn`), marked blocking or not; tick when cleared |
 | `frontend_todo.md` | The real API needs a client change (`FE-nnn`), naming the client and route |
 | `docs/data-model.md` | A migration adds or changes a table |
+| `docs/SETUP.md` | Anything new is needed to run the API: a service, credential, env variable, server setting, runtime setting or command. In the same PR |
 
 ---
 
@@ -240,3 +241,4 @@ Add to this list; do not remove entries.
 | 2026-11-18 | An emergency token is found by its SHA-256 and kept encrypted for the owner; each open writes a time-only access row and bumps the count; 30 opens an hour per token, 60 per address; `no-store` | App handover §3.3, portal handover §7 |
 | 2026-11-18 | Caregiver lists are paged like every app list (FE-003); the caregiver cap is the first gate in `Entitlements` | Owner's paging rule; one place for free-tier gates (§5.2) |
 | 2026-11-17 | A PDF with active content (`/JavaScript`, `/JS`, `/Launch`, `/EmbeddedFile`, `/RichMedia`) is 415 until a scanner exists (HT-011) | App handover §12: a PDF can carry scripts |
+| 2026-11-17 | Every setup requirement (services, credentials, env variables, server and runtime settings, one-off commands) lives in `docs/SETUP.md`, updated in the PR that adds it; `DEPLOY.md` covers the deploy itself | Owner's rule: nothing lives only in chat |
