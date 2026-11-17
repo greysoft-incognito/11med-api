@@ -8,9 +8,9 @@ use Illuminate\Container\Attributes\Bind;
 
 /**
  * Tells a user something happened: writes their notification history row and pushes it to their
- * devices as their preferences allow (app handover §8). The Notifications module (M7) implements it.
+ * devices as their preferences allow (app handover §8). `DeliveringNotifier` implements it.
  */
-#[Bind(SilentNotifier::class)]
+#[Bind(DeliveringNotifier::class)]
 interface Notifier
 {
     /**

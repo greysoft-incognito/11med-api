@@ -21,10 +21,11 @@ by id in [human_todo.md](../human_todo.md).
 | S3-compatible bucket and keys | Uploaded files | M3 | Files stay on the server's own disk | HT-005 |
 | A malware scanner (ClamAV or a service) | PDFs | M3 | PDFs with scripts or embedded files are refused; others stored as sent | HT-011, optional |
 | The real store link and emergency page address | Caregiver SMS, QR codes | M4 | The defaults below are used | HT-012 |
+| Apple Push Notifications key (`.p8`), its key id and the team id | Push to iPhones | M7 | Pushes are written to the log (ids only) | HT-006 |
+| Firebase project service account JSON (role Firebase Cloud Messaging API Admin, with the FCM HTTP v1 API enabled) | Push to Android | M7 | Pushes are written to the log (ids only) | HT-006 |
 | Paystack account: secret key (test on staging, live on production) and the webhook URL on its dashboard | Paying for orders, lab bookings and consultations | M9 | `POST payments` answers 422 `PAYMENTS_UNAVAILABLE`; paying at the counter still works | HT-007 |
 
-Not needed yet, listed so they are not a surprise: APNs key and FCM service account (M7, HT-006),
-a Daily.co or Agora key (M10, HT-008).
+Not needed yet, listed so they are not a surprise: a Daily.co or Agora key (M10, HT-008).
 
 ## 2. Server
 
@@ -42,8 +43,8 @@ a Daily.co or Agora key (M10, HT-008).
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
   ```
 
-- **Queue worker** (M2 onwards): every SMS and email is queued, and so is every refund sent to
-  Paystack (M9), so without a worker nothing is sent.
+- **Queue worker** (M2 onwards): every SMS, email, push (M7) and refund sent to Paystack (M9) is
+  queued, so without a worker nothing is sent.
   Run `php artisan queue:work` under Supervisor or systemd;
   `scripts/generate-supervisor-config.sh <user> [processes] [driver]` writes the Supervisor program.
 
@@ -84,6 +85,12 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `PAYMENTS_EMAIL_DOMAIN` | `customers.11med.ng` | Paystack needs an email; an account without one is sent as `<account id>@<this domain>`. No mail is ever sent there | M9 |
 | `PAYMENTS_ABANDON_AFTER_MINUTES` | `60` | How long a gateway payment may stay pending before the sweep asks Paystack once more and abandons it | M9 |
 | `PAYSTACK_BASE_URL` | `https://api.paystack.co` | Only for pointing tests at a stand-in | M9 |
+| `PUSH_ENABLED` | `false` | `true` sends pushes through APNs and FCM for each provider whose credentials are set; otherwise ids are logged | M7 |
+| `APNS_KEY_PATH` | none | Absolute path to the `.p8` key file, outside `public/`, readable by the PHP-FPM and queue user (HT-006) | M7 |
+| `APNS_KEY_ID`, `APNS_TEAM_ID` | none | The key's 10-character id and the Apple team id (HT-006) | M7 |
+| `APNS_BUNDLE_ID` | `ng.elevenmed.app` | The app's bundle id, sent as `apns-topic` | M7 |
+| `APNS_PRODUCTION` | `false` | `false` on staging, whose phones run development builds with sandbox tokens; `true` on production for App Store and TestFlight builds. The wrong value makes Apple refuse every token, and refused tokens are deleted | M7 |
+| `FCM_CREDENTIALS_PATH` | none | Absolute path to the Firebase service account JSON, outside `public/` (HT-006). The project id is read from it | M7 |
 
 Development only: `ELEVENMED_APP_PATH` and `ELEVENMED_PORTALS_PATH` point at the client checkouts
 (default `../11med` and `../11med-web`) for `php artisan contract:routes`.
@@ -108,6 +115,10 @@ Kept in the database (`laravel-dbconfig`), changed with Artisan, no deploy neede
 | Setting | Value | Command |
 | --- | --- | --- |
 | `prefered_sms_channel` | `KUDISMS` (the kit's default is Twilio) | `php artisan dbconfig:set prefered_sms_channel KUDISMS` |
+
+The free tier's limits (3 medications, 1 caregiver, 7 days of history and readings) are code
+config in `config/elevenmed.php` (`free_tier`, `caregivers`), changed by a deploy, not here. Premium
+needs no service or credential: the team records it in the admin portal (M5).
 
 ## 5. Commands, once per server
 

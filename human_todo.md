@@ -25,7 +25,7 @@ Things only the owner can do or decide. Each says whether it blocks and what.
   `MEDIA_PRIVATE_DISK` pointed at an `s3` disk (a public-read bucket or prefix for pictures, a
   private one for attachments, results and licences). Until then files go to the server's
   `storage/` (`php artisan storage:link` for the public ones). **Blocks:** M3 going live.
-- [ ] **HT-006 · Push credentials.** The APNs key (`.p8`), key id and team id; an FCM service account. **Blocks:** M7 going live.
+- [ ] **HT-006 · Push credentials.** The APNs key (`.p8`), key id and team id; an FCM service account JSON for the Firebase project the Android app is built with. Place both files on each server outside `public/` and set the `PUSH_ENABLED`, `APNS_*` and `FCM_CREDENTIALS_PATH` variables (`docs/SETUP.md` §3). **Blocks:** M7 going live; until then pushes are logged.
 - [ ] **HT-007 · Paystack.** Test and live secret keys, and the webhook URL set on the dashboard. Set
   `PAYSTACK_SECRET_KEY` in each server's `.env` (test key on staging, live on production) and the
   webhook URL `https://<API>/api/v1/payments/webhook/paystack` on that Paystack account; leave its

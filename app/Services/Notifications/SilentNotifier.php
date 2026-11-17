@@ -6,7 +6,7 @@ use App\Enums\NotificationCategory;
 use App\Models\User;
 
 /**
- * Sends and records nothing until the Notifications module does.
+ * Sends and records nothing, for a context that must not notify anyone.
  */
 class SilentNotifier implements Notifier
 {

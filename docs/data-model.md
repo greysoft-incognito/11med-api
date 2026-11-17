@@ -56,4 +56,18 @@ Money records: erasure nulls `payments.user_id` and keeps the rows. Statuses cha
 | `payment_targets` | One target's share: `purpose` and `target_id` (the target's public id, no foreign key since the target's table belongs to another module), `target_reference` and `partner_name` copied for the desk, `amount_kobo`, `refunded_kobo`, `state` (`standing`, `released`, `refund_pending`, `refund_failed`, `refunded`). Indexed on `(purpose, target_id)` |
 | `payment_refunds` | A refund of one share: `amount_kobo`, `status` (`pending`, `processed`, `failed`), `gateway_refund_id`, `requested_at` (when Paystack accepted the request), `processed_at`, `failure_reason` |
 
+### Subscriptions (M5)
+
+| Table | Notes |
+| --- | --- |
+| `subscriptions` | One live row per patient once the team records premium: `user_id`, `premium_until` (a Lagos calendar day, indexed for the premium count), the latest `reference`, `recorded_by` (the admin, null once erased). Premium holds while `premium_until` is today or later in Lagos; nothing is written when it lapses. `is_premium` is read from here, never stored on the user. Erasing the patient removes the row |
+| `subscription_payments` | Every recording: `user_id` (null once the patient is erased, so the reference stays used), `reference` (unique among live rows, checked across trashed ones too), `premium_until`, `recorded_by`, `recorded_at` |
+
+### Notifications (M7)
+
+| Table | Notes |
+| --- | --- |
+| `app_notifications` | A user's notification history (`zNotification`): `category`, `title`, `body`, `target_id` (the record a tap opens), `read_at` (the first read), an optional `dedupe_key` unique per user among live rows, so a repeated event writes nothing. Indexed `(user_id, created_at, id)` for the newest-first page and partially on unread rows for the count. Missed-dose titles name the medicine: never logged. Erasure removes the rows with the user |
+| `notification_preferences` | A saved choice per category: `push`, `sms`, `in_app`, `(user_id, category)` unique among live rows. A category with no row is on, SMS off |
+
 Domain tables are added here as each milestone lands.
