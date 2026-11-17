@@ -28,4 +28,12 @@ class FakeNotifier implements Notifier
     {
         return array_values(array_filter($this->sent, fn(array $sent) => $sent['to'] === $user->id));
     }
+
+    /**
+     * Drops what was sent to a user so far, such as the approval a test doctor is set up with.
+     */
+    public function forget(User $user): void
+    {
+        $this->sent = array_values(array_filter($this->sent, fn(array $sent) => $sent['to'] !== $user->id));
+    }
 }

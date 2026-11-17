@@ -56,7 +56,11 @@ trait MakesConsultations
      */
     protected function availableDoctor(array $practice = []): User
     {
-        return $this->approvedDoctor(['is_available_now' => true] + $practice);
+        $doctor = $this->approvedDoctor(['is_available_now' => true] + $practice);
+
+        $this->notifier->forget($doctor);
+
+        return $doctor;
     }
 
     protected function book(User $patient, User $doctor, array $overrides = []): array
