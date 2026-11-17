@@ -10,7 +10,8 @@ Things only the owner can do or decide. Each says whether it blocks and what.
   `DEPLOY_PATH` with its `.env`, PostgreSQL, a queue worker and the scheduler's cron. Step by step in
   `docs/DEPLOY.md`. **Blocks:** deploys only.
 - [ ] **HT-002 · SMS and email.** KudiSMS API key and sender id; SMTP credentials and the from address.
-  Then `SMS_ENABLED=true` in each server's `.env`. Until then codes go to the log; staging can set
+  Then `SMS_ENABLED=true`, `KUDISMS_API_KEY` and `KUDISMS_SENDER_ID` in each server's `.env`, and
+  `php artisan dbconfig:set prefered_sms_channel KUDISMS` (the kit defaults to Twilio; `docs/SETUP.md`). Until then codes go to the log; staging can set
   `OTP_FIXED_CODE=123456` so testers can sign up. **Blocks:** M2 going live.
 - [ ] **HT-003 · Social sign-in ids.** `APPLE_BUNDLE_ID` defaults to the app's bundle id,
   `ng.elevenmed.app`. `GOOGLE_WEB_CLIENT_ID` is the app's `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, which
