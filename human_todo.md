@@ -26,7 +26,11 @@ Things only the owner can do or decide. Each says whether it blocks and what.
   private one for attachments, results and licences). Until then files go to the server's
   `storage/` (`php artisan storage:link` for the public ones). **Blocks:** M3 going live.
 - [ ] **HT-006 · Push credentials.** The APNs key (`.p8`), key id and team id; an FCM service account. **Blocks:** M7 going live.
-- [ ] **HT-007 · Paystack.** Test and live secret keys, and the webhook URL set on the dashboard. **Blocks:** M9 going live.
+- [ ] **HT-007 · Paystack.** Test and live secret keys, and the webhook URL set on the dashboard. Set
+  `PAYSTACK_SECRET_KEY` in each server's `.env` (test key on staging, live on production) and the
+  webhook URL `https://<API>/api/v1/payments/webhook/paystack` on that Paystack account; leave its
+  callback URL empty (`docs/SETUP.md` §3). Until then `POST payments` answers 422
+  `PAYMENTS_UNAVAILABLE`. **Blocks:** M9 going live.
 - [ ] **HT-008 · Call provider.** A Daily.co (recommended) or Agora account and API key. **Blocks:** M10.4 going live.
 - [ ] **HT-009 · Allergy classes.** A clinician to review the drug class seed. **Blocks:** nothing; M10.3 ships the seed marked unreviewed.
 - [x] **HT-010 · Test server database.** Answered 2026-11-17: PHP 8.4.27, PostgreSQL 14.23 client; CI now matches. **Blocks:** the first staging deploy.
