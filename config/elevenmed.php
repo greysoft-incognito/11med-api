@@ -35,11 +35,30 @@ return [
         'enabled' => (bool) env('SMS_ENABLED', false),
     ],
 
+    // Notifications (M7): remote push through APNs and FCM directly, with native tokens (app handover §8).
+    // Logged until PUSH_ENABLED is true and a provider's credentials are set (HT-006).
+    'push' => [
+        'enabled' => (bool) env('PUSH_ENABLED', false),
+        'android_channel' => 'updates',
+        'apns' => [
+            'key_path' => env('APNS_KEY_PATH'),
+            'key_id' => env('APNS_KEY_ID'),
+            'team_id' => env('APNS_TEAM_ID'),
+            'bundle_id' => env('APNS_BUNDLE_ID', 'ng.elevenmed.app'),
+            'production' => (bool) env('APNS_PRODUCTION', false),
+        ],
+        'fcm' => [
+            'credentials_path' => env('FCM_CREDENTIALS_PATH'),
+        ],
+    ],
+
     // Account erasure (NDPR, app handover §3.1). What survives, severed from the person, pending a legal answer (HT-004).
     'erasure' => [
         'retained' => [
             'consent_records' => 'Records of the consents you gave, without your name or number',
             'account_erasures' => 'That an account was deleted, its role, when, and the reason you gave',
+            'payments' => 'Payments you made: the amount, what for and when, without your name or number',
+            'subscription_payments' => 'The payment references for premium the team recorded, without your name or number',
         ],
         'retention_years' => 6,
     ],
@@ -66,15 +85,6 @@ return [
 
     // Caregivers (app spec §6.5): the store link the invitation SMS carries, and the free and premium caps.
     'app_link' => env('APP_DOWNLOAD_URL', 'https://11med.ng/app'),
-    // Payments: the PayableTargets class each module provides for its purpose (M9 resolves them).
-    'payments' => [
-        'targets' => [
-            'order' => OrderPayables::class,
-            'lab_booking' => BookingPayables::class,
-            'consultation' => ConsultationPayables::class,
-        ],
-    ],
-
     // The free tier's limits (app CLAUDE.md "Free vs premium gates"); premium lifts all three.
     'free_tier' => [
         'medications' => 3,
@@ -97,14 +107,32 @@ return [
         'policy_version' => env('CONSENT_POLICY_VERSION', '2026-07-01'),
     ],
 
+    // Payments (app handover §16). Paystack's keys are in config/services.php. The callback is the app's pay
+    // screen; accounts with no email are given one at this domain for Paystack's sake.
+    'payments' => [
+        'callback_url' => env('PAYSTACK_CALLBACK_URL', 'elevenmed://pay'),
+        'email_domain' => env('PAYMENTS_EMAIL_DOMAIN', 'customers.11med.ng'),
+        'reference_prefix' => '11M-',
+        'abandon_after_minutes' => (int) env('PAYMENTS_ABANDON_AFTER_MINUTES', 60),
+        'check_every_seconds' => 15,
+        'initialise_per_minute' => 10,
+
+        // The PayableTargets class each module provides for its purpose; one not yet built finds nothing.
+        'targets' => [
+            'order' => OrderPayables::class,
+            'lab_booking' => BookingPayables::class,
+            'consultation' => ConsultationPayables::class,
+        ],
+    ],
+
     // The client checkouts the route inventory is read from (`php artisan contract:routes`).
     'clients' => [
         'app' => env('ELEVENMED_APP_PATH', base_path('../11med')),
         'portals' => env('ELEVENMED_PORTALS_PATH', base_path('../11med-web')),
     ],
 
-    // Routes the mocks register for development only; the handovers say not to build them. The doctor's
-    // self-review stands in for the admin portal, which now decides (M8).
+    // Routes the mocks register for development only; the handovers say not to build them. A doctor's
+    // review is the admin portal's decision, never the doctor's own.
     'mock_only_routes' => [
         'POST api/v1/consultations/{id}/accept',
         'POST api/v1/consultations/{id}/start',

@@ -2,14 +2,13 @@
 
 namespace Tests\Feature\Foundation;
 
-use App\Enums\NotificationCategory;
 use App\Exceptions\ApiException;
 use App\Models\User;
 use App\Services\Medications\NoPrescribedSchedules;
 use App\Services\Medications\PrescribedSchedules;
+use App\Services\Notifications\DeliveringNotifier;
 use App\Services\Notifications\Notifier;
-use App\Services\Notifications\SilentNotifier;
-use App\Services\Payments\NoPayments;
+use App\Services\Payments\GatewayPayments;
 use App\Services\Payments\Payments;
 use App\Services\Subscriptions\Entitlements;
 use Tests\TestCase;
@@ -18,16 +17,14 @@ class SeamsTest extends TestCase
 {
     public function test_each_seam_resolves_to_its_stand_in(): void
     {
-        $this->assertInstanceOf(SilentNotifier::class, app(Notifier::class));
-        $this->assertInstanceOf(NoPayments::class, app(Payments::class));
+        $this->assertInstanceOf(DeliveringNotifier::class, app(Notifier::class));
+        $this->assertInstanceOf(GatewayPayments::class, app(Payments::class));
         $this->assertInstanceOf(NoPrescribedSchedules::class, app(PrescribedSchedules::class));
     }
 
     public function test_the_stand_ins_do_nothing(): void
     {
         $user = User::factory()->create();
-
-        $this->assertNull(app(Notifier::class)->send($user, NotificationCategory::Order, 'Payment received', 'Your order is with the pharmacy.'));
 
         $this->assertTrue(app(PrescribedSchedules::class)->apply($user, $user, 'prescription', 'Malaria', [])->isEmpty());
     }

@@ -2,6 +2,17 @@
 
 Logged as found, never deleted; a resolved issue is marked resolved.
 
+### ISS-090: Paystack may not accept the app's `elevenmed://` callback
+
+- **Logged:** 2026-11-17 · **Found during:** M9.1 · **Blocking:** no · **Status:** open
+- **Detail:** App handover §16 asks for `callback_url = elevenmed://pay?reference=…`. Paystack
+  documents `callback_url` as a web address, and whether its page redirects to a custom scheme is
+  unconfirmed. Payment itself does not depend on it: the webhook settles the payment and the app
+  reads it on return to the foreground.
+- **Plan:** try it with the test keys (HT-007). If Paystack refuses the scheme, point
+  `PAYSTACK_CALLBACK_URL` at a small https page on the portals that opens `elevenmed://pay`, which
+  needs no API change.
+
 ### ISS-080: Doctors are not told of review decisions yet
 
 - **Logged:** 2026-11-17 · **Found during:** M8.2 · **Blocking:** no · **Status:** open
@@ -11,6 +22,15 @@ Logged as found, never deleted; a resolved issue is marked resolved.
   bookings are M10's.
 - **Plan:** M7 adds listeners that send through the `Notifier`; M10 adds the suspension listener
   for open consultations.
+
+### ISS-070: Push copy is English only
+
+- **Logged:** 2026-11-21 · **Found during:** M7.2 · **Blocking:** no · **Status:** open
+- **Detail:** App handover §8.2 asks for titles and bodies in the locale the device registered with,
+  and devices carry `locale`, but `Notifier::send()` takes finished English strings and the API has
+  only `lang/en`. A Yorùbá, Hausa or Igbo user gets English pushes and history rows.
+- **Plan:** once the app's translations are reviewed, let callers pass a `lang/` key with
+  parameters, and render it per device for the push and in the user's locale for the history row.
 
 ### ISS-005: No route verifies the emergency contact's number
 

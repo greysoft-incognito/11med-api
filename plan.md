@@ -34,10 +34,10 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 4.2 QR tokens, revocation, the public emergency page with its access log and rate limit
 - [x] 4.3 Caregiver invites (SMS, deferred link), accept, remove, read-only access
 
-## M5 Subscriptions and entitlements `[ ]`
+## M5 Subscriptions and entitlements `[x]`
 
-- [ ] 5.1 `subscriptions/:userId`, `is_premium`, the admin record and list
-- [ ] 5.2 The `Entitlements` service with every free-tier gate
+- [x] 5.1 `subscriptions/:userId`, `is_premium`, the admin record and list
+- [x] 5.2 The `Entitlements` service with every free-tier gate
 
 ## M6 Medications and readings `[ ]`
 
@@ -46,11 +46,11 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [ ] 6.3 History, compliance, the PDF report
 - [ ] 6.4 Readings and insights
 
-## M7 Notifications and push `[ ]`
+## M7 Notifications and push `[x]`
 
-- [ ] 7.1 History, read, read-all, preferences
-- [ ] 7.2 The `Notifier`, APNs and FCM senders, invalid-token cleanup
-- [ ] 7.3 The missed-dose job with dedupe
+- [x] 7.1 History, read, read-all, preferences
+- [x] 7.2 The `Notifier`, APNs and FCM senders, invalid-token cleanup
+- [x] 7.3 The missed-dose notification with dedupe (fires when M6's auto-miss dispatches `DoseMissed`)
 
 ## M8 Doctors `[x]`
 
@@ -58,10 +58,10 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 8.2 Admin review of documents and applications
 - [x] 8.3 The directory, availability, slots
 
-## M9 Payments `[ ]`
+## M9 Payments `[x]`
 
-- [ ] 9.1 `Payable`, Paystack initialise, `payments/:reference`
-- [ ] 9.2 The webhook, abandonment, refunds by share, the admin desk
+- [x] 9.1 `Payable`, Paystack initialise, `payments/:reference`
+- [x] 9.2 The webhook, abandonment, refunds by share, the admin desk
 
 ## M10 Consultations `[ ]`
 

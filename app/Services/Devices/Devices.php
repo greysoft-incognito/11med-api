@@ -4,6 +4,7 @@ namespace App\Services\Devices;
 
 use App\Models\Device;
 use App\Models\User;
+use Closure;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -51,6 +52,30 @@ class Devices
         Device::query()
             ->where('user_id', $user->id)
             ->whereIn('install_id', $installIds)
+            ->delete();
+    }
+
+    /**
+     * Every install the user is signed in on, read in batches.
+     *
+     * @param  Closure(Device): void  $each
+     */
+    public function eachOf(int $userId, Closure $each): void
+    {
+        Device::query()
+            ->where('user_id', $userId)
+            ->lazyById(100)
+            ->each($each);
+    }
+
+    /**
+     * A token the push service refused, unless the install registered a new one meanwhile.
+     */
+    public function dropInvalidToken(Device $device): void
+    {
+        Device::query()
+            ->whereKey($device->id)
+            ->where('push_token', $device->push_token)
             ->delete();
     }
 }
