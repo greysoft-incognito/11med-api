@@ -4,6 +4,7 @@ namespace Tests\Feature\Consultations;
 
 use App\Enums\MediaPurpose;
 use App\Models\DoctorProfile;
+use App\Models\Medication;
 use Database\Seeders\DrugClassSeeder;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -121,6 +122,57 @@ class SessionTest extends TestCase
             ->assertJsonPath('data.drugs.0.drug_name', 'Paracetamol');
 
         $this->assertCount(2, array_filter($this->notifier->to($patient), fn(array $sent) => $sent['category']->value === 'prescription'));
+    }
+
+    public function test_the_patient_adds_a_prescription_to_their_schedule_once(): void
+    {
+        $patient = $this->patient();
+        $doctor = $this->availableDoctor();
+        $id = $this->openSession($patient, $doctor);
+
+        $this->actingAs($patient)
+            ->postJson("api/v1/consultations/{$id}/prescription/apply")
+            ->assertNotFound()
+            ->assertJsonPath('error.code', 'NO_PRESCRIPTION');
+
+        $prescription = $this->actingAs($doctor)
+            ->postJson("api/v1/doctor/consultations/{$id}/prescription", ['diagnosis_summary' => 'Bacterial tonsillitis', 'drugs' => [self::DRUG]])
+            ->json('data.id');
+
+        $first = $this->actingAs($patient)
+            ->postJson("api/v1/consultations/{$id}/prescription/apply")
+            ->assertOk()
+            ->assertJsonPath('data.0.drug_name', 'Amoxicillin')
+            ->assertJsonPath('data.0.prescription_id', $prescription)
+            ->assertJsonPath('data.0.prescribed_by_doctor_id', $doctor->uuid)
+            ->assertJsonPath('data.0.condition_being_treated', 'Bacterial tonsillitis')
+            ->json('data');
+
+        $again = $this->actingAs($patient)
+            ->postJson("api/v1/consultations/{$id}/prescription/apply")
+            ->assertOk()
+            ->json('data');
+
+        $this->assertSame(array_column($first, 'id'), array_column($again, 'id'));
+        $this->assertSame(1, Medication::query()->where('user_id', $patient->id)->count());
+
+        $this->actingAs($patient)
+            ->getJson("api/v1/consultations/{$id}/prescription")
+            ->assertJsonPath('data.added_to_schedule', true);
+
+        $this->actingAs($doctor)
+            ->postJson("api/v1/doctor/consultations/{$id}/prescription", ['diagnosis_summary' => 'Tonsillitis', 'drugs' => [self::DRUG]])
+            ->assertStatus(409)
+            ->assertJsonPath('error.code', 'PRESCRIPTION_APPLIED');
+
+        $this->actingAs($this->patient())
+            ->postJson("api/v1/consultations/{$id}/prescription/apply")
+            ->assertNotFound()
+            ->assertJsonPath('error.code', 'CONSULTATION_NOT_FOUND');
+
+        $this->actingAs($doctor)
+            ->postJson("api/v1/consultations/{$id}/prescription/apply")
+            ->assertForbidden();
     }
 
     public function test_a_prescription_needs_the_session_to_have_started(): void

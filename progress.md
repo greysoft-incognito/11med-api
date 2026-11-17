@@ -2,6 +2,14 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M10.3 Applying a prescription
+
+- `POST consultations/{id}/prescription/apply` (patient only) adds the prescription's drugs to the
+  patient's schedules through M6's `Prescriptions`, exempt from the free-tier cap, and answers them
+  as `zMedication` items. Applying again returns the same schedules and adds nothing (FE-103); a
+  prescription once applied cannot be replaced (409 `PRESCRIPTION_APPLIED`).
+- M10 now has 22 routes built; the two lab request routes wait on M12.2.
+
 ## 2026-11-17: M10 Consultations
 
 - 10.1 `POST consultations` (201), `GET consultations` (paged, newest first), `GET consultations/{id}`

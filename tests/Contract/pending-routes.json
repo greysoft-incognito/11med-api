@@ -36,7 +36,6 @@
     "PATCH api/v1/portal/laboratory",
     "PATCH api/v1/portal/pharmacy",
     "PATCH api/v1/portal/pharmacy/drugs/{id}",
-    "POST api/v1/consultations/{id}/prescription/apply",
     "POST api/v1/doctor/consultations/{id}/lab-request",
     "POST api/v1/labs/bookings",
     "POST api/v1/labs/bookings/{bookingId}/cancel",

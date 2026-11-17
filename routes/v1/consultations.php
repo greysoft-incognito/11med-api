@@ -20,4 +20,5 @@ Route::middleware(['auth:sanctum', 'role:' . Role::Patient->value])
         Route::get('{id}/messages', [ConsultationChatController::class, 'patientMessages'])->whereUuid('id')->name('messages');
         Route::post('{id}/messages', [ConsultationChatController::class, 'patientSend'])->whereUuid('id')->name('messages.send');
         Route::get('{id}/prescription', [PrescriptionController::class, 'show'])->whereUuid('id')->name('prescription');
+        Route::post('{id}/prescription/apply', [PrescriptionController::class, 'apply'])->whereUuid('id')->name('prescription.apply');
     });
