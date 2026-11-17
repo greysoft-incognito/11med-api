@@ -52,4 +52,14 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `organisations` | A pharmacy or laboratory (`kind`): its application while `pending`, then the organisation its portal accounts belong to. `name`, `state`, `city`, `address`, `licence_number` (unique among live rows, case-insensitive), `licence_media_id`, the contact (`contact_name`, `contact_phone` local form, `contact_email` lower case), `status` (`pending`, `approved`, `suspended`), `notes` (the suspension reason), `applied_at`, `reviewed_at`. Only `approved` is listed in the app. Its `uuid` is the pharmacy's or laboratory's id in every contract |
 | `users` (extended) | `organisation_id`: a pharmacy or laboratory portal account's organisation, null for the team and app accounts |
 
+### Laboratories (M12)
+
+| Table | Notes |
+| --- | --- |
+| `lab_tests` | The platform's catalogue: `code` (unique among live rows, never changed once written), `name`, `category`, `sample`, `description`, `fasting_hours`, `turnaround_hours`. No delete route |
+| `laboratories` | A laboratory's listing beside its organisation (`organisation_id`, unique among live rows; name, state, city and address live on the organisation, whose uuid is the laboratory's public id): `opens` and `closes` (`HH:MM`), `home_collection_fee_kobo` (null when not offered), `logo_media_id`, `cover_media_id`, `rating` and `rating_count` (null and 0 until bookings are rated). Created on `PartnerApproved` |
+| `laboratory_tests` | A price list entry: `laboratory_id`, `lab_test_id` (unique pair among live rows), `price_kobo`, `available`. Removing a test soft deletes it. Reads always join the catalogue row, so an edit there shows on every list |
+| `lab_requests` | A doctor's request: `patient_id` (cascades on erasure), `doctor_id` (nulled on the doctor's erasure), `consultation_id` (the consultation's public uuid, unique among live rows; no foreign key until M10's table lands, ISS-120), `doctor_name` and `mdcn_number` as signed, `tests` JSONB (`test_code`, `test_name`, `reason`), `notes`, `issued_at`. Medical data: never logged |
+| `lab_bookings` | `reference` (`11L-` and eight characters), `patient_id`, `laboratory_id`, `lab_request_id` (one live, uncancelled booking per request, by partial unique index), `tests` JSONB as priced (`test_code`, `test_name`, `price_kobo`; GIN-indexed for the open-booking check), `tests_kobo`, `collection`, `collection_fee_kobo`, `total_kobo`, `address` JSONB for home collection, `scheduled_for`, `fasting_hours` (the longest of the tests), `status`, `booked_at`, `paid_at` (set by `PaymentSucceeded`; the laboratory sees only rows with it), `results_media_id`, `results_name`, `results_at`, `cancelled_at`, `cancelled_by`, `cancellation_reason`. Erasing the patient removes the rows and their results files. Medical data: never logged |
+
 Domain tables are added here as each milestone lands.

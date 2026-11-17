@@ -47,3 +47,22 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 - **Resolved:** 2026-11-17. `routes/api/auth.php` and `routes/api/account.php` are removed (sign-up,
   sign-in, reset, verification and account deletion all bypassed `/api/v1` and erasure); the kit's
   admin routes need the `admin` role. The kit's tests for the removed routes went with them.
+
+### ISS-120: `lab_requests.consultation_id` has no foreign key
+
+- **Logged:** 2026-11-26 · **Found during:** M12.2 · **Blocking:** no · **Status:** open
+- **Detail:** M10 owns `consultations` and builds in parallel, so M12 stores the consultation's
+  public uuid without a reference. `LabRequests::create()` is called only by M10's doctor route,
+  which checks the consultation first.
+- **Plan:** once M10 is on `main`, a migration in M12's date range adds the foreign key to
+  `consultations.uuid` (or swaps to its bigint id).
+
+### ISS-121: A request from an erased doctor has no `doctor_id`
+
+- **Logged:** 2026-11-26 · **Found during:** M12.2 · **Blocking:** no · **Status:** open
+- **Detail:** `zLabRequest.doctor_id` is a required uuid, but erasing the doctor nulls
+  `lab_requests.doctor_id` (the name and MDCN number stay, as signed). The resource would answer
+  null and the app's parse would refuse that request.
+- **Plan:** decide with M8 whether a doctor's erasure keeps a tombstone id, or the contract makes
+  `doctor_id` nullable (an FE item); the same question applies to prescriptions.
+

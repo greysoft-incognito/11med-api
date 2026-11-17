@@ -12,6 +12,11 @@ milestone that introduced it. The clients tick them; never delete.
   signed for 15 minutes (403 `LINK_EXPIRED` after), re-signed each time the record is read. Open
   them from a fresh read. Store pictures are plain URLs. A licence URL is accepted by one
   application only. (M3.2)
+- [ ] **FE-121 · Laboratory bookings, as the server keeps them.** `GET bookings` matches `q` on the
+  patient's phone too, and lists only paid bookings (an unpaid one is 404 `LAB_BOOKING_NOT_FOUND`).
+  `status` takes a stage or `open`; anything else is 400. `DELETE tests/{code}` answers
+  `data: null`. The laboratory's own listing is 404 `LAB_NOT_FOUND` for an account whose
+  organisation is still pending. (M12)
 
 ## App (`11med`)
 
@@ -59,6 +64,13 @@ milestone that introduced it. The clients tick them; never delete.
   `EMAIL_TAKEN` on `contact_email` when that address already signs in to an account, and the
   team's approval is refused the same way if it became one meanwhile. The mock guards neither.
   `dev_set_password_link` is always null: the link goes by email only. (M11.1)
+- [ ] **FE-120 · Laboratories.** `GET labs`, `labs/requests` and `labs/bookings` are paged (FE-003);
+  the catalogue (`labs/tests`) and a laboratory's price list (`labs/{id}/tests`) stay whole arrays.
+  A doctor may read the directory and the catalogue; requests and bookings are the patient's. Every
+  stage the laboratory moves a booking to (sample collected, processing, results ready) and the
+  laboratory's cancellation is pushed as category `lab_result` with the booking's id as
+  `target_id`, so a tap should open the booking, not only its results. The booking reference is
+  `11L-` and eight letters or digits. (M12)
 
 ## Both
 

@@ -78,11 +78,11 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [ ] 11.3 The app's store, cart, checkout into one order per pharmacy
 - [ ] 11.4 Fulfilment, rider, cancellations, refunds
 
-## M12 Laboratories `[ ]`
+## M12 Laboratories `[x]`
 
-- [ ] 12.1 The catalogue (admin) and price lists (portal)
-- [ ] 12.2 The app's directory, requests and bookings
-- [ ] 12.3 The laboratory portal's bookings, results, cancellations
+- [x] 12.1 The catalogue (admin) and price lists (portal)
+- [x] 12.2 The app's directory, requests and bookings
+- [x] 12.3 The laboratory portal's bookings, results, cancellations
 
 ## M13 Guide and the servers `[ ]`
 
