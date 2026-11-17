@@ -61,6 +61,31 @@ milestone that introduced it. The clients tick them; never delete.
   that state. (M4)
 - [ ] **FE-014 · Caregiver lists are paged.** `GET /medications/caregivers` and
   `GET /medications/caregiving` answer `{ items, next_cursor, total }` (FE-003). (M4.3)
+- [ ] **FE-080 · Doctor documents are uploaded first.** `POST /doctor/documents` cannot read a
+  phone's `file://` URI. Upload the image to `POST /media` with the new purpose `doctor_document`
+  (add it to `MEDIA_PURPOSES`; images only, served by signed links), then send
+  `{ kind, file: { uri: <the returned url>, width, height } }`. A URL that is not the doctor's own
+  `doctor_document` upload is 422 `MEDIA_NOT_FOUND` on `file.uri`; a malformed body is 400
+  `VALIDATION_FAILED` with its field rather than the mock's `NO_FILE`. (M8.1)
+- [ ] **FE-081 · Doctor submission refusals.** `POST /doctor/profile/submit` also answers 422
+  `DOCTOR_APPROVED` or `DOCTOR_SUSPENDED` (neither resubmits), returns a pending submission
+  unchanged so the 48-hour queue position holds, and lists in `meta.missing` a document that was
+  rejected and not uploaded again, and `fees` when any of the three is unset. `PATCH
+  /doctor/profile` refuses a changed `mdcn_number` once submitted, unless rejected: 422
+  `MDCN_NUMBER_LOCKED` on `mdcn_number`. A time window whose `end` is not after its `start` is 400
+  on `availability.N.end`. `POST /doctor/profile/review` is not built: the admin portal decides,
+  so the development panel has nothing to call against the real API. (M8.1)
+- [ ] **FE-082 · The doctor directory is paged.** `GET /doctors` answers
+  `{ items, next_cursor, total }` (FE-003), still available first and then by rating. (M8.3)
+
+## Portals (`11med-web`), doctors
+
+- [ ] **FE-083 · Doctor applications.** `GET /portal/admin/doctors` is paged and lists only
+  applications submitted at least once, oldest submission first; a draft is not an application.
+  Each document's `url` is a signed link that lapses after 15 minutes (as FE-012), null for bank
+  details, which are the doctor's payout fields. Suspending or rejecting also turns the doctor's
+  `is_available_now` off. (M8.2)
+
 - [ ] **FE-050 · A recorded premium does not renew.** `GET /subscriptions/:userId` answers
   `status: 'active'`, `plan_id: 'premium'`, `current_period_end` (the start of the day after the
   recorded end date, in Lagos) and `cancels_at_period_end: true`, because the team records a fixed

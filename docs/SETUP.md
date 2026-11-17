@@ -58,7 +58,7 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | Variable | Value |
 | --- | --- |
 | `APP_ENV` | `staging` or `production` |
-| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. It also encrypts guide messages (M13), which become unreadable too: start over clears them |
+| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. It also encrypts guide messages (M13), which become unreadable too: start over clears them. It also encrypts doctors' payout account numbers (M8), which a changed key would lose: doctors would have to enter them again before a payout |
 | `APP_DEBUG` | `false` |
 | `APP_URL` | The API's public `https://` address. Upload URLs and signed file links are built from it (M3) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL. `DB_CONNECTION=pgsql` |

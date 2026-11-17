@@ -45,6 +45,13 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `qr_accesses` | Not soft deleted. One row per open of the emergency page: `qr_token_id`, `opened_at`, and nothing about the reader |
 | `caregivers` | A patient's invitation (`patient_id`, `phone` local form, `invite_code`, both unique among live rows) and, once accepted, `caregiver_user_id`, `status` `active`, `accepted_at`. Revoking soft deletes; erasing either account removes the row |
 
+### Doctors (M8)
+
+| Table | Notes |
+| --- | --- |
+| `doctor_profiles` | One live row per doctor, started blank on first read. Professional fields, `languages` and `availability` (`[{ day, start, end }]`, Africa/Lagos) as JSONB with a GIN index on `languages`, `photo_media_id`, the three fees, `follow_up_fee_kobo`, `session_minutes`, `chat_window_hours`, `bank_name`, `bank_account_number` (encrypted with `APP_KEY`) and `bank_account_last4` for the mask, `is_available_now`, `verification_status`, `verification_notes`, `submitted_at` (the review queue's order), `reviewed_at`, and the running rating (`rating_total`, `rating_count`, `rating_mean`) the directory sorts on. Erasure cascades |
+| `doctor_documents` | One live row per profile and `kind`, created at the first upload: `status`, `media_id` (a private `doctor_document` upload; null for bank details, which are the payout fields), `uploaded_at`, `rejection_reason`, `reviewed_at`. A new upload replaces the file and returns the row to `uploaded` |
+
 ### Guide (M13)
 
 | Table | Notes |

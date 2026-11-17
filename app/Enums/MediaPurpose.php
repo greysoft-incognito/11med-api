@@ -10,6 +10,7 @@ enum MediaPurpose: string
 {
     case ProfilePhoto = 'profile_photo';
     case DoctorPhoto = 'doctor_photo';
+    case DoctorDocument = 'doctor_document';
     case MessageAttachment = 'message_attachment';
     case DrugImage = 'drug_image';
     case PharmacyLogo = 'pharmacy_logo';
@@ -32,7 +33,7 @@ enum MediaPurpose: string
     {
         return match ($this) {
             self::ProfilePhoto => [Role::Patient],
-            self::DoctorPhoto => [Role::Doctor],
+            self::DoctorPhoto, self::DoctorDocument => [Role::Doctor],
             self::MessageAttachment => [Role::Patient, Role::Doctor],
             self::DrugImage, self::PharmacyLogo, self::PharmacyCover => [Role::Pharmacy],
             self::LaboratoryLogo, self::LaboratoryCover, self::LabResults => [Role::Laboratory],
@@ -61,11 +62,11 @@ enum MediaPurpose: string
     }
 
     /**
-     * Medical files and licences are served by signed, short-lived URLs; store pictures are public.
+     * Medical files, a doctor's verification documents and licences are served by signed, short-lived URLs; store pictures are public.
      */
     public function isPrivate(): bool
     {
-        return in_array($this, [self::MessageAttachment, self::LabResults, self::PartnerLicence], true);
+        return in_array($this, [self::DoctorDocument, self::MessageAttachment, self::LabResults, self::PartnerLicence], true);
     }
 
     public static function isImage(string $contentType): bool

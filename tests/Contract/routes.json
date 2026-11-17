@@ -114,7 +114,6 @@
     "POST api/v1/doctor/consultations/{id}/prescription",
     "POST api/v1/doctor/consultations/{id}/start",
     "POST api/v1/doctor/documents",
-    "POST api/v1/doctor/profile/review",
     "POST api/v1/doctor/profile/submit",
     "POST api/v1/guide/conversation/messages",
     "POST api/v1/labs/bookings",
