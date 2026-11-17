@@ -1,5 +1,9 @@
 <?php
 
+use App\Services\Consultations\ConsultationPayables;
+use App\Services\Laboratories\BookingPayables;
+use App\Services\Pharmacy\OrderPayables;
+
 return [
     // Calendar logic (slots, dose days, "today" on summaries) runs here; instants stay UTC.
     'timezone' => 'Africa/Lagos',
@@ -62,6 +66,22 @@ return [
 
     // Caregivers (app spec §6.5): the store link the invitation SMS carries, and the free and premium caps.
     'app_link' => env('APP_DOWNLOAD_URL', 'https://11med.ng/app'),
+    // Payments: the PayableTargets class each module provides for its purpose (M9 resolves them).
+    'payments' => [
+        'targets' => [
+            'order' => OrderPayables::class,
+            'lab_booking' => BookingPayables::class,
+            'consultation' => ConsultationPayables::class,
+        ],
+    ],
+
+    // The free tier's limits (app CLAUDE.md "Free vs premium gates"); premium lifts all three.
+    'free_tier' => [
+        'medications' => 3,
+        'history_days' => 7,
+        'readings_days' => 7,
+    ],
+
     'caregivers' => [
         'free' => 1,
         'premium' => 5,
