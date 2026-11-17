@@ -115,6 +115,26 @@ class MediaLibrary
     }
 
     /**
+     * What a record's picture becomes when an edit names `$url`: the same file when the URL still
+     * names it, nothing when null, else the caller's own upload claimed in its place. A file the
+     * record drops is discarded.
+     */
+    public function replace(User $owner, ?Media $current, ?string $url, MediaPurpose $purpose, string $field): ?Media
+    {
+        if ($current !== null && $url !== null && $this->identifies($current, $url)) {
+            return $current;
+        }
+
+        $next = $url === null ? null : $this->claim($owner, $url, $purpose, $field);
+
+        if ($current !== null) {
+            $this->discard($current);
+        }
+
+        return $next;
+    }
+
+    /**
      * A file its record no longer carries, or whose record is gone: removed for real.
      */
     public function discard(Media $media): void

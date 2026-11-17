@@ -77,6 +77,12 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('caregiver-invite', fn(Request $request) => Limit::perDay(config('elevenmed.caregivers.invites_per_day'))->by('caregiver-invite|' . $request->user()?->id));
         RateLimiter::for('caregiver-accept', fn(Request $request) => Limit::perHour(config('elevenmed.caregivers.accept_attempts_per_hour'))->by('caregiver-accept|' . $request->user()?->id));
 
+        // Partners: the public application, per address, since it needs no account.
+        RateLimiter::for('partner-apply', fn(Request $request) => Limit::perHour(config('elevenmed.partners.applications_per_hour'))->by('partner-apply|' . $request->ip()));
+
+        // Pharmacy: each checkout starts a gateway transaction.
+        RateLimiter::for('checkout', fn(Request $request) => Limit::perHour(config('elevenmed.pharmacy.checkouts_per_hour'))->by('checkout|' . $request->user()?->id));
+
         // Medications (M6): a compliance report renders a PDF, so it is rationed per account.
         RateLimiter::for('compliance-report', fn(Request $request) => Limit::perHour(config('elevenmed.medications.reports_per_hour'))->by('compliance-report|' . $request->user()?->id));
 

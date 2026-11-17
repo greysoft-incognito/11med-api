@@ -12,6 +12,10 @@ milestone that introduced it. The clients tick them; never delete.
   signed for 15 minutes (403 `LINK_EXPIRED` after), re-signed each time the record is read. Open
   them from a fresh read. Store pictures are plain URLs. A licence URL is accepted by one
   application only. (M3.2)
+- [ ] **FE-113 · A refund reads `refunded` when the gateway confirms it.** After a cancellation in
+  the portal, the order's `payment.status` stays `paid` until Paystack confirms the refund, which
+  can take days; the mock marks it at once. The rider's phone comes back in the local `0…` form.
+  `GET /portal/pharmacy/drugs` also takes `stock=in`. (M11.4)
 
 - [ ] **FE-051 · Subscription records exist only once recorded.** `GET /portal/admin/subscriptions`
   lists patients the team has recorded premium for, not every patient; `POST` finds any verified
@@ -20,6 +24,15 @@ milestone that introduced it. The clients tick them; never delete.
   current one. (M5.1)
 
 ## App (`11med`)
+
+- [ ] **FE-111 · The store's lists are paged.** `GET /pharmacy/pharmacies`, `GET /pharmacy/drugs`
+  and `GET /pharmacy/orders` answer `{ items, next_cursor, total }` (FE-003), in the same order the
+  mock ranks them. (M11.3)
+- [ ] **FE-112 · Store refusals the mock does not make.** A cart holds at most 50 lines (422
+  `CART_FULL`, `meta.limit`) of at most 99 each; checkout refuses an out-of-stock line (422
+  `OUT_OF_STOCK`, `meta.drug_ids`) instead of ordering it; the order reference is `ORD-` and eight
+  characters. The live store lists only approved pharmacies, so a suspended pharmacy's medicines
+  drop out of the cart. (M11.3)
 
 - [ ] **FE-002 · `scheduled_for` is an instant.** A dose's `scheduled_for` is a real UTC instant
   computed in Africa/Lagos, so `formatScheduledTime` must read it as local time like
@@ -61,6 +74,11 @@ milestone that introduced it. The clients tick them; never delete.
   that state. (M4)
 - [ ] **FE-014 · Caregiver lists are paged.** `GET /medications/caregivers` and
   `GET /medications/caregiving` answer `{ items, next_cursor, total }` (FE-003). (M4.3)
+- [ ] **FE-110 · A partner's contact email must be free.** `POST /partners/apply` is 409
+  `EMAIL_TAKEN` on `contact_email` when that address already signs in to an account, and the
+  team's approval is refused the same way if it became one meanwhile. The mock guards neither.
+  `dev_set_password_link` is always null: the link goes by email only. (M11.1)
+
 - [ ] **FE-060 · Schedules are paged.** `GET /medications/:userId` answers `{ items, next_cursor, total }`
   (FE-003), oldest first; the reminder scheduler should page through with `limit=100`. (M6.1)
 - [ ] **FE-061 · When a schedule's doses begin.** A new schedule owes doses from an hour before it was

@@ -45,6 +45,8 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `qr_accesses` | Not soft deleted. One row per open of the emergency page: `qr_token_id`, `opened_at`, and nothing about the reader |
 | `caregivers` | A patient's invitation (`patient_id`, `phone` local form, `invite_code`, both unique among live rows) and, once accepted, `caregiver_user_id`, `status` `active`, `accepted_at`. Revoking soft deletes; erasing either account removes the row |
 
+### Partners and pharmacy (M11)
+
 ### Medications and readings (M6)
 
 ### Doctors (M8)
@@ -58,6 +60,14 @@ null, and later modules remove their own rows on `AccountErasing`.
 
 | Table | Notes |
 | --- | --- |
+| `organisations` | A pharmacy or laboratory (`kind`): its application while `pending`, then the organisation its portal accounts belong to. `name`, `state`, `city`, `address`, `licence_number` (unique among live rows, case-insensitive), `licence_media_id`, the contact (`contact_name`, `contact_phone` local form, `contact_email` lower case), `status` (`pending`, `approved`, `suspended`), `notes` (the suspension reason), `applied_at`, `reviewed_at`. Only `approved` is listed in the app. Its `uuid` is the pharmacy's or laboratory's id in every contract |
+| `pharmacies` | A pharmacy organisation's store settings, made on approval (`organisation_id` unique): `logo_media_id`, `cover_media_id`, `delivery_fee_kobo` (₦1,500 to start), `free_delivery_over_kobo`, `delivery_minutes`, `rating` and `rating_count` (no route rates an order yet) |
+| `drugs` | A pharmacy's medicines (`zDrug`): `organisation_id`, name, brand, `nafdac_number` (unique per pharmacy among live rows, case-insensitive), `category`, `dosage_form`, `dosage_strength`, `description`, `price_kobo`, `requires_prescription`, `in_stock`, `image_media_id`. Removing soft deletes, refused while an open order holds it |
+| `orders` | One pharmacy's share of a checkout: `reference` (unique), `checkout_id` (shared by the siblings one payment covers), `patient_id`, `organisation_id`, `status`, `fulfilment`, subtotal, delivery fee and total in kobo, `address` JSONB (null for a pickup), `payment_status` and `payment_channel` (mirrors of the payment, written on `PaymentSucceeded` and `PaymentRefunded`, so a pharmacy's list filters paid orders in SQL), the three points `placed_at`, `ready_at`, `completed_at`, `estimated_delivery_at`, `cancelled_at`, `cancelled_by`, `cancel_reason`, `rider` JSONB |
+| `order_items` | A line as sold: `drug_id` (the medicine, kept when it is removed), `drug_name`, `dosage_strength`, `price_kobo`, `quantity`, `requires_prescription` |
+| `cart_items` | Not soft deleted (working state). A patient's cart line: `patient_id`, `drug_id`, `quantity`, unique per patient and medicine |
+| `users` (extended) | `organisation_id`: a pharmacy or laboratory portal account's organisation, null for the team and app accounts |
+
 | `medications` | A schedule (`zMedication`): drug, strength, form, `dose_quantity` (numeric) and `dose_unit`, `frequency_type`, `specific_times` (JSONB `HH:MM`, read in Africa/Lagos), `start_date`, `end_date`, the reminder flags, `paused_at`, and `settled_through`: the instant up to which every dose has a `dose_logs` row. Doses after it are derived from the schedule. `prescribed_by_doctor_id` (nulled if the doctor's account is erased) and `prescription_id` (the consultation's prescription, indexed; applying is idempotent on it) mark a prescribed schedule, which the cap never counts. Medical data: never logged |
 | `dose_logs` | One live row per `(medication_id, scheduled_for)` (partial unique index): `state`, `skip_reason`, `logged_at` (null when the job marked it missed), `snooze_count`. Written by the patient, or by `medications:settle-doses` sixty minutes past due. A retraction soft deletes the row and, for a dose past its hour, writes a `missed` one in its place. `user_id` is denormalised for the per-patient reads |
 | `readings` | A home reading (`zReading`): `type`, then `systolic`, `diastolic`, `pulse` for blood pressure, `mmol_l` and `context` for sugar, `kg` for weight (the other columns null), `taken_at`, `note`. Indexed by `(user_id, taken_at)` and `(user_id, type, taken_at)` |
