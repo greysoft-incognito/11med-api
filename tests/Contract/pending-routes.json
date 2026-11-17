@@ -1,5 +1,4 @@
 [
-    "DELETE api/v1/guide/conversation",
     "DELETE api/v1/medications/doses/log/{doseId}",
     "DELETE api/v1/medications/{medId}",
     "DELETE api/v1/portal/laboratory/tests/{code}",
@@ -16,7 +15,6 @@
     "GET api/v1/doctors",
     "GET api/v1/doctors/{doctorId}",
     "GET api/v1/doctors/{doctorId}/slots",
-    "GET api/v1/guide/conversation",
     "GET api/v1/insights",
     "GET api/v1/labs",
     "GET api/v1/labs/bookings",
@@ -64,7 +62,6 @@
     "POST api/v1/doctor/documents",
     "POST api/v1/doctor/profile/review",
     "POST api/v1/doctor/profile/submit",
-    "POST api/v1/guide/conversation/messages",
     "POST api/v1/labs/bookings",
     "POST api/v1/labs/bookings/{bookingId}/cancel",
     "POST api/v1/medications",

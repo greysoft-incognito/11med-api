@@ -57,6 +57,10 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `cart_items` | Not soft deleted (working state). A patient's cart line: `patient_id`, `drug_id`, `quantity`, unique per patient and medicine |
 | `users` (extended) | `organisation_id`: a pharmacy or laboratory portal account's organisation, null for the team and app accounts |
 
+### Guide (M13)
+
+| `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
+| `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 ### Payments (M9)
 
 Money records: erasure nulls `payments.user_id` and keeps the rows. Statuses change only through
