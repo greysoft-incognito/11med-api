@@ -5,9 +5,8 @@ use App\Http\Controllers\Admin\NotificationTemplateController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
-$permissionMiddlewares = 'role:' . implode('|', config('permission-defs.roles', []));
-
-Route::middleware(['auth:sanctum', $permissionMiddlewares])->prefix('admin')->group(function () {
+// The kit's platform administration, for the team only.
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->group(function () {
     Route::apiResource('users', UserController::class);
 
     Route::apiResource('configurations', ConfigurationController::class)->only(['index', 'show', 'store']);

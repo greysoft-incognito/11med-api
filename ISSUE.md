@@ -19,9 +19,12 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 
 ### ISS-003: The kit's own routes are live under `/api`
 
-- **Logged:** 2026-11-16 · **Found during:** M1.2 · **Blocking:** no · **Status:** open
+- **Logged:** 2026-11-16 · **Found during:** M1.2 · **Blocking:** no · **Status:** resolved (M2)
 - **Detail:** `routes/api/auth.php` exposes open self-registration and password login at
   `/api/auth/*`, and `routes/api/admin.php` the kit's admin routes, beside ours under `/api/v1`.
   Neither is in a client contract.
 - **Plan:** M2 removes the kit's registration and login routes, as agrolog did, and limits the
   kit's admin routes to the `admin` role.
+- **Resolved:** 2026-11-17. `routes/api/auth.php` and `routes/api/account.php` are removed (sign-up,
+  sign-in, reset, verification and account deletion all bypassed `/api/v1` and erasure); the kit's
+  admin routes need the `admin` role. The kit's tests for the removed routes went with them.
