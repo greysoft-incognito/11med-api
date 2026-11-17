@@ -3,9 +3,12 @@
 namespace Tests\Feature\Consultations;
 
 use App\Enums\MediaPurpose;
+use App\Models\Consultation;
 use App\Models\DoctorProfile;
 use App\Models\Medication;
+use App\Services\Pharmacy\PrescribedDrugs;
 use Database\Seeders\DrugClassSeeder;
+use Database\Seeders\LabCatalogueSeeder;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
@@ -115,6 +118,8 @@ class SessionTest extends TestCase
             ->postJson("api/v1/doctor/consultations/{$id}/prescription", ['diagnosis_summary' => 'Tonsillitis', 'drugs' => [['drug_name' => 'Paracetamol'] + self::DRUG]])
             ->assertCreated();
 
+        $this->assertSame(['paracetamol'], app(PrescribedDrugs::class)->names($patient));
+
         $this->actingAs($patient)
             ->getJson("api/v1/consultations/{$id}/prescription")
             ->assertOk()
@@ -216,6 +221,68 @@ class SessionTest extends TestCase
         $this->actingAs($doctor)
             ->postJson("api/v1/doctor/consultations/{$id}/prescription", ['diagnosis_summary' => 'Tonsillitis', 'drugs' => [self::DRUG], 'acknowledge_allergy_conflicts' => true])
             ->assertCreated();
+    }
+
+    public function test_the_doctor_requests_tests_once_from_a_started_session(): void
+    {
+        $this->seed(LabCatalogueSeeder::class);
+
+        $patient = $this->patient();
+        $doctor = $this->availableDoctor();
+        $waiting = $this->book($patient, $this->availableDoctor())['id'];
+        $id = $this->openSession($this->patient(), $doctor);
+        $route = "api/v1/doctor/consultations/{$id}/lab-request";
+
+        $this->actingAs($doctor)
+            ->getJson($route)
+            ->assertNotFound()
+            ->assertJsonPath('error.code', 'NO_LAB_REQUEST');
+
+        $this->actingAs($doctor)
+            ->postJson($route, ['tests' => []])
+            ->assertStatus(400)
+            ->assertJsonPath('error.field', 'tests');
+
+        $this->actingAs($doctor)
+            ->postJson($route, ['tests' => [['test_code' => 'NOPE']]])
+            ->assertUnprocessable()
+            ->assertJsonPath('error.code', 'UNKNOWN_TEST')
+            ->assertJsonPath('error.field', 'tests.0.test_code');
+
+        $this->actingAs($doctor)
+            ->postJson($route, ['tests' => [['test_code' => 'fbc', 'reason' => 'Fever for a week'], ['test_code' => 'MP']], 'notes' => 'Fasting not needed'])
+            ->assertCreated()
+            ->assertJsonPath('data.consultation_id', $id)
+            ->assertJsonPath('data.mdcn_number', 'MDCN/12345')
+            ->assertJsonPath('data.tests.0.test_code', 'FBC')
+            ->assertJsonPath('data.tests.0.reason', 'Fever for a week')
+            ->assertJsonPath('data.booking_id', null);
+
+        $this->actingAs($doctor)
+            ->postJson($route, ['tests' => [['test_code' => 'MP']]])
+            ->assertStatus(409)
+            ->assertJsonPath('error.code', 'LAB_REQUEST_EXISTS');
+
+        $this->actingAs($doctor)
+            ->getJson($route)
+            ->assertOk()
+            ->assertJsonCount(2, 'data.tests');
+
+        $this->actingAs($this->availableDoctor())
+            ->getJson($route)
+            ->assertNotFound()
+            ->assertJsonPath('error.code', 'CONSULTATION_NOT_FOUND');
+
+        $this->actingAs($patient)
+            ->getJson($route)
+            ->assertForbidden();
+
+        $this->pay($waiting);
+
+        $this->actingAs(Consultation::query()->where('uuid', $waiting)->sole()->doctor)
+            ->postJson("api/v1/doctor/consultations/{$waiting}/lab-request", ['tests' => [['test_code' => 'MP']]])
+            ->assertUnprocessable()
+            ->assertJsonPath('error.code', 'NOT_ACTIVE');
     }
 
     public function test_the_patient_rates_a_finished_session_once(): void

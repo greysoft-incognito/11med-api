@@ -147,16 +147,16 @@ php artisan key:generate                       # only if APP_KEY is empty
 php artisan dbconfig:sync                      # seeds the runtime settings
 php artisan dbconfig:set prefered_sms_channel KUDISMS
 php artisan app:create-admin you@example.com "Your Name"   # first team account; prints its link
+php artisan db:seed --class=DrugClassSeeder --force        # the allergy classes (M10); safe to run again
 php artisan db:seed --class=LabCatalogueSeeder --force    # the starting test catalogue (M12)
-php artisan db:seed --class=DrugClassSeeder --force        # M10: the allergy classes; safe to run again
 ```
+
+Run the `DrugClassSeeder` line again after a release that changes the seed (it adds what is
+missing and never removes a class).
 
 The test catalogue (M12) starts empty, and a laboratory can only price tests that are in it. The
 seeder adds the twenty tests the app's mock uses, only those missing, so running it again never
 undoes the team's edits in the admin portal.
-
-Run the `DrugClassSeeder` line again after a release that changes the seed (it adds what is
-missing and never removes a class).
 
 The missed-dose job can be run by hand to check the scheduler is wired: `php artisan medications:settle-doses`
 prints how many doses it marked missed.

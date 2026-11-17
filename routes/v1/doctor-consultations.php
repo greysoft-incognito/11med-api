@@ -3,6 +3,7 @@
 use App\Enums\Role;
 use App\Http\Controllers\Consultations\ConsultationChatController;
 use App\Http\Controllers\Consultations\DoctorConsultationController;
+use App\Http\Controllers\Consultations\LabRequestController;
 use App\Http\Controllers\Consultations\PrescriptionController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,5 +21,7 @@ Route::middleware(['auth:sanctum', 'role:' . Role::Doctor->value])
         Route::get('consultations/{id}/messages', [ConsultationChatController::class, 'doctorMessages'])->whereUuid('id')->name('consultations.messages');
         Route::post('consultations/{id}/messages', [ConsultationChatController::class, 'doctorSend'])->whereUuid('id')->name('consultations.messages.send');
         Route::post('consultations/{id}/prescription', [PrescriptionController::class, 'issue'])->whereUuid('id')->name('consultations.prescription');
+        Route::get('consultations/{id}/lab-request', [LabRequestController::class, 'show'])->whereUuid('id')->name('consultations.lab-request');
+        Route::post('consultations/{id}/lab-request', [LabRequestController::class, 'issue'])->whereUuid('id')->name('consultations.lab-request.issue');
         Route::get('earnings', [DoctorConsultationController::class, 'earnings'])->name('earnings');
     });
