@@ -24,7 +24,7 @@ class DemoAccounts
             'password' => self::PASSWORD,
         ]);
 
-        $user->forceFill(['phone_verified_at' => now()->subDays(60)])->save();
+        $user->forceFill(['phone_verified_at' => now()->subDays(60), 'email_verified_at' => $email === null ? null : now()->subDays(60)])->save();
         $user->assignRole($role->value);
 
         ConsentRecord::create([
