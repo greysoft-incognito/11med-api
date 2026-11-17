@@ -2,6 +2,18 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M10.4 Lab requests, M10 done
+
+- `GET` and `POST doctor/consultations/{id}/lab-request` (doctor only, their own consultation, once
+  it has started; 422 `NOT_ACTIVE` before) through M12's `LabRequests`: one per consultation (409
+  `LAB_REQUEST_EXISTS`), each code in the catalogue (422 `UNKNOWN_TEST` on `tests.N.test_code`),
+  the MDCN number from the doctor's record, the patient told by M12. Answers `zLabRequest`, 201 on
+  issue.
+- `lab_requests.consultation_id` now references `consultations.uuid` (ISS-120 resolved).
+- `PrescribedDrugs` (M11) is bound to `ConsultationPrescribedDrugs`: a patient's unexpired
+  prescriptions open prescription-only medicines in the store.
+- M10 is done: every consultation route in the contract is built (24).
+
 ## 2026-11-17: M10.3 Applying a prescription
 
 - `POST consultations/{id}/prescription/apply` (patient only) adds the prescription's drugs to the

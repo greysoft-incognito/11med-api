@@ -121,12 +121,14 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 
 ### ISS-120: `lab_requests.consultation_id` has no foreign key
 
-- **Logged:** 2026-11-26 · **Found during:** M12.2 · **Blocking:** no · **Status:** open
+- **Logged:** 2026-11-26 · **Found during:** M12.2 · **Blocking:** no · **Status:** resolved (M10)
 - **Detail:** M10 owns `consultations` and builds in parallel, so M12 stores the consultation's
   public uuid without a reference. `LabRequests::create()` is called only by M10's doctor route,
   which checks the consultation first.
 - **Plan:** once M10 is on `main`, a migration in M12's date range adds the foreign key to
   `consultations.uuid` (or swaps to its bigint id).
+- **Resolved:** 2026-11-17 (M10). `2026_11_26_200000_add_consultation_foreign_key_to_lab_requests`
+  references `consultations.uuid` and cascades when a consultation is erased.
 
 ### ISS-121: A request from an erased doctor has no `doctor_id`
 

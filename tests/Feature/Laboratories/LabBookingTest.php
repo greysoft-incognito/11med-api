@@ -28,7 +28,7 @@ class LabBookingTest extends TestCase
     {
         $doctor = User::factory()->app(Role::Doctor)->create(['full_name' => 'Dr Bello Musa']);
 
-        return app(LabRequests::class)->create($doctor, $patient, fake()->uuid(), 'MDCN/12345', $tests, 'Fast overnight');
+        return app(LabRequests::class)->create($doctor, $patient, $this->consultationBetween($doctor, $patient), 'MDCN/12345', $tests, 'Fast overnight');
     }
 
     public function test_a_patient_books_priced_from_the_laboratorys_list_and_born_unpaid(): void

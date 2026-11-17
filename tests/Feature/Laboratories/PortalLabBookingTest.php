@@ -54,7 +54,7 @@ class PortalLabBookingTest extends TestCase
         [$laboratory, $account] = $this->laboratory(['FBC' => 300000]);
         $patient = $this->labPatient();
         $doctor = User::factory()->app(Role::Doctor)->create(['full_name' => 'Dr Bello Musa']);
-        $request = app(LabRequests::class)->create($doctor, $patient, fake()->uuid(), 'MDCN/1', [['test_code' => 'FBC']], 'Fast overnight');
+        $request = app(LabRequests::class)->create($doctor, $patient, $this->consultationBetween($doctor, $patient), 'MDCN/1', [['test_code' => 'FBC']], 'Fast overnight');
 
         $unpaid = $this->book($laboratory, $patient, paid: false);
 

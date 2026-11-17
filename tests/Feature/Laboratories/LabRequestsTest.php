@@ -23,7 +23,7 @@ class LabRequestsTest extends TestCase
         $requests = app(LabRequests::class);
         $doctor = User::factory()->app(Role::Doctor)->create();
         $patient = $this->labPatient();
-        $consultation = fake()->uuid();
+        $consultation = $this->consultationBetween($doctor, $patient);
 
         $this->assertRefused('NO_LAB_REQUEST', 404, fn() => $requests->forConsultation($consultation));
 

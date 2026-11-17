@@ -2,8 +2,12 @@
 
 namespace Tests\Concerns;
 
+use App\Enums\ConsultationStatus;
 use App\Enums\PartnerKind;
 use App\Enums\Role;
+use App\Enums\SessionType;
+use App\Enums\Specialty;
+use App\Models\Consultation;
 use App\Models\Laboratory;
 use App\Models\LaboratoryTest;
 use App\Models\LabTest;
@@ -118,5 +122,31 @@ trait MakesLaboratories
             'scheduled_for' => now()->addDay()->utc()->toIso8601ZuluString('millisecond'),
             ...$overrides,
         ];
+    }
+
+    /**
+     * A finished consultation between the two, the record a lab request hangs on.
+     */
+    protected function consultationBetween(User $doctor, User $patient): string
+    {
+        $consultation = Consultation::create([
+            'patient_id' => $patient->id,
+            'doctor_id' => $doctor->id,
+            'doctor_name' => $doctor->full_name,
+            'doctor_specialty' => Specialty::GeneralPractice,
+            'session_type' => SessionType::Chat,
+            'status' => ConsultationStatus::Completed,
+            'complaint' => 'Tired all the time.',
+            'fee_kobo' => 500000,
+            'scheduled_for' => now(),
+            'scheduled' => false,
+            'length_minutes' => 30,
+            'paid_at' => now(),
+            'started_at' => now(),
+            'ended_at' => now(),
+            'profile_shared' => false,
+        ]);
+
+        return $consultation->uuid;
     }
 }
