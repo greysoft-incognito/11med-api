@@ -242,6 +242,11 @@ class User extends Authenticatable implements WalletOperations
         return $this->hasOne(MedicalProfile::class);
     }
 
+    public function doctorProfile(): HasOne
+    {
+        return $this->hasOne(DoctorProfile::class);
+    }
+
     /**
      * Premium comes from a current subscription record. False until the Subscriptions module (M5) records one.
      */
