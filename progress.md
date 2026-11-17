@@ -2,6 +2,15 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.2 Token pairs
+
+- `SessionTokens` issues a pair (Sanctum access token, 15 minutes; refresh token, 30 days), rotates
+  it with the row locked, treats a reused refresh token as theft and revokes the family, and
+  revokes by refresh token, by access token or for a whole account. Ending a family dispatches
+  `SessionsEnded` with its installs, for the device cleanup in 2.6.
+- A 401 says `TOKEN_EXPIRED` when the bearer token exists and has expired (`BearerToken`).
+- `HttpStatus::LOCKED` (423) and `ApiException::locked()` for the login lockout in 2.3.
+
 ## 2026-11-17: M2.1 Roles, users, devices, consent
 
 - `Role` enum (patient, doctor, pharmacy, laboratory, admin) drives `permission-defs.php`; the kit's

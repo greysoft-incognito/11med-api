@@ -4,6 +4,12 @@ return [
     // Calendar logic (slots, dose days, "today" on summaries) runs here; instants stay UTC.
     'timezone' => 'Africa/Lagos',
 
+    // Access tokens live fifteen minutes; a refresh token rotates on use and lapses unused (app spec §2.1.4).
+    'auth' => [
+        'access_minutes' => 15,
+        'refresh_days' => 30,
+    ],
+
     // The client checkouts the route inventory is read from (`php artisan contract:routes`).
     'clients' => [
         'app' => env('ELEVENMED_APP_PATH', base_path('../11med')),

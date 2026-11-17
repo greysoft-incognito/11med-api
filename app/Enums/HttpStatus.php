@@ -18,6 +18,7 @@ enum HttpStatus: int
     case METHOD_NOT_ALLOWED = 405;   // Method Not Allowed
     case CONFLICT = 409;             // Conflict
     case UNPROCESSABLE_ENTITY = 422; // Unprocessable Entity
+    case LOCKED = 423;               // Locked
     case TOO_MANY_REQUESTS = 429;    // Too Many Requests
     case SERVER_ERROR = 500;         // Internal Server Error
 

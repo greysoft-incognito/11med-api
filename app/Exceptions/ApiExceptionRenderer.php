@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use App\Enums\HttpStatus;
+use App\Services\Identity\BearerToken;
 use App\Support\Envelope;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -43,7 +44,9 @@ final class ApiExceptionRenderer
         return match (true) {
             $e instanceof ApiException => $e,
             $e instanceof ValidationException => self::validation($e),
-            $e instanceof AuthenticationException => ApiException::unauthorized(),
+            $e instanceof AuthenticationException => ApiException::unauthorized(
+                BearerToken::isExpired(request()) ? 'TOKEN_EXPIRED' : 'UNAUTHENTICATED'
+            ),
             $e instanceof AuthorizationException,
             $e instanceof UnauthorizedException => ApiException::forbidden(),
             $e instanceof ModelNotFoundException => ApiException::notFound(self::notFoundCode($e)),
