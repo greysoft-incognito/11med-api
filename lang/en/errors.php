@@ -22,6 +22,8 @@ return [
     'EMAIL_TAKEN' => 'That email is already on another account.',
     'NO_EMAIL' => 'There is no email address to confirm.',
     'EMAIL_VERIFIED' => 'That address is already confirmed.',
+    'SOCIAL_TOKEN_INVALID' => 'That sign-in could not be confirmed. Please try again.',
+    'SOCIAL_UNAVAILABLE' => 'That sign-in option is not available yet. Use your phone number instead.',
     'FORBIDDEN' => 'You do not have access to this.',
     'NOT_FOUND' => 'We could not find that.',
     'METHOD_NOT_ALLOWED' => 'That action is not available here.',

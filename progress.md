@@ -2,6 +2,19 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.5 Google and Apple sign-in
+
+- `POST auth/social` verifies the ID token against the provider's published keys (cached an hour):
+  signature, issuer, audience (`GOOGLE_WEB_CLIENT_ID`, `APPLE_BUNDLE_ID`, HT-003) and expiry. A
+  confirmed identity gets a session; a new one gets a link token (15 minutes, single use, held in the
+  cache by its hash). Without a configured audience the provider answers 422 `SOCIAL_UNAVAILABLE`; a
+  token that fails is 401 `SOCIAL_TOKEN_INVALID`.
+- `POST auth/social/phone` creates the account as registration does (no password, consent context
+  `social-link`), copies the token's email with its own `email_verified` claim unless another
+  account holds it, and binds the identity unconfirmed. The phone code confirms it.
+- New dependency: `firebase/php-jwt` ^7.0, to verify RS256 tokens against a JWKS (6.x carries
+  CVE-2025-45769).
+
 ## 2026-11-17: M2.4 Passwords and email
 
 - `forgot-password` and `reset-password` over the phone code (`Passwords`): forgot shares the

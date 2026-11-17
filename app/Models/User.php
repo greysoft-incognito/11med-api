@@ -249,6 +249,11 @@ class User extends Authenticatable implements WalletOperations
         return $this->hasMany(Device::class);
     }
 
+    public function socialIdentities(): HasMany
+    {
+        return $this->hasMany(SocialIdentity::class);
+    }
+
     public function consents(): HasMany
     {
         return $this->hasMany(ConsentRecord::class);

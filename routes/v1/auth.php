@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Http\Controllers\Identity\AppAuthController;
 use App\Http\Controllers\Identity\AppEmailController;
 use App\Http\Controllers\Identity\AppPasswordController;
+use App\Http\Controllers\Identity\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
 $app = 'role:' . implode('|', Role::values(Role::app()));
@@ -18,6 +19,8 @@ Route::prefix('auth')->name('auth.')->group(function () use ($app) {
         Route::post('logout', [AppAuthController::class, 'logout'])->name('logout');
         Route::post('forgot-password', [AppPasswordController::class, 'forgot'])->name('forgot-password');
         Route::post('reset-password', [AppPasswordController::class, 'reset'])->name('reset-password');
+        Route::post('social', [SocialAuthController::class, 'signIn'])->name('social');
+        Route::post('social/phone', [SocialAuthController::class, 'linkPhone'])->name('social.phone');
     });
 
     Route::middleware(['auth:sanctum', $app])->group(function () {

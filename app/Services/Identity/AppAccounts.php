@@ -74,6 +74,10 @@ class AppAccounts
 
         $user->forceFill(['phone_verified_at' => $user->phone_verified_at ?? now()])->save();
 
+        $user->socialIdentities()
+            ->whereNull('confirmed_at')
+            ->update(['confirmed_at' => now()]);
+
         return $this->open($user, $installId);
     }
 

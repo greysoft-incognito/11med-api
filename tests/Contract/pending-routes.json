@@ -83,8 +83,6 @@
     "PATCH api/v1/portal/pharmacy",
     "PATCH api/v1/portal/pharmacy/drugs/{id}",
     "PATCH api/v1/profile/{userId}",
-    "POST api/v1/auth/social",
-    "POST api/v1/auth/social/phone",
     "POST api/v1/consultations",
     "POST api/v1/consultations/{id}/call",
     "POST api/v1/consultations/{id}/cancel",
