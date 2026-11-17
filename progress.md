@@ -2,6 +2,12 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: Prescribed medicines reach the store
+
+- `PrescribedDrugs` is bound to `ConsultationPrescribedDrugs` (M10); `NoPrescribedDrugs` is
+  removed. Until now every prescription-only line stayed blocked on main even with a valid
+  prescription. A feature test prescribes through a session and sees the cart unblock.
+
 ## 2026-11-17: M10.3 Applying a prescription
 
 - `POST consultations/{id}/prescription/apply` (patient only) adds the prescription's drugs to the
