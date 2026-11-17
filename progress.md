@@ -2,6 +2,17 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.4 Passwords and email
+
+- `forgot-password` and `reset-password` over the phone code (`Passwords`): forgot shares the
+  resend budget and answers alike for any number; reset refuses an unknown number as a wrong code,
+  clears the lockout, confirms the phone and ends every session.
+- `change-password` needs the current password (422 `PASSWORD_INCORRECT`, `PASSWORD_UNCHANGED`)
+  and ends every session but the one making the change.
+- `PATCH auth/email`, `email/verify`, `email/resend` (`EmailAddresses`): a new address is
+  unconfirmed until its emailed code returns; the same address in any case sends nothing; 409
+  `EMAIL_TAKEN`, 422 `NO_EMAIL`, 422 `EMAIL_VERIFIED`; the phone code's budget.
+
 ## 2026-11-17: M2.3 App sign-up and sign-in
 
 - `POST auth/register`, `verify-otp`, `resend-otp`, `login`, `refresh`, `logout` and
