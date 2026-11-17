@@ -2,6 +2,24 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-25: M11.4 Fulfilment, M11 done
+
+- `GET portal/pharmacy/orders[/{id}]` (paged, newest first, `status` including `open`, `q` over
+  the reference, the patient's name and phone in either form) lists only orders paid, refunded, or
+  to be paid at the counter; anything else, or another pharmacy's, is 404 `ORDER_NOT_FOUND`.
+  `prescription_verified` comes from `PrescribedDrugs`.
+- `POST portal/pharmacy/orders/{id}/advance`: one stage at a time, `OrderBook` the only code that
+  moves an order. A delivery handed to the rider needs `rider` (422 `RIDER_REQUIRED`) and takes
+  `estimated_delivery_at`, else the pharmacy's `delivery_minutes` or 45; `ready_at` and
+  `completed_at` are set as the steps are taken; collecting a counter pickup calls
+  `Payments::collectAtCounter()`. 422 `ORDER_CANCELLED`, `ORDER_FINAL`.
+- `POST portal/pharmacy/orders/{id}/cancel`: a reason of 3 to 200 characters, only before `ready`
+  (422 `ORDER_STARTED`), `Payments::refund()` of that order's share.
+- Each step and a pharmacy's cancellation push to the patient through `Notifier` (`OrderNotices`,
+  category `order`, the mock's wording, no medicine named), deduplicated per order and status.
+- M11 is done: 61 of 154 contract routes built (36 on main and 25 here), 93 pending.
+  Next: the owner's review; M12 builds on `organisations`.
+
 ## 2026-11-25: M11.3 The app's store, cart and checkout
 
 - `GET pharmacy/pharmacies[/{id}]` and `GET pharmacy/drugs[/{id}]`, patient role, approved

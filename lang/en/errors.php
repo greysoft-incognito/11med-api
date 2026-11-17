@@ -52,6 +52,9 @@ return [
     'ORDER_NOT_FOUND' => 'That order is not yours, or no longer exists.',
     'ORDER_CANCELLED' => 'This order was cancelled.',
     'ORDER_CONFIRMED' => 'The pharmacy has already started on this order. Contact them to change it.',
+    'ORDER_FINAL' => 'This order cannot move any further.',
+    'ORDER_STARTED' => 'This order is with the rider or on the counter. Contact the patient directly.',
+    'RIDER_REQUIRED' => "Say who is bringing it. The patient sees the rider's name and number.",
     'DRUG_IN_OPEN_ORDER' => 'This medicine is in an order that has not been delivered. Mark it out of stock instead, and remove it once the order is done.',
 
     'FORBIDDEN' => 'You do not have access to this.',

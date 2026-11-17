@@ -12,6 +12,10 @@ milestone that introduced it. The clients tick them; never delete.
   signed for 15 minutes (403 `LINK_EXPIRED` after), re-signed each time the record is read. Open
   them from a fresh read. Store pictures are plain URLs. A licence URL is accepted by one
   application only. (M3.2)
+- [ ] **FE-113 · A refund reads `refunded` when the gateway confirms it.** After a cancellation in
+  the portal, the order's `payment.status` stays `paid` until Paystack confirms the refund, which
+  can take days; the mock marks it at once. The rider's phone comes back in the local `0…` form.
+  `GET /portal/pharmacy/drugs` also takes `stock=in`. (M11.4)
 
 ## App (`11med`)
 

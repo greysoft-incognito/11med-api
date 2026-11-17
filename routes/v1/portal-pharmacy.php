@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\Pharmacy\PortalDrugController;
+use App\Http\Controllers\Pharmacy\PortalOrderController;
 use App\Http\Controllers\Pharmacy\PortalPharmacyController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,9 @@ Route::middleware(['auth:sanctum', 'role:' . Role::Pharmacy->value])
         Route::get('drugs/{id}', [PortalDrugController::class, 'show'])->whereUuid('id')->name('drugs.show');
         Route::patch('drugs/{id}', [PortalDrugController::class, 'update'])->whereUuid('id')->name('drugs.update');
         Route::delete('drugs/{id}', [PortalDrugController::class, 'destroy'])->whereUuid('id')->name('drugs.destroy');
+
+        Route::get('orders', [PortalOrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{id}', [PortalOrderController::class, 'show'])->whereUuid('id')->name('orders.show');
+        Route::post('orders/{id}/advance', [PortalOrderController::class, 'advance'])->whereUuid('id')->name('orders.advance');
+        Route::post('orders/{id}/cancel', [PortalOrderController::class, 'cancel'])->whereUuid('id')->name('orders.cancel');
     });

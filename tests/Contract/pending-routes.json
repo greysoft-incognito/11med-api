@@ -47,8 +47,6 @@
     "GET api/v1/portal/laboratory/catalogue",
     "GET api/v1/portal/laboratory/summary",
     "GET api/v1/portal/laboratory/tests",
-    "GET api/v1/portal/pharmacy/orders",
-    "GET api/v1/portal/pharmacy/orders/{id}",
     "GET api/v1/readings",
     "GET api/v1/subscriptions/{userId}",
     "PATCH api/v1/doctor/profile",
@@ -91,8 +89,6 @@
     "POST api/v1/portal/admin/subscriptions",
     "POST api/v1/portal/laboratory/bookings/{id}/advance",
     "POST api/v1/portal/laboratory/bookings/{id}/cancel",
-    "POST api/v1/portal/pharmacy/orders/{id}/advance",
-    "POST api/v1/portal/pharmacy/orders/{id}/cancel",
     "POST api/v1/readings",
     "PUT api/v1/portal/admin/catalogue/{code}",
     "PUT api/v1/portal/laboratory/tests/{code}"
