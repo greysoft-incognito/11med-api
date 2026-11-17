@@ -39,12 +39,12 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 5.1 `subscriptions/:userId`, `is_premium`, the admin record and list
 - [x] 5.2 The `Entitlements` service with every free-tier gate
 
-## M6 Medications and readings `[ ]`
+## M6 Medications and readings `[x]`
 
-- [ ] 6.1 Schedules, the cap with the prescription exemption, pause and resume
-- [ ] 6.2 Dose expansion, logging, the offline batch, snoozes, the missed-dose rule
-- [ ] 6.3 History, compliance, the PDF report
-- [ ] 6.4 Readings and insights
+- [x] 6.1 Schedules, the cap with the prescription exemption, pause and resume
+- [x] 6.2 Dose expansion, logging, the offline batch, snoozes, the missed-dose rule
+- [x] 6.3 History, compliance, the PDF report
+- [x] 6.4 Readings and insights
 
 ## M7 Notifications and push `[x]`
 

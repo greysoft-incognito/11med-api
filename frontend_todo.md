@@ -77,6 +77,32 @@ milestone that introduced it. The clients tick them; never delete.
   laboratory's cancellation is pushed as category `lab_result` with the booking's id as
   `target_id`, so a tap should open the booking, not only its results. The booking reference is
   `11L-` and eight letters or digits. (M12)
+- [ ] **FE-060 · Schedules are paged.** `GET /medications/:userId` answers `{ items, next_cursor, total }`
+  (FE-003), oldest first; the reminder scheduler should page through with `limit=100`. (M6.1)
+- [ ] **FE-061 · When a schedule's doses begin.** A new schedule owes doses from an hour before it was
+  added (or its `start_date`, if later), never further back, so backdating `start_date` adds no
+  missed doses. A change to `specific_times`, `start_date` or `end_date` applies from an hour before
+  the change; doses already answered or missed keep their times. Resuming a pause owes nothing for
+  the paused days. The free-tier count (`3 of 3`) excludes prescribed schedules, which never take a
+  place. `weekly` and `every_x_hours` are accepted and expanded daily from `specific_times`, as the
+  handover's §5.1 says. (M6.1)
+- [ ] **FE-062 · Dose answers the mock did not refuse.** `POST doses/log` answers 404
+  `DOSE_NOT_FOUND` on `dose_id` for an instant that is not one of the schedule's times, or falls
+  before the schedule's doses begin or inside a pause; 400 on `logged_at` more than five minutes
+  ahead. `log-batch` takes at most 200 entries, applies them in `logged_at` order, clamps a third
+  snooze and silently drops answers to deleted schedules. `DELETE doses/log/:id` on a dose past its
+  hour leaves it `missed` rather than unanswered, and a dose the server marked missed has no answer
+  to retract (404 `DOSE_NOT_ANSWERED`). (M6.2)
+- [ ] **FE-063 · History is settled doses, paged.** `GET /medications/:userId/history` is paged
+  newest first (FE-003) and lists answered and missed doses; a dose inside its hour and unanswered
+  is on `/doses` until it is answered or missed. `window`, `days` and `date` must be integers and
+  `YYYY-MM-DD` (400 otherwise); lengths outside 1 to 365 are clamped. (M6.3)
+- [ ] **FE-064 · The report is a signed API link.** `url` is
+  `https://<api>/api/v1/medications/reports/<id>/file?expires=…&signature=…`, a PDF for 15 minutes,
+  then 403 `LINK_EXPIRED`; ten reports an hour per account (429). (M6.3)
+- [ ] **FE-065 · Readings are paged.** `GET /readings` answers `{ window_days, items, next_cursor,
+  total }`. `pulse` must be sent on a blood pressure, as `zLogReadingRequest` already requires,
+  `null` when the cuff gives none. (M6.4)
 
 - [ ] **FE-080 · Doctor documents are uploaded first.** `POST /doctor/documents` cannot read a
   phone's `file://` URI. Upload the image to `POST /media` with the new purpose `doctor_document`

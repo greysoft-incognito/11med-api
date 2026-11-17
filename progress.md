@@ -63,6 +63,29 @@ Newest first. Never edit an old entry.
   `organisation_name`. Suspension and reinstatement email the partner's accounts.
 - Seam for M12: `App\Models\Organisation`, `Organisation::listed()`, `Organisations::of()` and
   `updateListing()`, and the `PartnerApproved`, `PartnerSuspended`, `PartnerReinstated` events.
+## 2026-11-20: M6 Medications and readings, done
+
+- 6.1 `POST`, `PATCH`, `DELETE medications`, `pause`, `resume`, `GET medications/{userId}` (paged,
+  FE-060). The cap is `Entitlements::medicationLimit()` from the seams PR, 422
+  `MEDICATION_LIMIT_REACHED` with `meta.limit` and `meta.active`, counting active schedules the
+  patient added; checked on create, resume and an edit that reopens an ended course.
+  `Prescriptions` implements `PrescribedSchedules` for M10. `ScheduledMedications` replaces
+  `NoCurrentMedications` on the emergency page. An accepted caregiver reads every `{userId}` route
+  except the report; anyone else gets 404.
+- 6.2 Doses come from `specific_times` in Africa/Lagos as UTC instants (FE-002). `GET doses?date=`,
+  `POST doses/log`, `log-batch`, `DELETE doses/log/{doseId}` (FE-062). Two snoozes; the
+  `medications:settle-doses` command, every minute, marks unanswered and snoozed doses missed sixty
+  minutes past due, once, and dispatches `DoseMissed` for M7.
+- 6.3 `history` (paged, settled doses, FE-063), `compliance` with `date` (FE-004), counted per
+  Lagos day in SQL, null for a day with nothing due. `report` is premium (403 `PREMIUM_REQUIRED`),
+  owner only, a dompdf PDF behind a 15-minute signed link (FE-064); files pruned hourly after a day.
+- 6.4 `GET`, `POST`, `DELETE readings` (paged with `window_days`, FE-065), bounds as
+  `READING_LIMITS`, `taken_at` at most five minutes ahead. `GET insights` (premium): the three
+  formulas of handover §14, aggregated in SQL.
+- New package: `barryvdh/laravel-dompdf` (the report's PDF), needs `ext-dom`; new env `REPORT_DISK`;
+  the scheduler now has to run every minute (docs/SETUP.md).
+- Built on the seams PR (#9) for `Entitlements` and `PrescribedSchedules`.
+- 53 of 154 contract routes built.
 
 ## 2026-11-17: M8 Doctors
 
@@ -109,7 +132,6 @@ Newest first. Never edit an old entry.
 - Not built: `GET portal/admin/summary`, which counts M5, M8, M10 and M11 tables; it lands once
   those merge. M13.2 waits on HT-001, HT-002, HT-005. 39 of 154 contract routes built on this
   branch.
-
 
 ## 2026-11-23: M9 Payments
 
@@ -239,7 +261,6 @@ exists now with a stand-in bound by `#[Bind]`; the owning milestone swaps the bi
   the `Medication` collection, idempotent on patient and prescription, for M10.3; stand-in
   `NoPrescribedSchedules`.
 - `tests/Feature/Foundation/SeamsTest.php`. Next: the milestones, each in its own thread.
-
 ## 2026-11-18: M4.3 Caregivers, M4 done
 
 - `POST medications/caregivers/invite` (201): the number in local form, a six-character code from
