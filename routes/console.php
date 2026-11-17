@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\GuideConversation;
 use App\Models\Media;
 use App\Models\OtpCode;
 use App\Models\PasswordLink;
@@ -17,3 +18,6 @@ Schedule::command('model:prune', ['--model' => [RefreshToken::class, OtpCode::cl
 
 // Uploads no record claimed within a day, with their files (app handover §12).
 Schedule::command('model:prune', ['--model' => [Media::class]])->hourly();
+
+// Guide conversations idle past the retention period, with their messages (app handover §11).
+Schedule::command('model:prune', ['--model' => [GuideConversation::class]])->daily();
