@@ -20,6 +20,25 @@ Newest first. Never edit an old entry.
 - Seam for M12: `App\Models\Organisation`, `Organisation::listed()`, `Organisations::of()` and
   `updateListing()`, and the `PartnerApproved`, `PartnerSuspended`, `PartnerReinstated` events.
 
+## 2026-11-19: The seams between M5 to M13
+
+So the remaining milestones can be built in parallel, each interface one module owns and others call
+exists now with a stand-in bound by `#[Bind]`; the owning milestone swaps the binding.
+
+- `Entitlements` (M5): `medicationLimit`, `historyDays`, `readingsDays` (null is unlimited) and
+  `requirePremium` (403 `PREMIUM_REQUIRED`), from `elevenmed.free_tier` (3, 7, 7). `isPremium()`
+  is still false until M5 reads the subscription record.
+- `Notifier` (M7): `send(User, NotificationCategory, title, body, data): ?string` (the history
+  row's id); stand-in `SilentNotifier`. `NotificationCategory` mirrors `zNotificationCategory`.
+- Payments (M9): `Payable` (on each paid record), `PayableTargets` (one per purpose, named in
+  `elevenmed.payments.targets`: `OrderPayables` M11, `BookingPayables` M12,
+  `ConsultationPayables` M10), `Payments` (`summaryFor`, `openAtCounter`, `collectAtCounter`,
+  `refund`; stand-in `NoPayments`), events `PaymentSucceeded` and `PaymentRefunded`, and the
+  `PaymentPurpose`, `PaymentStatus` and `PaymentChannel` enums.
+- `PrescribedSchedules` (M6): `apply(patient, doctor, prescriptionId, drugs)`, idempotent, for
+  M10.3; stand-in `NoPrescribedSchedules`.
+- `tests/Feature/Foundation/SeamsTest.php`. Next: the milestones, each in its own thread.
+
 ## 2026-11-18: M4.3 Caregivers, M4 done
 
 - `POST medications/caregivers/invite` (201): the number in local form, a six-character code from
