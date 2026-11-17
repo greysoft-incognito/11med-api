@@ -102,7 +102,6 @@
     "POST api/v1/consultations/{id}/call",
     "POST api/v1/consultations/{id}/cancel",
     "POST api/v1/consultations/{id}/messages",
-    "POST api/v1/consultations/{id}/prescription",
     "POST api/v1/consultations/{id}/prescription/apply",
     "POST api/v1/consultations/{id}/rate",
     "POST api/v1/doctor/consultations/{id}/accept",

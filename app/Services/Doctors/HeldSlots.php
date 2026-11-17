@@ -2,14 +2,14 @@
 
 namespace App\Services\Doctors;
 
+use App\Services\Consultations\ConsultationHeldSlots;
 use Carbon\CarbonInterface;
 use Illuminate\Container\Attributes\Bind;
 
 /**
  * The slot instants a doctor already has a live booking for (pending, confirmed or in progress).
- * The Consultations module (M10) implements it.
  */
-#[Bind(NoHeldSlots::class)]
+#[Bind(ConsultationHeldSlots::class)]
 interface HeldSlots
 {
     /**
