@@ -36,6 +36,7 @@ return [
         'retained' => [
             'consent_records' => 'Records of the consents you gave, without your name or number',
             'account_erasures' => 'That an account was deleted, its role, when, and the reason you gave',
+            'subscription_payments' => 'The payment references for premium the team recorded, without your name or number',
         ],
         'retention_years' => 6,
     ],

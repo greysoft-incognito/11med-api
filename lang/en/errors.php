@@ -37,4 +37,8 @@ return [
     'METHOD_NOT_ALLOWED' => 'That action is not available here.',
     'RATE_LIMITED' => 'Too many attempts. Wait a moment and try again.',
     'SERVER_ERROR' => 'Something went wrong on our side. Try again shortly.',
+
+    // Subscriptions
+    'PATIENT_NOT_FOUND' => 'No patient account has this phone number.',
+    'REFERENCE_USED' => 'This payment reference has already been recorded.',
 ];

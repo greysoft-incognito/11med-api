@@ -2,6 +2,24 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-19: M5.1 Subscriptions
+
+- `GET subscriptions/{userId}` for patients and doctors, their own only (404 otherwise): `none`
+  without a current record; `active`, `plan_id: 'premium'`, `current_period_end` the start of the
+  day after `premium_until` in Lagos, and `cancels_at_period_end: true`, since a recorded premium
+  does not renew (FE-050).
+- `User::isPremium()` reads the `subscription` relation: premium while `premium_until` is today or
+  later in Lagos. It lapses on its own with nothing written, so no job runs.
+- `GET portal/admin/subscriptions` is paged, newest change first, with `q` over the patient's name,
+  phone (either spelling) and the reference, in SQL. `POST` records `{ phone, premium_until,
+  reference }` (200): 400 `VALIDATION_FAILED` on `premium_until` unless after today in Lagos, 404
+  `PATIENT_NOT_FOUND` on `phone` (a verified patient account only), 409 `REFERENCE_USED` on
+  `reference` for any reference ever recorded. Recording again replaces the end date (FE-051).
+- Two tables: `subscriptions` (one per patient, the current state) and `subscription_payments`
+  (every recording, by reference, with the admin who recorded it). Erasure removes the first and
+  keeps the second without the person, so a reference can never be recorded twice.
+- `Subscriptions::activeCount()` is the premium count M13's admin summary will read.
+
 ## 2026-11-18: M4.3 Caregivers, M4 done
 
 - `POST medications/caregivers/invite` (201): the number in local form, a six-character code from

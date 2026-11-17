@@ -13,6 +13,12 @@ milestone that introduced it. The clients tick them; never delete.
   them from a fresh read. Store pictures are plain URLs. A licence URL is accepted by one
   application only. (M3.2)
 
+- [ ] **FE-051 · Subscription records exist only once recorded.** `GET /portal/admin/subscriptions`
+  lists patients the team has recorded premium for, not every patient; `POST` finds any verified
+  patient account by phone and creates the record. A lapsed record lists as `plan: 'free'` with its
+  last `premium_until`. The reference is unique across every recording ever made, not only the
+  current one. (M5.1)
+
 ## App (`11med`)
 
 - [ ] **FE-002 · `scheduled_for` is an instant.** A dose's `scheduled_for` is a real UTC instant
@@ -55,6 +61,11 @@ milestone that introduced it. The clients tick them; never delete.
   that state. (M4)
 - [ ] **FE-014 · Caregiver lists are paged.** `GET /medications/caregivers` and
   `GET /medications/caregiving` answer `{ items, next_cursor, total }` (FE-003). (M4.3)
+- [ ] **FE-050 · A recorded premium does not renew.** `GET /subscriptions/:userId` answers
+  `status: 'active'`, `plan_id: 'premium'`, `current_period_end` (the start of the day after the
+  recorded end date, in Lagos) and `cancels_at_period_end: true`, because the team records a fixed
+  end date. The status screen shows "Renews {date}" for any active plan; it should say premium runs
+  until that date when `cancels_at_period_end` is true. A lapsed record reads `status: 'none'`. (M5.1)
 
 ## Both
 
