@@ -23,10 +23,10 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 2.7 Portal sign-in, refresh, sign-out, forgot, set-password
 - [x] 2.8 Account erasure
 
-## M3 Media `[ ]`
+## M3 Media `[x]`
 
-- [ ] 3.1 `POST media` for every purpose, size, type and resize checks, re-encode without EXIF
-- [ ] 3.2 The ownership rule, signed URLs for medical files, orphan collection
+- [x] 3.1 `POST media` for every purpose, size, type and resize checks, re-encode without EXIF
+- [x] 3.2 The ownership rule, signed URLs for medical files, orphan collection
 
 ## M4 Profile and caregiving `[ ]`
 

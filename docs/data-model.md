@@ -30,4 +30,10 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `account_erasures` | That an account was erased: `role`, `reason` (as given), `erased_at`. Nothing that names the person |
 | `consent_records` | `context` (`register`, `social-link`, `profile-sharing`), `policy_version`, `accepted_at` as the client captured it, `recorded_at`, an optional `subject`. `user_id` is nulled on erasure, so the record survives severed |
 
+### Media (M3)
+
+| Table | Notes |
+| --- | --- |
+| `media` | An upload: `user_id` (null for a partner's licence, uploaded signed out; cascades on erasure, whose listener removes the files), `purpose`, `disk` and `path` (`media/<purpose>/<uuid>.<ext>`), `name` as uploaded, `content_type` as sniffed, `width` and `height` (null for a PDF), `size` in bytes as stored, `claimed_at` once a record takes it. Unclaimed rows older than a day are pruned hourly with their files |
+
 Domain tables are added here as each milestone lands.

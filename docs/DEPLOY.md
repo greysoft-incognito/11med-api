@@ -28,11 +28,14 @@ deploys. Two deploys to the same server never overlap: a second one waits for th
    `APP_URL`, the `DB_*` values, `QUEUE_CONNECTION=redis` and `CACHE_STORE=redis` with the `REDIS_*`
    values, and mail. For sign-in also set `SMS_ENABLED` (with the kit's SMS settings) or, on staging
    only, `OTP_FIXED_CODE`; `GOOGLE_WEB_CLIENT_ID` and `APPLE_BUNDLE_ID` for social sign-in; and
-   `PORTALS_URL`, where portal reset emails link to. The deploy never writes `.env`, and stops if it
+   `PORTALS_URL`, where portal reset emails link to; `MEDIA_PUBLIC_DISK` and `MEDIA_PRIVATE_DISK` once
+   object storage exists (HT-005). The deploy never writes `.env`, and stops if it
    is missing.
 5. **Web server**: point the document root at `DEPLOY_PATH/public`. Give the PHP-FPM user write
-   access to `storage/` and `bootstrap/cache/`.
-6. **Scheduler**: the consultation deadlines, missed doses and abandoned payments run on Laravel's
+   access to `storage/` and `bootstrap/cache/`. Uploads are up to 5 MB, so allow a little more:
+   `upload_max_filesize = 6M` and `post_max_size = 8M` in PHP, `client_max_body_size 8m` in nginx.
+   GD needs JPEG, PNG and WebP support.
+6. **Scheduler**: the consultation deadlines, missed doses, abandoned payments and unclaimed uploads run on Laravel's
    scheduler, so add this cron entry for the PHP-FPM user:
 
    ```
