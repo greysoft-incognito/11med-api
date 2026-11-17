@@ -19,7 +19,7 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 2.3 App registration, OTP verify and resend budget, login with lockouts, logout, session
 - [x] 2.4 Forgot and reset password, change password, email change and verification
 - [x] 2.5 Apple and Google sign-in, linking a phone
-- [ ] 2.6 Devices (`PUT`/`DELETE devices/:installId`)
+- [x] 2.6 Devices (`PUT`/`DELETE devices/:installId`)
 - [ ] 2.7 Portal sign-in, refresh, sign-out, forgot, set-password
 - [ ] 2.8 Account erasure
 

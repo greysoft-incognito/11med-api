@@ -2,6 +2,15 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.6 Devices
+
+- `PUT devices/{installId}` upserts with the row locked and answers 200 every time; an install
+  another account holds moves to the caller. `DELETE devices/{installId}` removes only the
+  caller's own and answers `{ install_id }` either way.
+- `ForgetEndedDevices` listens to `SessionsEnded`, so a sign-out, a revoked family, a reset or a
+  password change drops the installs of the sessions it ended (app handover §8.1).
+- Removing a token APNs or FCM reports invalid is M7's, with the senders.
+
 ## 2026-11-17: M2.5 Google and Apple sign-in
 
 - `POST auth/social` verifies the ID token against the provider's published keys (cached an hour):
