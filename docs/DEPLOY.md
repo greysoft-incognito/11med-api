@@ -28,7 +28,7 @@ deploys. Two deploys to the same server never overlap: a second one waits for th
    `APP_URL`, the `DB_*` values, `QUEUE_CONNECTION=redis` and `CACHE_STORE=redis` with the `REDIS_*`
    values, and mail. For sign-in also set `SMS_ENABLED` (with the kit's SMS settings) or, on staging
    only, `OTP_FIXED_CODE`; `GOOGLE_WEB_CLIENT_ID` and `APPLE_BUNDLE_ID` for social sign-in; and
-   `PORTALS_URL`, where portal reset emails link to; `MEDIA_PUBLIC_DISK` and `MEDIA_PRIVATE_DISK` once
+   `PORTALS_URL`, where portal reset emails link to; `EMERGENCY_URL` and `APP_DOWNLOAD_URL` (HT-012); `MEDIA_PUBLIC_DISK` and `MEDIA_PRIVATE_DISK` once
    object storage exists (HT-005). The deploy never writes `.env`, and stops if it
    is missing.
 5. **Web server**: point the document root at `DEPLOY_PATH/public`. Give the PHP-FPM user write

@@ -2,6 +2,46 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-18: M4.3 Caregivers, M4 done
+
+- `POST medications/caregivers/invite` (201): the number in local form, a six-character code from
+  the mock's alphabet, unique among live rows, and an SMS with the store link and the code
+  (`APP_DOWNLOAD_URL`). 409 `CAREGIVER_ALREADY_INVITED` on `phone` comes before 422
+  `CAREGIVER_LIMIT_REACHED` (`meta.limit`, `meta.current`), as the mock orders them; the cap is
+  `Entitlements::caregiverLimit()`, 1 free and 5 premium, counting pending and active. Ten
+  invitations a day per account, since each is a paid SMS.
+- `POST caregivers/accept` (ten tries an hour): 404 `INVITE_NOT_FOUND`, 409 `INVITE_ALREADY_USED`
+  (also when the accepter already cares for that patient), 422 `INVITE_SELF`, all on `code`;
+  answers `zCaredForPatient` and dispatches `CaregiverAccepted` for M7 to tell the patient.
+- `GET caregivers` and `GET caregiving` are paged (FE-003); `DELETE caregivers/{id}` soft deletes
+  at once, only the patient's own (404 `CAREGIVER_NOT_FOUND`), and frees the number to be invited
+  again. `Caregivers::canRead()` is what M6's schedule routes will ask.
+- Caregiving routes need the patient role: a caregiver is a patient account (spec §6.5). Erasing
+  either side removes the row through its foreign keys.
+- `App\Services\Subscriptions\Entitlements` starts here with the caregiver cap; M5 adds the rest.
+- M4 is done: 36 of 154 contract routes built, 118 pending. Next: M5 Subscriptions and
+  entitlements, on the owner's go-ahead.
+
+## 2026-11-18: M4.1 and M4.2 Medical profile and the emergency QR page
+
+- `POST profile` (201, 409 `PROFILE_EXISTS`), `GET` and `PATCH profile/{userId}`, patient only.
+  Another account's id is 404 `NOT_FOUND`; one's own without a profile, 404 `PROFILE_NOT_FOUND`.
+- Rules mirror `zCreateProfileRequest` and `zUpdateProfileRequest`, plus server bounds the zod
+  schemas leave open (lengths, list sizes, no birth date in the future). The state must be one of
+  the 37 and the area one of its LGAs (`resources/data/nigerian-lgas.php`, generated from the app's
+  bundled list; handover §5.5); a move to another state drops an area the request did not restate.
+- A changed emergency contact number reads `is_verified: false`; no contract has a route to verify
+  it yet (ISS-005). `profile_photo_url` is claimed through `MediaLibrary`, and a replaced or removed
+  photo is discarded.
+- `GET profile/{userId}/qr` makes the token on first ask; `POST profile/qr/revoke` replaces it and
+  the old one is refused at once. The token is 40 random characters, found by its SHA-256 and kept
+  encrypted so the app can show it again.
+- `GET profile/view?token=` is public: the portals' `zEmergencyRecord`, the safe subset only, with
+  `Cache-Control: no-store`. Each open increments `opened_count`, sets `last_opened_at` (the app's
+  `last_accessed_at`) and writes a `qr_accesses` row with the time and nothing about who. 30 opens
+  an hour per token and 60 per address. 404 `QR_NOT_FOUND` for an unknown or replaced token.
+- `medications` on the page is empty until M6 implements `CurrentMedications`.
+
 ## 2026-11-17: M3.2 Ownership, signed links, orphans, M3 done
 
 - `MediaLibrary::claim($owner, $url, $purpose, $field)` is the rule every record that carries a

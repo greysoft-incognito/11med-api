@@ -28,11 +28,11 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 3.1 `POST media` for every purpose, size, type and resize checks, re-encode without EXIF
 - [x] 3.2 The ownership rule, signed URLs for medical files, orphan collection
 
-## M4 Profile and caregiving `[ ]`
+## M4 Profile and caregiving `[x]`
 
-- [ ] 4.1 Medical profile (create, read, update), LGA validation
-- [ ] 4.2 QR tokens, revocation, the public emergency page with its access log and rate limit
-- [ ] 4.3 Caregiver invites (SMS, deferred link), accept, remove, read-only access
+- [x] 4.1 Medical profile (create, read, update), LGA validation
+- [x] 4.2 QR tokens, revocation, the public emergency page with its access log and rate limit
+- [x] 4.3 Caregiver invites (SMS, deferred link), accept, remove, read-only access
 
 ## M5 Subscriptions and entitlements `[ ]`
 

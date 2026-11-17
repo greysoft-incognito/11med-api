@@ -53,6 +53,22 @@ return [
         'public_uploads_per_hour' => 10,
     ],
 
+    // The public emergency page a QR code opens (portal `/profile/view`), and its limits per token and address.
+    'emergency_url' => env('EMERGENCY_URL', 'https://11med.ng/profile/view'),
+    'emergency' => [
+        'opens_per_hour_per_token' => 30,
+        'opens_per_hour_per_address' => 60,
+    ],
+
+    // Caregivers (app spec §6.5): the store link the invitation SMS carries, and the free and premium caps.
+    'app_link' => env('APP_DOWNLOAD_URL', 'https://11med.ng/app'),
+    'caregivers' => [
+        'free' => 1,
+        'premium' => 5,
+        'invites_per_day' => 10,
+        'accept_attempts_per_hour' => 10,
+    ],
+
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 

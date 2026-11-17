@@ -32,3 +32,7 @@ Things only the owner can do or decide. Each says whether it blocks and what.
 - [ ] **HT-011 · A malware scanner for PDFs.** ClamAV on the server, or a scanning service, for
   attachments, results and licences (app handover §12). Until then a PDF with scripts, launch
   actions or embedded files is refused and the rest is stored as sent. **Blocks:** nothing.
+- [ ] **HT-012 · The app's download link and the emergency page address.** `APP_DOWNLOAD_URL` is the
+  link in the caregiver invitation SMS (default `https://11med.ng/app`; it should open the right
+  store). `EMERGENCY_URL` is where a QR code points (default `https://11med.ng/profile/view`, the
+  portals' public page). **Blocks:** caregiver invitations and QR codes going live.

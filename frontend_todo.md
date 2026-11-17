@@ -49,6 +49,12 @@ milestone that introduced it. The clients tick them; never delete.
   name (415); a PDF with scripts or embedded files is 415; a picture whose pixels differ from the
   `width` and `height` sent is 422 `IMAGE_NOT_RESIZED`. `src/lib/images.ts` already sends the
   encoded size, so nothing changes unless that does. (M3.1)
+- [ ] **FE-013 · Profile and caregiving are patient routes.** A doctor account gets 403 on
+  `profile/*` and `medications/caregivers*`; the doctor app never calls them, so nothing should
+  change unless it does. A move to another state clears `lga` unless the same request sends one in
+  that state. (M4)
+- [ ] **FE-014 · Caregiver lists are paged.** `GET /medications/caregivers` and
+  `GET /medications/caregiving` answer `{ items, next_cursor, total }` (FE-003). (M4.3)
 
 ## Both
 
