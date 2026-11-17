@@ -30,6 +30,28 @@ Newest first. Never edit an old entry.
   (every recording, by reference, with the admin who recorded it). Erasure removes the first and
   keeps the second without the person, so a reference can never be recorded twice.
 - `Subscriptions::activeCount()` is the premium count M13's admin summary will read.
+## 2026-11-19: The seams between M5 to M13
+
+So the remaining milestones can be built in parallel, each interface one module owns and others call
+exists now with a stand-in bound by `#[Bind]`; the owning milestone swaps the binding.
+
+- `Entitlements` (M5): `medicationLimit`, `historyDays`, `readingsDays` (null is unlimited) and
+  `requirePremium` (403 `PREMIUM_REQUIRED`), from `elevenmed.free_tier` (3, 7, 7). `isPremium()`
+  is still false until M5 reads the subscription record.
+- `Notifier` (M7): `send(User, NotificationCategory, title, body, data): ?string` (the history
+  row's id); stand-in `SilentNotifier`. `NotificationCategory` mirrors `zNotificationCategory`.
+- Payments (M9): `Payable` (on each paid record, with `paymentReference` and
+  `paymentPartnerName` for the admin desk), `PayableTargets` (one per purpose, named in
+  `elevenmed.payments.targets`: `OrderPayables` M11, `BookingPayables` M12,
+  `ConsultationPayables` M10), `Payments` (`initialise(targets, payer, channel)`, `summaryFor`,
+  `summariesFor(purpose, ids)` for lists, `openAtCounter`, `collectAtCounter`,
+  `refund(target, kobo = all)`; stand-in `NoPayments`), events `PaymentSucceeded` and
+  `PaymentRefunded`, and the `PaymentPurpose`, `PaymentStatus` and `PaymentChannel` enums.
+  Summaries are `zPaymentSummary` arrays, `authorization_url` included while pending.
+- `PrescribedSchedules` (M6): `apply(patient, doctor, prescriptionId, diagnosis, drugs)` returning
+  the `Medication` collection, idempotent on patient and prescription, for M10.3; stand-in
+  `NoPrescribedSchedules`.
+- `tests/Feature/Foundation/SeamsTest.php`. Next: the milestones, each in its own thread.
 
 ## 2026-11-18: M4.3 Caregivers, M4 done
 
