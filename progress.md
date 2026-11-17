@@ -29,7 +29,25 @@ Newest first. Never edit an old entry.
   document through the `Notifier` (ISS-080, doctor side).
 - `POST doctor/profile/review` was added to the mock-only list, so the inventory is 153 routes.
 - No new service or variable. `APP_KEY` now also protects payout account numbers (SETUP §3).
-- M8 is done: its 11 routes have left `pending-routes.json` (95 pending with M5, M7 and M9 merged).
+- M8 is done: its 11 routes have left `pending-routes.json`.
+
+## 2026-11-27: M13.1 The guide's conversation (admin summary and M13.2 open)
+
+- `GET guide/conversation` (opened with a greeting that names 112 on first read),
+  `POST guide/conversation/messages` (`{ body }`, 1 to 1000 characters, 60 an hour, answers the
+  whole thread) and `DELETE guide/conversation` (start over). Patient role only; `no-store`.
+- `App\Services\Guide`: `EmergencyCheck` runs before anything else and wins; `RuleResponder`
+  (with `PlatformRules`, `TestRules`, `SymptomRules`) is the app mock's rule engine, ported;
+  `ReplyGuard` keeps only allow-listed actions and puts the 112 call first on an emergency, so a
+  future model behind `GuideResponder` cannot route anywhere else.
+- `StoreSearch` (M11) and `TestCatalogue` (M12) are seams with stand-ins: no drug names yet, every
+  test code accepted.
+- Retention: bodies encrypted; start over and erasure delete for real; idle 30 days pruned daily;
+  newest 100 messages kept. Guide text is never logged.
+- Not built: `GET portal/admin/summary`, which counts M5, M8, M10 and M11 tables; it lands once
+  those merge. M13.2 waits on HT-001, HT-002, HT-005. 39 of 154 contract routes built on this
+  branch.
+
 
 ## 2026-11-23: M9 Payments
 

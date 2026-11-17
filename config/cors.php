@@ -19,7 +19,8 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    // The portals call from the browser; the app is native and sends no Origin.
+    'allowed_origins' => array_values(array_filter(array_map('trim', explode(',', (string) env('CORS_ALLOWED_ORIGINS', env('PORTALS_URL', 'http://localhost:3000')))))),
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +30,7 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => true,
+    // Both clients send bearer tokens; no cookie crosses origins.
+    'supports_credentials' => false,
 
 ];

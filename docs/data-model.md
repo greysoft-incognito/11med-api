@@ -52,6 +52,12 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `doctor_profiles` | One live row per doctor, started blank on first read. Professional fields, `languages` and `availability` (`[{ day, start, end }]`, Africa/Lagos) as JSONB with a GIN index on `languages`, `photo_media_id`, the three fees, `follow_up_fee_kobo`, `session_minutes`, `chat_window_hours`, `bank_name`, `bank_account_number` (encrypted with `APP_KEY`) and `bank_account_last4` for the mask, `is_available_now`, `verification_status`, `verification_notes`, `submitted_at` (the review queue's order), `reviewed_at`, and the running rating (`rating_total`, `rating_count`, `rating_mean`) the directory sorts on. Erasure cascades |
 | `doctor_documents` | One live row per profile and `kind`, created at the first upload: `status`, `media_id` (a private `doctor_document` upload; null for bank details, which are the payout fields), `uploaded_at`, `rejection_reason`, `reviewed_at`. A new upload replaces the file and returns the row to `uploaded` |
 
+### Guide (M13)
+
+| Table | Notes |
+| --- | --- |
+| `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
+| `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 ### Payments (M9)
 
 Money records: erasure nulls `payments.user_id` and keeps the rows. Statuses change only through
