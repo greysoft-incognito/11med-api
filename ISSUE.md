@@ -2,6 +2,16 @@
 
 Logged as found, never deleted; a resolved issue is marked resolved.
 
+### ISS-080: Doctors are not told of review decisions yet
+
+- **Logged:** 2026-11-17 · **Found during:** M8.2 · **Blocking:** no · **Status:** open
+- **Detail:** Portal handover §6 makes each decision a push to the doctor, and a suspension a
+  message to patients with a booking in progress. M8 dispatches `DoctorReviewed` (with the previous
+  status) and `DoctorDocumentReviewed`, but nothing sends yet: the `Notifier` is M7's and the
+  bookings are M10's.
+- **Plan:** M7 adds listeners that send through the `Notifier`; M10 adds the suspension listener
+  for open consultations.
+
 ### ISS-005: No route verifies the emergency contact's number
 
 - **Logged:** 2026-11-18 · **Found during:** M4.1 · **Blocking:** no · **Status:** open
