@@ -40,4 +40,12 @@ return [
 
     // Subscriptions
     'PREMIUM_REQUIRED' => 'This is part of premium.',
+
+    // Medications and readings (M6)
+    'MEDICATION_NOT_FOUND' => 'That medication no longer exists.',
+    'MEDICATION_LIMIT_REACHED' => 'Free accounts can track 3 medications at a time.',
+    'DOSE_NOT_FOUND' => 'That dose is not on this schedule.',
+    'DOSE_NOT_ANSWERED' => 'That dose has not been answered.',
+    'SNOOZE_LIMIT_REACHED' => 'You have used every snooze for this dose.',
+    'READING_NOT_FOUND' => 'That reading is not here.',
 ];

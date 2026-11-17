@@ -3,12 +3,13 @@
 namespace App\Services\Profile;
 
 use App\Models\User;
+use App\Services\Medications\ScheduledMedications;
 use Illuminate\Container\Attributes\Bind;
 
 /**
- * What a patient takes now, for the emergency page. The Medications module (M6) implements it.
+ * What a patient takes now, for the emergency page.
  */
-#[Bind(NoCurrentMedications::class)]
+#[Bind(ScheduledMedications::class)]
 interface CurrentMedications
 {
     /**
