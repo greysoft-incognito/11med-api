@@ -1,5 +1,4 @@
 [
     "GET api/v1/doctor/consultations/{id}/lab-request",
-    "GET api/v1/portal/admin/summary",
     "POST api/v1/doctor/consultations/{id}/lab-request"
 ]

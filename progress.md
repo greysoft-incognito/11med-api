@@ -2,6 +2,13 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M13.1 The admin summary
+
+- `GET portal/admin/summary` (admin only), the portal's `zAdminSummary`. `DeskSummary` asks each
+  owning module for one SQL count: `DoctorApplications::awaitingReview()` (submitted, pending, and
+  the oldest wait in whole hours, as the portal's `hoursSince`), `Organisations::awaitingReview()`,
+  `Payouts::pendingTotals()` (count and net kobo) and `Subscriptions::activeCount()`.
+
 ## 2026-11-17: M10.3 Applying a prescription
 
 - `POST consultations/{id}/prescription/apply` (patient only) adds the prescription's drugs to the
