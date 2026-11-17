@@ -45,7 +45,6 @@
     "GET api/v1/portal/admin/doctors",
     "GET api/v1/portal/admin/doctors/{id}",
     "GET api/v1/portal/admin/partners",
-    "GET api/v1/portal/admin/payments",
     "GET api/v1/portal/admin/payouts",
     "GET api/v1/portal/admin/subscriptions",
     "GET api/v1/portal/admin/summary",
