@@ -9,4 +9,18 @@ return [
         'line' => 'Enter this code in 11med to confirm this address: :code',
         'expiry' => 'It expires in :minutes minutes. If you did not ask for it, ignore this email.',
     ],
+    'portal_link' => [
+        'reset' => [
+            'subject' => 'Reset your 11med password',
+            'line' => 'Someone asked to reset the password for this address. If it was you, choose a new one.',
+            'action' => 'Choose a new password',
+            'expiry' => 'The link works once, for an hour. If you did not ask, ignore this email.',
+        ],
+        'welcome' => [
+            'subject' => 'Your 11med account is ready',
+            'line' => 'An account has been opened for you on 11med. Choose a password to sign in.',
+            'action' => 'Choose your password',
+            'expiry' => 'The link works once, for seven days.',
+        ],
+    ],
 ];

@@ -2,6 +2,20 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.7 Portal sign-in
+
+- `POST portal/auth/sign-in` (201), `GET session`, `POST sign-out`, `refresh`, `forgot`,
+  `set-password` through `PortalAccounts`. Only pharmacy, laboratory and admin accounts sign in;
+  wrong details are 401 `INVALID_CREDENTIALS`, five tries a minute per address and email.
+- Sign-out ends the pair even with an expired access token. A refresh answers the full session; a
+  reused refresh token is 401 `INVALID_REFRESH` and ends the family.
+- `forgot` emails a one-hour link to `PORTALS_URL/set-password?token=…` and answers
+  `{ sent: true, dev_link: null }` for any address. `set-password` (422 `RESET_INVALID` on
+  `token`) sets the password, confirms the email, ends other sessions and signs in.
+- `php artisan app:create-admin <email> <name>` opens a team account and emails (and prints) a
+  week-long first-password link; M11 reuses `PortalAccounts::welcome()` for approved partners.
+- `organisation_id` and `organisation_name` are null until M11 links accounts to organisations.
+
 ## 2026-11-17: M2.6 Devices
 
 - `PUT devices/{installId}` upserts with the row locked and answers 200 every time; an install
