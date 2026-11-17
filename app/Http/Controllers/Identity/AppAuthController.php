@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Identity;
 use App\Enums\AuthClient;
 use App\Enums\HttpStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Identity\DeleteAccountRequest;
 use App\Http\Requests\Identity\LoginRequest;
 use App\Http\Requests\Identity\LogoutRequest;
 use App\Http\Requests\Identity\PhoneRequest;
@@ -16,6 +17,7 @@ use App\Http\Resources\Identity\AppSessionResource;
 use App\Http\Resources\Identity\OtpSentResource;
 use App\Http\Resources\Identity\PendingAccountResource;
 use App\Http\Resources\Identity\TokenPairResource;
+use App\Services\Identity\AccountEraser;
 use App\Services\Identity\AppAccounts;
 use App\Services\Identity\AppSession;
 use App\Services\Identity\SessionTokens;
@@ -31,6 +33,7 @@ class AppAuthController extends Controller
     public function __construct(
         private readonly AppAccounts $accounts,
         private readonly SessionTokens $tokens,
+        private readonly AccountEraser $eraser,
     ) {}
 
     public function register(RegisterRequest $request): JsonResponse
@@ -97,5 +100,19 @@ class AppAuthController extends Controller
         $session = new AppSession($request->user(), $pair);
 
         return new AppSessionResource($session);
+    }
+
+    /**
+     * Erase the signed-in account (NDPR). The password is the confirmation.
+     */
+    public function destroy(DeleteAccountRequest $request): EmptyResource
+    {
+        $this->eraser->erase(
+            $request->user(),
+            $request->string('password')->toString(),
+            $request->validated('reason'),
+        );
+
+        return new EmptyResource;
     }
 }

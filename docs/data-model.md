@@ -14,6 +14,10 @@ Money columns are `bigint` kobo; instants are `timestamptz` in UTC.
 
 ### Identity (M2)
 
+Erasure removes the person's rows for real (`forceDelete`): `devices`, `social_identities`,
+`refresh_tokens` and `password_links` cascade, `consent_records` keep their row with `user_id`
+null, and later modules remove their own rows on `AccountErasing`.
+
 | Table | Notes |
 | --- | --- |
 | `users` (extended) | `uuid`, `full_name`, `deleted_at`. `phone` (local `0…` form) and `lower(email)` are unique among live rows. `email` and `password` are nullable: portal accounts have no phone, social accounts may have no password. The role is the user's one Spatie role |
@@ -23,6 +27,7 @@ Money columns are `bigint` kobo; instants are `timestamptz` in UTC.
 | `login_lockouts` | Not soft deleted. Failed sign-ins per `phone`, whether or not it has an account: `failures`, `locked_until`, `hard_locked_at`. Cleared by a successful sign-in or a password reset |
 | `social_identities` | A Google or Apple `subject` bound to an account (`provider`, `subject` unique among live rows), `confirmed_at` set when the phone code comes back. Only a confirmed identity signs in |
 | `password_links` | Not soft deleted. Emailed portal links: `token_hash`, `kind` (`reset`, an hour; `welcome`, a week), `expires_at`, `used_at`. Pruned a week after expiry |
+| `account_erasures` | That an account was erased: `role`, `reason` (as given), `erased_at`. Nothing that names the person |
 | `consent_records` | `context` (`register`, `social-link`, `profile-sharing`), `policy_version`, `accepted_at` as the client captured it, `recorded_at`, an optional `subject`. `user_id` is nulled on erasure, so the record survives severed |
 
 Domain tables are added here as each milestone lands.

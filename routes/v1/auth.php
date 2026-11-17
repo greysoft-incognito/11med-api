@@ -29,5 +29,6 @@ Route::prefix('auth')->name('auth.')->group(function () use ($app) {
         Route::patch('email', [AppEmailController::class, 'update'])->name('email.update');
         Route::post('email/verify', [AppEmailController::class, 'verify'])->name('email.verify');
         Route::post('email/resend', [AppEmailController::class, 'resend'])->name('email.resend');
+        Route::delete('account', [AppAuthController::class, 'destroy'])->name('account.destroy');
     });
 });

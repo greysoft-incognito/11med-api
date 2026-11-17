@@ -2,6 +2,16 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.8 Account erasure, M2 done
+
+- `DELETE auth/account` confirms with the password (422 `PASSWORD_INCORRECT` on `password`), then
+  in one transaction writes an `account_erasures` row, dispatches `AccountErasing`, deletes tokens,
+  notifications, roles, codes and the lockout, and removes the user for real. Devices, social
+  identities, refresh tokens and password links cascade; consent records survive with `user_id`
+  null. The phone number is free at once.
+- The retained set lives in `config/elevenmed.php` pending a legal answer (HT-004).
+- M2 Identity is done: 24 of 154 contract routes built, 130 pending. Next: M3 Media, on the owner's go-ahead.
+
 ## 2026-11-17: M2.7 Portal sign-in
 
 - `POST portal/auth/sign-in` (201), `GET session`, `POST sign-out`, `refresh`, `forgot`,

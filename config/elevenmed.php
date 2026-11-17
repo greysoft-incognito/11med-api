@@ -31,6 +31,15 @@ return [
         'enabled' => (bool) env('SMS_ENABLED', false),
     ],
 
+    // Account erasure (NDPR, app handover §3.1). What survives, severed from the person, pending a legal answer (HT-004).
+    'erasure' => [
+        'retained' => [
+            'consent_records' => 'Records of the consents you gave, without your name or number',
+            'account_erasures' => 'That an account was deleted, its role, when, and the reason you gave',
+        ],
+        'retention_years' => 6,
+    ],
+
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 
