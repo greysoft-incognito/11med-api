@@ -23,8 +23,9 @@ by id in [human_todo.md](../human_todo.md).
 | The real store link and emergency page address | Caregiver SMS, QR codes | M4 | The defaults below are used | HT-012 |
 | Apple Push Notifications key (`.p8`), its key id and the team id | Push to iPhones | M7 | Pushes are written to the log (ids only) | HT-006 |
 | Firebase project service account JSON (role Firebase Cloud Messaging API Admin, with the FCM HTTP v1 API enabled) | Push to Android | M7 | Pushes are written to the log (ids only) | HT-006 |
+| Paystack account: secret key (test on staging, live on production) and the webhook URL on its dashboard | Paying for orders, lab bookings and consultations | M9 | `POST payments` answers 422 `PAYMENTS_UNAVAILABLE`; paying at the counter still works | HT-007 |
 
-Not needed yet, listed so they are not a surprise: Paystack keys and webhook (M9, HT-007), a Daily.co or Agora key (M10, HT-008).
+Not needed yet, listed so they are not a surprise: a Daily.co or Agora key (M10, HT-008).
 
 ## 2. Server
 
@@ -34,13 +35,16 @@ Not needed yet, listed so they are not a surprise: Paystack keys and webhook (M9
   `client_max_body_size 8m;` in nginx. The API refuses anything over 5 MB itself.
 - **Document root** `DEPLOY_PATH/public`; the PHP-FPM user can write `storage/` and `bootstrap/cache/`.
 - **Scheduler** (M2 onwards): a cron line for the PHP-FPM user. It prunes spent tokens and codes,
-  and every hour removes uploads no record claimed (M3).
+  every hour removes uploads no record claimed (M3), and every five minutes runs `payments:sweep`
+  (M9), which settles or abandons gateway payments pending over an hour and re-sends refunds the
+  gateway never received.
 
   ```
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
   ```
 
-- **Queue worker** (M2 onwards): every SMS, email and push (M7) is queued, so without a worker nothing is sent.
+- **Queue worker** (M2 onwards): every SMS, email, push (M7) and refund sent to Paystack (M9) is
+  queued, so without a worker nothing is sent.
   Run `php artisan queue:work` under Supervisor or systemd;
   `scripts/generate-supervisor-config.sh <user> [processes] [driver]` writes the Supervisor program.
 
@@ -76,6 +80,11 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `PAYSTACK_SECRET_KEY` | none | Paystack's secret key (`sk_test_…` on staging, `sk_live_…` on production). It also verifies the webhook's signature. Never give it to a client (HT-007) | M9 |
+| `PAYSTACK_CALLBACK_URL` | `elevenmed://pay` | Where Paystack's page sends the patient back; `?reference=` is added per payment. The app's pay screen (app CLAUDE.md, "Deep links"). See ISS-090 | M9 |
+| `PAYMENTS_EMAIL_DOMAIN` | `customers.11med.ng` | Paystack needs an email; an account without one is sent as `<account id>@<this domain>`. No mail is ever sent there | M9 |
+| `PAYMENTS_ABANDON_AFTER_MINUTES` | `60` | How long a gateway payment may stay pending before the sweep asks Paystack once more and abandons it | M9 |
+| `PAYSTACK_BASE_URL` | `https://api.paystack.co` | Only for pointing tests at a stand-in | M9 |
 | `PUSH_ENABLED` | `false` | `true` sends pushes through APNs and FCM for each provider whose credentials are set; otherwise ids are logged | M7 |
 | `APNS_KEY_PATH` | none | Absolute path to the `.p8` key file, outside `public/`, readable by the PHP-FPM and queue user (HT-006) | M7 |
 | `APNS_KEY_ID`, `APNS_TEAM_ID` | none | The key's 10-character id and the Apple team id (HT-006) | M7 |
@@ -85,6 +94,19 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 
 Development only: `ELEVENMED_APP_PATH` and `ELEVENMED_PORTALS_PATH` point at the client checkouts
 (default `../11med` and `../11med-web`) for `php artisan contract:routes`.
+
+### Paystack dashboard (M9, HT-007)
+
+On each Paystack account (test for staging, live for production), under Settings, API Keys &
+Webhooks:
+
+- **Webhook URL:** `https://<the API's address>/api/v1/payments/webhook/paystack`, for example
+  `https://11med-api.greysoft.com.ng/api/v1/payments/webhook/paystack` on the test server. The
+  webhook is what marks a payment paid and a refund done; without it payments settle only when the
+  app reads them or the sweep runs.
+- **Callback URL:** leave empty. The API sends one with every transaction.
+- Refunds draw on the Paystack balance; keep it funded, or refunds fail and wait for the team
+  (`payment_refunds.status = failed`).
 
 ## 4. Runtime settings
 

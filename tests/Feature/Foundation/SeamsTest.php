@@ -8,7 +8,7 @@ use App\Services\Medications\NoPrescribedSchedules;
 use App\Services\Medications\PrescribedSchedules;
 use App\Services\Notifications\DeliveringNotifier;
 use App\Services\Notifications\Notifier;
-use App\Services\Payments\NoPayments;
+use App\Services\Payments\GatewayPayments;
 use App\Services\Payments\Payments;
 use App\Services\Subscriptions\Entitlements;
 use Tests\TestCase;
@@ -18,7 +18,7 @@ class SeamsTest extends TestCase
     public function test_each_seam_resolves_to_its_stand_in(): void
     {
         $this->assertInstanceOf(DeliveringNotifier::class, app(Notifier::class));
-        $this->assertInstanceOf(NoPayments::class, app(Payments::class));
+        $this->assertInstanceOf(GatewayPayments::class, app(Payments::class));
         $this->assertInstanceOf(NoPrescribedSchedules::class, app(PrescribedSchedules::class));
     }
 
