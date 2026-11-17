@@ -63,4 +63,18 @@ Money records: erasure nulls `payments.user_id` and keeps the rows. Statuses cha
 | `payment_targets` | One target's share: `purpose` and `target_id` (the target's public id, no foreign key since the target's table belongs to another module), `target_reference` and `partner_name` copied for the desk, `amount_kobo`, `refunded_kobo`, `state` (`standing`, `released`, `refund_pending`, `refund_failed`, `refunded`). Indexed on `(purpose, target_id)` |
 | `payment_refunds` | A refund of one share: `amount_kobo`, `status` (`pending`, `processed`, `failed`), `gateway_refund_id`, `requested_at` (when Paystack accepted the request), `processed_at`, `failure_reason` |
 
+### Consultations (M10)
+
+Erasing a patient force-deletes their consultations that are not completed, with their messages and
+prescriptions; a completed one keeps its row for the doctor's payout with `patient_id` null, the
+complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and keeps the copied name.
+
+| Table | Notes |
+| --- | --- |
+| `consultations` | `patient_id`, `doctor_id` (both null on erasure), `doctor_name` and `doctor_specialty` copied at booking, `session_type`, `status` (changed only by `ConsultationLifecycle`), `complaint`, `fee_kobo`, `scheduled_for` (the slot, or the booking time for now), `scheduled`, `length_minutes`, `follow_up_of_id`, `expires_at` (the accept or join deadline the scheduler enforces), `paid_at` (set once by the payment; an unpaid row is never shown to a doctor), `started_at`, `ended_at`, `profile_shared`, `rating`, `review`, `rated_at`, `call_provider`, `call_room`, `payout_id`. A generated `inbox_rank` orders the doctor's inbox (partial index on paid rows). A partial unique index on `(doctor_id, scheduled_for)` for live scheduled rows holds a slot once |
+| `consultation_messages` | `consultation_id`, `sender` (`patient` or `doctor`), `body`, `attachment_media_id` (a claimed `message_attachment` upload), `sent_at`. Medical data: never logged |
+| `prescriptions` | One live row per consultation: `doctor_id`, `doctor_name` and `mdcn_number` copied at issue, `diagnosis_summary`, `drugs` (JSONB, `zPrescribedDrug` items), `issued_at`, `expires_at` (30 days), `applied_at` once added to the patient's schedule, after which it cannot be replaced |
+| `drug_classes`, `drug_class_members` | Seeded by `DrugClassSeeder` (HT-009): a class's `code`, `name` and `reviewed_at`; its members' lower-case names, generic and brand, indexed for the allergy check |
+| `payouts` | One per doctor per run: `doctor_name`, `bank_name` and `bank_account_masked` copied, `gross_kobo`, `commission_percent` as it was, `commission_kobo`, `net_kobo`, `consultation_count`, `status` (`pending`, `paid`, `failed`), `period_start`, `period_end`, `paid_at`, `note` (the transfer reference or the failure reason). A generated `status_rank` orders the desk. A failed payout releases its consultations to the next |
+
 Domain tables are added here as each milestone lands.

@@ -63,13 +63,13 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 9.1 `Payable`, Paystack initialise, `payments/:reference`
 - [x] 9.2 The webhook, abandonment, refunds by share, the admin desk
 
-## M10 Consultations `[ ]`
+## M10 Consultations `[~]`
 
-- [ ] 10.1 Booking now and scheduled, cancel, the two deadlines on the scheduler
-- [ ] 10.2 The doctor's inbox, accept, decline, start, end
-- [ ] 10.3 Chat with attachments, prescriptions, idempotent apply, allergy classes, ratings, follow-ups
-- [ ] 10.4 Lab requests, call rooms through a provider adapter
-- [ ] 10.5 Earnings and 48-hourly payouts, the admin payout routes
+- [x] 10.1 Booking now and scheduled, cancel, the two deadlines on the scheduler
+- [x] 10.2 The doctor's inbox, accept, decline, start, end
+- [~] 10.3 Chat with attachments, prescriptions, idempotent apply, allergy classes, ratings, follow-ups (apply waits on M6)
+- [~] 10.4 Lab requests, call rooms through a provider adapter (lab requests wait on M12.2)
+- [x] 10.5 Earnings and 48-hourly payouts, the admin payout routes
 
 ## M11 Partners and pharmacy `[ ]`
 

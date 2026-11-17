@@ -2,6 +2,31 @@
 
 Logged as found, never deleted; a resolved issue is marked resolved.
 
+### ISS-100: A doctor in a session can still be booked for now
+
+- **Logged:** 2026-11-17 · **Found during:** M10.1 · **Blocking:** no · **Status:** open
+- **Detail:** Neither handover says whether a doctor with a session in progress stays available to
+  new "now" requests. The API follows the mock: `is_available_now` is the doctor's own toggle, and
+  a request waits five minutes for them to accept it. A busy doctor can let it lapse, and the
+  patient is refunded.
+- **Plan:** if product wants it, treat a doctor with a call or chat in progress as unavailable in
+  `DoctorDirectory` and `Bookings::slot()`.
+
+### ISS-101: No reminder before a scheduled session
+
+- **Logged:** 2026-11-17 · **Found during:** M10.1 · **Blocking:** no · **Status:** open
+- **Detail:** A scheduled consultation is accepted up to an hour before its slot and must be joined
+  within ten minutes of it, but nothing reminds either side as it nears. No handover asks for one.
+- **Plan:** a scheduler step sending a push to both sides fifteen minutes before, through the
+  `Notifier`, once M7 lands.
+
+### ISS-102: Only the Daily.co call adapter exists
+
+- **Logged:** 2026-11-17 · **Found during:** M10.4 · **Blocking:** no · **Status:** open
+- **Detail:** `CallProvider` has the mock and Daily.co. The contract also names `agora`; choosing it
+  refuses calls with `CALL_UNAVAILABLE` (HT-008 recommends Daily.co).
+- **Plan:** an `AgoraCallProvider` (a channel name and an RTC token) if Agora is chosen.
+
 ### ISS-080: Doctors are not told of review decisions yet
 
 - **Logged:** 2026-11-17 · **Found during:** M8.2 · **Blocking:** no · **Status:** open
@@ -11,6 +36,9 @@ Logged as found, never deleted; a resolved issue is marked resolved.
   bookings are M10's.
 - **Plan:** M7 adds listeners that send through the `Notifier`; M10 adds the suspension listener
   for open consultations.
+- **Update 2026-11-17 (M10):** suspending a doctor, or rejecting one who was approved, cancels and
+  refunds their bookings that have not begun and tells each patient. The doctor's own push still
+  waits on M7.
 
 ### ISS-090: Paystack may not accept the app's `elevenmed://` callback
 

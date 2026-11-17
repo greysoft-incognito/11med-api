@@ -22,9 +22,10 @@ by id in [human_todo.md](../human_todo.md).
 | A malware scanner (ClamAV or a service) | PDFs | M3 | PDFs with scripts or embedded files are refused; others stored as sent | HT-011, optional |
 | The real store link and emergency page address | Caregiver SMS, QR codes | M4 | The defaults below are used | HT-012 |
 | Paystack account: secret key (test on staging, live on production) and the webhook URL on its dashboard | Paying for orders, lab bookings and consultations | M9 | `POST payments` answers 422 `PAYMENTS_UNAVAILABLE`; paying at the counter still works | HT-007 |
+| Daily.co account and API key | Voice and video consultations | M10 | `CALL_PROVIDER=mock` answers made-up rooms only the app's stand-in can open; chat consultations work | HT-008 |
+| A clinician's review of the drug class seed | The allergy check at prescribing | M10 | The seed ships unreviewed; doctors can still prescribe past a warning | HT-009, optional |
 
-Not needed yet, listed so they are not a surprise: APNs key and FCM service account (M7, HT-006),
-a Daily.co or Agora key (M10, HT-008).
+Not needed yet, listed so they are not a surprise: APNs key and FCM service account (M7, HT-006).
 
 ## 2. Server
 
@@ -36,7 +37,10 @@ a Daily.co or Agora key (M10, HT-008).
 - **Scheduler** (M2 onwards): a cron line for the PHP-FPM user. It prunes spent tokens and codes,
   every hour removes uploads no record claimed (M3), and every five minutes runs `payments:sweep`
   (M9), which settles or abandons gateway payments pending over an hour and re-sends refunds the
-  gateway never received.
+  gateway never received. Since M10 it also runs `consultations:settle` every minute (a request not
+  accepted in 5 minutes, or a session not joined in 10, expires and is refunded; a chat closes at
+  the end of its window) and `consultations:payouts` at 02:00 every other day (doctors' payouts).
+  Without the scheduler, consultations never expire and patients are never refunded for them.
 
   ```
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
@@ -84,6 +88,10 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `PAYMENTS_EMAIL_DOMAIN` | `customers.11med.ng` | Paystack needs an email; an account without one is sent as `<account id>@<this domain>`. No mail is ever sent there | M9 |
 | `PAYMENTS_ABANDON_AFTER_MINUTES` | `60` | How long a gateway payment may stay pending before the sweep asks Paystack once more and abandons it | M9 |
 | `PAYSTACK_BASE_URL` | `https://api.paystack.co` | Only for pointing tests at a stand-in | M9 |
+| `CONSULTATION_COMMISSION_PERCENT` | `15` | The platform's share of each consultation fee, taken when a payout is made. A payout keeps the percentage it was made with | M10 |
+| `CALL_PROVIDER` | `mock` | `daily` once the Daily.co key exists (HT-008). `mock` answers made-up rooms; anything else refuses calls with 422 `CALL_UNAVAILABLE` | M10 |
+| `DAILY_API_KEY` | none | The Daily.co API key. Never give it to a client: the API mints a token per participant | M10 |
+| `DAILY_API_URL` | `https://api.daily.co/v1` | Only for pointing tests at a stand-in | M10 |
 
 Development only: `ELEVENMED_APP_PATH` and `ELEVENMED_PORTALS_PATH` point at the client checkouts
 (default `../11med` and `../11med-web`) for `php artisan contract:routes`.
@@ -119,7 +127,11 @@ php artisan key:generate                       # only if APP_KEY is empty
 php artisan dbconfig:sync                      # seeds the runtime settings
 php artisan dbconfig:set prefered_sms_channel KUDISMS
 php artisan app:create-admin you@example.com "Your Name"   # first team account; prints its link
+php artisan db:seed --class=DrugClassSeeder --force        # M10: the allergy classes; safe to run again
 ```
+
+Run the `DrugClassSeeder` line again after a release that changes the seed (it adds what is
+missing and never removes a class).
 
 ## 6. Local development
 

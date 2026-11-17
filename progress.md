@@ -2,6 +2,51 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M10 Consultations
+
+- 10.1 `POST consultations` (201), `GET consultations` (paged, newest first), `GET consultations/{id}`
+  and `POST consultations/{id}/cancel`, patient only. A booking for now needs the doctor's live
+  toggle; a slot must be one `DoctorSlots::offers()` gives, held once under a lock on the doctor's
+  profile and a partial unique index (409 `SLOT_TAKEN`). The fee is the session type's, or the
+  follow-up fee for a follow-up with the same doctor within 14 days of a finished session. Profile
+  sharing is recorded as a consent. Payment starts at booking through the `Payments` seam
+  (`ConsultationPayables` resolves the target); `PaymentSucceeded` sets `paid_at`, and only then
+  does the doctor see the request and get a push. `consultations:settle` runs every minute: a
+  request not accepted in 5 minutes (a slot: by 24 hours after booking or an hour before it) or a
+  session not joined in 10 expires, and both are refunded in full, as are a decline, a
+  cancellation and a payment landing after expiry. An open chat closes at the end of its window.
+  `HeldSlots` and `EngagedDoctors` (M8's seams) now read consultations.
+- 10.2 `GET doctor/consultations` (paid only, pending first, the patient's profile only when
+  shared), `accept`, `decline`, `start` (a slot opens five minutes early), `end`. `ConsultationLifecycle`
+  is the one writer of a status. Suspending a doctor, or rejecting an approved one, cancels and
+  refunds their bookings that have not begun (part of ISS-080).
+- 10.3 Messages both ways while a session runs, paged oldest first; an attachment is the sender's own
+  `message_attachment` upload. `POST doctor/consultations/{id}/prescription` issues or replaces the
+  prescription (refused once applied), with the MDCN number from the doctor's record, valid 30 days,
+  checked against the patient's drug allergies by name and by class (`drug_classes`, seeded with 11
+  classes for HT-009): 422 `ALLERGY_CONFLICT` with `meta.conflicts` unless the doctor acknowledges
+  (FE-100). Ratings once per finished session through `DoctorRatings::record()`. Follow-ups as in
+  10.1. `Prescribing::apply()` calls M6's `PrescribedSchedules` seam; its route
+  (`POST consultations/{id}/prescription/apply`) waits for M6's `MedicationResource` and stays pending.
+- 10.4 `POST consultations/{id}/call` and `doctor/consultations/{id}/call`: one room per session,
+  made when the first side joins and deleted when the session ends, a token per participant valid
+  for the session plus 30 minutes, screen sharing for the doctor. `CALL_PROVIDER` picks the
+  adapter: `mock` (default) or `daily` (HT-008); `agora` is not built (ISS-102). The lab request
+  routes wait on M12's `LabRequests` seam (PR #16) and stay pending.
+- 10.5 `GET doctor/earnings` (owed net, paid total, commission, the newest 50 payouts),
+  `consultations:payouts` at 02:00 every other day (completed, paid, unpaid-out sessions per doctor,
+  commission `CONSULTATION_COMMISSION_PERCENT`, 15 by default, summed in SQL),
+  `GET portal/admin/payouts` (paged, pending first, `status` filter) and `POST …/{id}/settle`
+  (FE-104).
+- `ConsultationPrescribedDrugs` implements M11's `PrescribedDrugs` seam; its `#[Bind]` is switched
+  by whichever of M10 and M11 merges second.
+- `POST consultations/{id}/prescription` (the mock's patient-side issue) joined the mock-only list:
+  152 contract routes. New settings: `CONSULTATION_COMMISSION_PERCENT`, `CALL_PROVIDER`,
+  `DAILY_API_KEY`, `DAILY_API_URL`, the two scheduler entries and the `DrugClassSeeder` run
+  (SETUP §2, §3, §5). No new Composer dependency.
+- M10 is partial: 21 routes built, 3 pending (apply on M6, the two lab request routes on M12.2).
+  Issues ISS-100 to ISS-102; frontend items FE-100 to FE-104.
+
 ## 2026-11-17: M8 Doctors
 
 - 8.1 `GET` and `PATCH doctor/profile`, `POST doctor/documents`, `POST doctor/profile/submit`,
