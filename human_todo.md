@@ -12,9 +12,11 @@ Things only the owner can do or decide. Each says whether it blocks and what.
 - [ ] **HT-002 · SMS and email.** KudiSMS API key and sender id; SMTP credentials and the from address.
   Then `SMS_ENABLED=true` in each server's `.env`. Until then codes go to the log; staging can set
   `OTP_FIXED_CODE=123456` so testers can sign up. **Blocks:** M2 going live.
-- [ ] **HT-003 · Social sign-in ids.** Apple bundle id (`APPLE_BUNDLE_ID`); the Google web client id
-  (`GOOGLE_WEB_CLIENT_ID`, the `563169425212-…` id in the app's environment). Until set, social
-  sign-in answers 422 `SOCIAL_UNAVAILABLE`. **Blocks:** M2.5 going live.
+- [ ] **HT-003 · Social sign-in ids.** `APPLE_BUNDLE_ID` defaults to the app's bundle id,
+  `ng.elevenmed.app`. `GOOGLE_WEB_CLIENT_ID` is the app's `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, which
+  lives in the EAS `development` environment on expo.dev, not in the repo (only `563169425212-…` is
+  written down). Until it is set, Google sign-in answers 422 `SOCIAL_UNAVAILABLE`. Also set
+  `PORTALS_URL` to wherever the portals are hosted. **Blocks:** Google sign-in going live.
 - [ ] **HT-004 · What survives account deletion, and for how long.** A legal answer (app spec item 19).
   The placeholder is `elevenmed.erasure` in `config/elevenmed.php`: consent records and the erasure
   record itself, severed from the person, for six years. **Blocks:** nothing; erasure ships with it.
