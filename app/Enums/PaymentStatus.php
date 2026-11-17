@@ -3,8 +3,7 @@
 namespace App\Enums;
 
 /**
- * A payment's state (app `zPaymentStatus`). Only `pending` moves, except that a paid payment becomes
- * `refunded` once every share it covered is refunded.
+ * Where a payment stands (app `zPaymentStatus`).
  */
 enum PaymentStatus: string
 {

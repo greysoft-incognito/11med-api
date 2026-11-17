@@ -2,28 +2,19 @@
 
 namespace App\Services\Payments;
 
-use App\Enums\PaymentPurpose;
-use App\Exceptions\ApiException;
 use App\Models\User;
 
 /**
- * Resolves `{ purpose, target_id }` to the patient's own target, through the purpose's source.
- * A purpose whose module has not landed finds nothing.
+ * Finds what `POST payments` is paying for. One implementation per purpose, named in
+ * `elevenmed.payments.targets` by the module that owns the record.
  */
-class PayableTargets
+interface PayableTargets
 {
-    public function find(PaymentPurpose $purpose, User $patient, string $targetId): Payable
-    {
-        $class = $purpose->sourceClass();
-
-        $target = class_exists($class) || app()->bound($class)
-            ? app($class)->find($patient, $targetId)
-            : null;
-
-        if (! $target instanceof Payable || $target->paymentPurpose() !== $purpose) {
-            throw ApiException::notFound($purpose->notFoundCode());
-        }
-
-        return $target;
-    }
+    /**
+     * Every target one payment covers, the named one first: for an order, the other unpaid orders
+     * of the same checkout. Throws 404 for a target that is not the payer's.
+     *
+     * @return non-empty-list<Payable>
+     */
+    public function resolve(string $targetId, User $payer): array;
 }

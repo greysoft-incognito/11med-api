@@ -6,39 +6,37 @@ use App\Enums\PaymentPurpose;
 use App\Models\User;
 
 /**
- * Something a patient pays for: an order, a lab booking or a consultation. The owning module's model
- * implements it; payments know nothing else about it.
+ * Something a patient pays for: an order, a lab booking or a consultation. The one interface the
+ * Payments module (M9) knows; the module that owns the record implements it on its model.
  */
 interface Payable
 {
     public function paymentPurpose(): PaymentPurpose;
 
     /**
-     * The target's public id.
+     * The public id the client names as `target_id`.
      */
     public function paymentTargetId(): string;
 
-    public function paymentPatient(): User;
-
-    public function paymentAmountKobo(): int;
+    /**
+     * The reference the admin desk shows for the target (`ORD-…`, `LAB-…`; a consultation may give
+     * its id).
+     */
+    public function paymentReference(): string;
 
     /**
-     * The reference staff read on the admin desk (`ORD-…`), or the public id where there is none.
+     * The pharmacy or laboratory the payment reaches, or null for a consultation.
      */
-    public function paymentTargetReference(): string;
-
     public function paymentPartnerName(): ?string;
 
-    /**
-     * Throws the module's 422 when the target can no longer be paid for (`ORDER_CANCELLED`, …).
-     */
-    public function ensurePayable(): void;
+    public function payer(): User;
+
+    public function amountKobo(): int;
 
     /**
-     * What one payment for this target covers, the target included: every order of a checkout, or
-     * just the target itself.
-     *
-     * @return list<Payable>
+     * Refuses a payment the record's own state forbids with the contract's 422 code
+     * (`ORDER_CANCELLED`, `BOOKING_CANCELLED`, `CONSULTATION_CLOSED`). `ALREADY_PAID` is checked by
+     * the Payments module.
      */
-    public function paymentTargets(): array;
+    public function assertPayable(): void;
 }

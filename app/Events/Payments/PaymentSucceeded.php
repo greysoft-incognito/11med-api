@@ -2,18 +2,20 @@
 
 namespace App\Events\Payments;
 
-use App\Models\Payment;
-use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
+use App\Enums\PaymentChannel;
+use App\Services\Payments\Payable;
 use Illuminate\Foundation\Events\Dispatchable;
 
 /**
- * A payment cleared. The target's module tells its partner or doctor and sends the receipt. Listeners filter on `$payment->purpose`.
+ * A target is paid, announced once per target after the gateway confirms (or at the counter).
  */
-class PaymentSucceeded implements ShouldDispatchAfterCommit
+class PaymentSucceeded
 {
     use Dispatchable;
 
     public function __construct(
-        public readonly Payment $payment,
+        public readonly Payable $target,
+        public readonly string $reference,
+        public readonly PaymentChannel $channel,
     ) {}
 }

@@ -1,5 +1,9 @@
 <?php
 
+use App\Services\Consultations\ConsultationPayables;
+use App\Services\Laboratories\BookingPayables;
+use App\Services\Pharmacy\OrderPayables;
+
 return [
     // Calendar logic (slots, dose days, "today" on summaries) runs here; instants stay UTC.
     'timezone' => 'Africa/Lagos',
@@ -63,6 +67,13 @@ return [
 
     // Caregivers (app spec §6.5): the store link the invitation SMS carries, and the free and premium caps.
     'app_link' => env('APP_DOWNLOAD_URL', 'https://11med.ng/app'),
+    // The free tier's limits (app CLAUDE.md "Free vs premium gates"); premium lifts all three.
+    'free_tier' => [
+        'medications' => 3,
+        'history_days' => 7,
+        'readings_days' => 7,
+    ],
+
     'caregivers' => [
         'free' => 1,
         'premium' => 5,
@@ -87,6 +98,13 @@ return [
         'abandon_after_minutes' => (int) env('PAYMENTS_ABANDON_AFTER_MINUTES', 60),
         'check_every_seconds' => 15,
         'initialise_per_minute' => 10,
+
+        // The PayableTargets class each module provides for its purpose; one not yet built finds nothing.
+        'targets' => [
+            'order' => OrderPayables::class,
+            'lab_booking' => BookingPayables::class,
+            'consultation' => ConsultationPayables::class,
+        ],
     ],
 
     // The client checkouts the route inventory is read from (`php artisan contract:routes`).
