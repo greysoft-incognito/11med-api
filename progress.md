@@ -2,6 +2,50 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-26: M12, the guide's test catalogue
+
+- `GuideTestCatalogue` (Laboratories) now backs the guide's `TestCatalogue` seam in place of the
+  unchecked stand-in, so a `find_test` action survives only when its code is in `lab_tests`.
+
+## 2026-11-26: M12 Laboratories
+
+- **12.1** `lab_tests`, `laboratories`, `laboratory_tests`. `GET`, `POST portal/admin/catalogue` and
+  `PUT portal/admin/catalogue/{code}` (admin): 409 `DUPLICATE_CODE`, 422 `CODE_IMMUTABLE`, 404
+  `TEST_NOT_FOUND`, no delete. `LabCatalogueSeeder` holds the app mock's twenty tests and adds only
+  missing codes (SETUP §5). An approved laboratory gets its listing from the `PartnerApproved`
+  listener (08:00 to 17:00, no home collection); its id everywhere is the organisation's uuid, and
+  `PATCH portal/laboratory` writes name, state, city and address through
+  `Organisations::updateListing()`, the rest here, with logo and cover claimed as the account's own
+  uploads (400 under `closes` when it is not after `opens`). `GET`, `PUT`, `DELETE
+  portal/laboratory/tests/{code}` (201 new, 200 re-priced; 422 `UNKNOWN_TEST`, 404 `TEST_NOT_LISTED`,
+  422 `TEST_IN_OPEN_BOOKING` by a JSONB containment query), `GET portal/laboratory/catalogue` with
+  `offered`, and `GET portal/laboratory/summary`, counted in one `FILTER` query on Lagos days.
+- **12.2** `lab_requests`, `lab_bookings`. `GET labs` (paged, FE-003/FE-120): listed laboratories
+  only, the patient's state first (from `MedicalProfiles::stateOf()`), then rating, unrated last,
+  then name, keyset-paged over a derived table; `q`, and `test` with each laboratory's
+  `test_price_kobo`. `GET labs/tests` with `from_kobo` and `offered_by` as SQL aggregates, `GET
+  labs/{id}` and `labs/{id}/tests` (404 `LAB_NOT_FOUND` for a pending, suspended or unknown one).
+  Patients and doctors read these; requests and bookings are the patient's. `LabRequests::create()`
+  is M10's seam: catalogue codes only (422 `UNKNOWN_TEST`, `meta.test_code`), one per consultation
+  (409 `LAB_REQUEST_EXISTS`), a `lab_request` push naming no test; `forConsultation()` is 404
+  `NO_LAB_REQUEST`. `POST labs/bookings` (20 an hour): every refusal in handover §10, priced from
+  the list, `fasting_hours` the longest fast, the payment initialised in the same transaction so the
+  booking is born carrying it; `REQUEST_ALREADY_BOOKED` is also held by a partial unique index.
+  `POST labs/bookings/{id}/cancel` only while booked, refunds or abandons through `Payments::refund()`
+  and reopens the request. `BookingPayables` resolves the patient's booking in any state.
+- **12.3** The laboratory sees a booking once `PaymentSucceeded` sets `paid_at`. `GET
+  portal/laboratory/bookings` (paged, by `scheduled_for`; `status` a stage or `open`; `q` over
+  reference, patient name and phone), `GET bookings/{id}`, `POST bookings/{id}/advance` (one step;
+  results ready needs this account's own `lab_results` PDF: 422 `RESULTS_REQUIRED`, `MEDIA_NOT_FOUND`;
+  422 `BOOKING_FINAL`, `BOOKING_CANCELLED`, `PAYMENT_PENDING`), `POST bookings/{id}/cancel` with a
+  reason (422 `BOOKING_STARTED`), refunded in full. `BookingLifecycle` is the only writer of a
+  booking's stage. Each step and the laboratory's cancellation push `lab_result` to the patient,
+  saying what happened and never a test or value; the results link is signed per read.
+- Erasing a patient removes their requests, bookings and results files.
+- Decisions in CLAUDE.md §8. Open: ISS-120 (the consultation foreign key waits for M10), ISS-121
+  (an erased doctor's requests). FE-120, FE-121. No new setup beyond the seeder command.
+- Built on `feat/partners` (M11.1) and `chore/seams`; merges once those and M9 are on `main`.
+
 ## 2026-11-25: M11 The guide's store search
 
 - `StoreDrugSearch` implements the guide's `StoreSearch` seam (M14) in SQL: the longest name of a

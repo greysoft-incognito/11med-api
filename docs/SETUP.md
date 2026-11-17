@@ -140,7 +140,12 @@ php artisan key:generate                       # only if APP_KEY is empty
 php artisan dbconfig:sync                      # seeds the runtime settings
 php artisan dbconfig:set prefered_sms_channel KUDISMS
 php artisan app:create-admin you@example.com "Your Name"   # first team account; prints its link
+php artisan db:seed --class=LabCatalogueSeeder --force    # the starting test catalogue (M12)
 ```
+
+The test catalogue (M12) starts empty, and a laboratory can only price tests that are in it. The
+seeder adds the twenty tests the app's mock uses, only those missing, so running it again never
+undoes the team's edits in the admin portal.
 
 The missed-dose job can be run by hand to check the scheduler is wired: `php artisan medications:settle-doses`
 prints how many doses it marked missed.

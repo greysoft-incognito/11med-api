@@ -104,6 +104,11 @@ return [
         'applications_per_hour' => 5,
     ],
 
+    // Laboratories: bookings a patient may start in an hour, since each opens a payment.
+    'laboratories' => [
+        'bookings_per_hour' => 20,
+    ],
+
     // Pharmacy: checkouts per patient an hour, each starting a gateway transaction.
     'pharmacy' => [
         'checkouts_per_hour' => 20,

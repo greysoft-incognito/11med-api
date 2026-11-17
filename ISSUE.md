@@ -91,3 +91,22 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 - **Plan:** `ReplyGuard` already drops any test code `TestCatalogue::known()` does not return; once
   M12 binds it to the catalogue table those actions disappear on their own. The admin should add
   the missing tests, or the rules should name `KFT`, once the catalogue is seeded.
+
+### ISS-120: `lab_requests.consultation_id` has no foreign key
+
+- **Logged:** 2026-11-26 · **Found during:** M12.2 · **Blocking:** no · **Status:** open
+- **Detail:** M10 owns `consultations` and builds in parallel, so M12 stores the consultation's
+  public uuid without a reference. `LabRequests::create()` is called only by M10's doctor route,
+  which checks the consultation first.
+- **Plan:** once M10 is on `main`, a migration in M12's date range adds the foreign key to
+  `consultations.uuid` (or swaps to its bigint id).
+
+### ISS-121: A request from an erased doctor has no `doctor_id`
+
+- **Logged:** 2026-11-26 · **Found during:** M12.2 · **Blocking:** no · **Status:** open
+- **Detail:** `zLabRequest.doctor_id` is a required uuid, but erasing the doctor nulls
+  `lab_requests.doctor_id` (the name and MDCN number stay, as signed). The resource would answer
+  null and the app's parse would refuse that request.
+- **Plan:** decide with M8 whether a doctor's erasure keeps a tombstone id, or the contract makes
+  `doctor_id` nullable (an FE item); the same question applies to prescriptions.
+

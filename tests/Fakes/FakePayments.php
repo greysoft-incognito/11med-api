@@ -77,6 +77,9 @@ class FakePayments implements Payments
             $this->summaries[$target->paymentTargetId()]['status'] = PaymentStatus::Refunded->value;
 
             PaymentRefunded::dispatch($target, $summary['reference'], $amountKobo ?? $target->amountKobo());
+        } elseif ($summary !== null && $summary['status'] === PaymentStatus::Pending->value) {
+            $this->summaries[$target->paymentTargetId()]['status'] = PaymentStatus::Abandoned->value;
+            $this->summaries[$target->paymentTargetId()]['authorization_url'] = null;
         }
     }
 
@@ -96,5 +99,13 @@ class FakePayments implements Payments
         ];
 
         PaymentSucceeded::dispatch($target, $summary['reference'], $channel);
+    }
+
+    /**
+     * The same as `settle()`, under the name the laboratory tests use.
+     */
+    public function pay(Payable $target, PaymentChannel $channel = PaymentChannel::Card): void
+    {
+        $this->settle($target, $channel);
     }
 }
