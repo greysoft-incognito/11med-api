@@ -31,8 +31,13 @@ Things only the owner can do or decide. Each says whether it blocks and what.
   webhook URL `https://<API>/api/v1/payments/webhook/paystack` on that Paystack account; leave its
   callback URL empty (`docs/SETUP.md` §3). Until then `POST payments` answers 422
   `PAYMENTS_UNAVAILABLE`. **Blocks:** M9 going live.
-- [ ] **HT-008 · Call provider.** A Daily.co (recommended) or Agora account and API key. **Blocks:** M10.4 going live.
-- [ ] **HT-009 · Allergy classes.** A clinician to review the drug class seed. **Blocks:** nothing; M10.3 ships the seed marked unreviewed.
+- [ ] **HT-008 · Call provider.** A Daily.co (recommended) or Agora account and API key. M10 built
+  the Daily.co adapter: set `CALL_PROVIDER=daily` and `DAILY_API_KEY` (docs/SETUP.md §3). Agora
+  would need an adapter of its own. **Blocks:** voice and video consultations going live.
+- [ ] **HT-009 · Allergy classes.** A clinician to review the drug class seed
+  (`database/seeders/DrugClassSeeder.php`: 11 classes, the generic and common Nigerian brand names
+  in each). Each class's `reviewed_at` stays empty until then. **Blocks:** nothing; M10.3 ships the
+  seed unreviewed, and a doctor can prescribe past a warning.
 - [x] **HT-010 · Test server database.** Answered 2026-11-17: PHP 8.4.27, PostgreSQL 14.23 client; CI now matches. **Blocks:** the first staging deploy.
 - [ ] **HT-011 · A malware scanner for PDFs.** ClamAV on the server, or a scanning service, for
   attachments, results and licences (app handover §12). Until then a PDF with scripts, launch

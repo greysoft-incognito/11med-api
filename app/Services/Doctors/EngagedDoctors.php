@@ -3,13 +3,14 @@
 namespace App\Services\Doctors;
 
 use App\Models\User;
+use App\Services\Consultations\ConsultationEngagedDoctors;
 use Illuminate\Container\Attributes\Bind;
 
 /**
  * The doctors a patient is already with (a confirmed or open consultation), who are not offered to
- * that patient as available now. The Consultations module (M10) implements it.
+ * that patient as available now.
  */
-#[Bind(NoEngagedDoctors::class)]
+#[Bind(ConsultationEngagedDoctors::class)]
 interface EngagedDoctors
 {
     /**

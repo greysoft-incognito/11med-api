@@ -144,6 +144,44 @@ milestone that introduced it. The clients tick them; never delete.
   details, which are the doctor's payout fields. Suspending or rejecting also turns the doctor's
   `is_available_now` off. (M8.2)
 
+## App (`11med`), consultations
+
+- [ ] **FE-100 · Prescribing checks allergies.** `POST /doctor/consultations/{id}/prescription`
+  refuses a drug that matches one of the patient's drug allergies by name or by drug class: 422
+  `ALLERGY_CONFLICT` on `drugs`, with `meta.conflicts` a list of `{ drug_name, allergy_name,
+  severity, drug_class }` (only `drug_name` and `drug_class` when the patient did not share their
+  profile). The doctor's screen should show them and offer to send again with
+  `acknowledge_allergy_conflicts: true`, which issues it. A prescription the patient already added
+  to their schedule cannot be replaced: 409 `PRESCRIPTION_APPLIED`. The route answers 201, as a
+  new prescription replaces an unapplied one. (M10.3)
+- [ ] **FE-101 · Consultation lists are paged.** `GET /consultations`, `GET /doctor/consultations`
+  and both `messages` routes answer `{ items, next_cursor, total }` (FE-003). Consultations come
+  newest first; the doctor's inbox puts pending requests first, then confirmed, then in progress;
+  messages come oldest first, so the next page is newer messages. `GET /doctor/earnings` carries the
+  newest 50 payouts. (M10.1, M10.2, M10.3, M10.5)
+- [ ] **FE-102 · Booking refusals the mock does not have.** `POST /consultations` also answers 422
+  `SESSION_TYPE_UNAVAILABLE` on `session_type` when the doctor set no fee for it, and 422
+  `DOCTOR_UNAVAILABLE` when the patient already has a confirmed or running session with that
+  doctor. It takes an optional `channel` for the checkout, as `POST /payments` does. A consultation
+  whose fee is 0 is paid at once and reaches the doctor without a checkout. A message's
+  `attachment_url` must be the sender's own `message_attachment` upload, or 422 `MEDIA_NOT_FOUND`;
+  the doctor's message answers 201, as the patient's does. (M10.1, M10.3)
+- [ ] **FE-103 · The patient does not issue prescriptions.** The mock's patient-side
+  `POST /consultations/{id}/prescription` is not built (mock-only); the doctor's route issues them.
+  A call answers 422 `CALL_UNAVAILABLE` when no call provider is configured. A doctor suspended
+  while a booking waits cancels it: the patient is refunded and told by push, and the
+  consultation reads `cancelled`. Applying a prescription a second time answers the schedules
+  the first time made, not every medication the patient has. (M10.3, M10.4)
+
+## Portals (`11med-web`), payouts
+
+- [ ] **FE-104 · Payouts are paged and settle with a reference or a reason.**
+  `GET /portal/admin/payouts` answers `{ items, next_cursor, total }`, pending first, then by period
+  end, newest first; `status` filters. `POST /portal/admin/payouts/{id}/settle` takes
+  `{ decision: "paid", reference }` (4 to 64 characters, the bank transfer's reference) or
+  `{ decision: "failed", reason }` (4 to 200), which comes back as `note`. A failed payout returns
+  its consultations to the next one. A settled payout is 422 `PAYOUT_SETTLED`. (M10.5)
+
 - [ ] **FE-050 · A recorded premium does not renew.** `GET /subscriptions/:userId` answers
   `status: 'active'`, `plan_id: 'premium'`, `current_period_end` (the start of the day after the
   recorded end date, in Lagos) and `cancels_at_period_end: true`, because the team records a fixed

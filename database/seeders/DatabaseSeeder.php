@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         Artisan::call(SyncRoles::class);
+        $this->call(DrugClassSeeder::class);
 
         if (! app()->environment(['local', 'testing'])) {
             return;

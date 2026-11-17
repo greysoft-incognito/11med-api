@@ -24,8 +24,8 @@ by id in [human_todo.md](../human_todo.md).
 | Apple Push Notifications key (`.p8`), its key id and the team id | Push to iPhones | M7 | Pushes are written to the log (ids only) | HT-006 |
 | Firebase project service account JSON (role Firebase Cloud Messaging API Admin, with the FCM HTTP v1 API enabled) | Push to Android | M7 | Pushes are written to the log (ids only) | HT-006 |
 | Paystack account: secret key (test on staging, live on production) and the webhook URL on its dashboard | Paying for orders, lab bookings and consultations | M9 | `POST payments` answers 422 `PAYMENTS_UNAVAILABLE`; paying at the counter still works | HT-007 |
-
-Not needed yet, listed so they are not a surprise: a Daily.co or Agora key (M10, HT-008).
+| Daily.co account and API key | Voice and video consultations | M10 | `CALL_PROVIDER=mock` answers made-up rooms only the app's stand-in can open; chat consultations work | HT-008 |
+| A clinician's review of the drug class seed | The allergy check at prescribing | M10 | The seed ships unreviewed; doctors can still prescribe past a warning | HT-009, optional |
 
 ## 2. Server
 
@@ -43,7 +43,10 @@ Not needed yet, listed so they are not a surprise: a Daily.co or Agora key (M10,
   every hour removes uploads no record claimed (M3), every five minutes runs `payments:sweep`
   (M9), which settles or abandons gateway payments pending over an hour and re-sends refunds the
   gateway never received, and every day deletes guide conversations idle past
-  `GUIDE_RETENTION_DAYS` (M13).
+  `GUIDE_RETENTION_DAYS` (M13). Since M10 it also runs `consultations:settle` every minute (a request not
+  accepted in 5 minutes, or a session not joined in 10, expires and is refunded; a chat closes at
+  the end of its window) and `consultations:payouts` at 02:00 every other day (doctors' payouts).
+  Without the scheduler, consultations never expire and patients are never refunded for them.
 
   ```
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
@@ -101,6 +104,10 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `APNS_BUNDLE_ID` | `ng.elevenmed.app` | The app's bundle id, sent as `apns-topic` | M7 |
 | `APNS_PRODUCTION` | `false` | `false` on staging, whose phones run development builds with sandbox tokens; `true` on production for App Store and TestFlight builds. The wrong value makes Apple refuse every token, and refused tokens are deleted | M7 |
 | `FCM_CREDENTIALS_PATH` | none | Absolute path to the Firebase service account JSON, outside `public/` (HT-006). The project id is read from it | M7 |
+| `CONSULTATION_COMMISSION_PERCENT` | `15` | The platform's share of each consultation fee, taken when a payout is made. A payout keeps the percentage it was made with | M10 |
+| `CALL_PROVIDER` | `mock` | `daily` once the Daily.co key exists (HT-008). `mock` answers made-up rooms; anything else refuses calls with 422 `CALL_UNAVAILABLE` | M10 |
+| `DAILY_API_KEY` | none | The Daily.co API key. Never give it to a client: the API mints a token per participant | M10 |
+| `DAILY_API_URL` | `https://api.daily.co/v1` | Only for pointing tests at a stand-in | M10 |
 
 Development only: `ELEVENMED_APP_PATH` and `ELEVENMED_PORTALS_PATH` point at the client checkouts
 (default `../11med` and `../11med-web`) for `php artisan contract:routes`.
@@ -141,11 +148,15 @@ php artisan dbconfig:sync                      # seeds the runtime settings
 php artisan dbconfig:set prefered_sms_channel KUDISMS
 php artisan app:create-admin you@example.com "Your Name"   # first team account; prints its link
 php artisan db:seed --class=LabCatalogueSeeder --force    # the starting test catalogue (M12)
+php artisan db:seed --class=DrugClassSeeder --force        # M10: the allergy classes; safe to run again
 ```
 
 The test catalogue (M12) starts empty, and a laboratory can only price tests that are in it. The
 seeder adds the twenty tests the app's mock uses, only those missing, so running it again never
 undoes the team's edits in the admin portal.
+
+Run the `DrugClassSeeder` line again after a release that changes the seed (it adds what is
+missing and never removes a class).
 
 The missed-dose job can be run by hand to check the scheduler is wired: `php artisan medications:settle-doses`
 prints how many doses it marked missed.

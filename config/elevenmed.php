@@ -163,6 +163,33 @@ return [
         ],
     ],
 
+    // Consultations (app spec §7, handover §2.3 and §13): two deadlines, run on the scheduler, both
+    // refunded in full; slots in Africa/Lagos; payouts every 48 hours at the platform's commission.
+    'consultations' => [
+        'accept_minutes' => 5,
+        'join_minutes' => 10,
+        'scheduled_accept_max_hours' => 24,
+        'scheduled_accept_before_minutes' => 60,
+        'cancel_cutoff_minutes' => 60,
+        'early_start_minutes' => 5,
+        'follow_up_days' => 14,
+        'prescription_valid_days' => 30,
+        'commission_percent' => (float) env('CONSULTATION_COMMISSION_PERCENT', 15),
+        'payout_interval_hours' => 48,
+        'earnings_payouts' => 50,
+    ],
+
+    // Voice and video calls (app handover §15): a provider carries the media; the server makes rooms
+    // and mints a token per participant. `mock` answers made-up rooms the app's stand-in opens.
+    'calls' => [
+        'provider' => env('CALL_PROVIDER', 'mock'),
+        'token_margin_minutes' => 30,
+        'daily' => [
+            'api_key' => env('DAILY_API_KEY'),
+            'api_url' => env('DAILY_API_URL', 'https://api.daily.co/v1'),
+        ],
+    ],
+
     // The client checkouts the route inventory is read from (`php artisan contract:routes`).
     'clients' => [
         'app' => env('ELEVENMED_APP_PATH', base_path('../11med')),
@@ -170,11 +197,13 @@ return [
     ],
 
     // Routes the mocks register for development only; the handovers say not to build them. A doctor's
-    // review is the admin portal's decision, never the doctor's own.
+    // review is the admin portal's decision, never the doctor's own. The patient's prescription route
+    // stands in for the doctor's own (M10).
     'mock_only_routes' => [
         'POST api/v1/consultations/{id}/accept',
         'POST api/v1/consultations/{id}/start',
         'POST api/v1/consultations/{id}/end',
+        'POST api/v1/consultations/{id}/prescription',
         'POST api/v1/consultations/{id}/simulate',
         'POST api/v1/devices/{installId}/mock-deliveries',
         'POST api/v1/doctor/profile/review',

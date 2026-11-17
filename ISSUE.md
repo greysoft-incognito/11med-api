@@ -2,6 +2,31 @@
 
 Logged as found, never deleted; a resolved issue is marked resolved.
 
+### ISS-100: A doctor in a session can still be booked for now
+
+- **Logged:** 2026-11-17 · **Found during:** M10.1 · **Blocking:** no · **Status:** open
+- **Detail:** Neither handover says whether a doctor with a session in progress stays available to
+  new "now" requests. The API follows the mock: `is_available_now` is the doctor's own toggle, and
+  a request waits five minutes for them to accept it. A busy doctor can let it lapse, and the
+  patient is refunded.
+- **Plan:** if product wants it, treat a doctor with a call or chat in progress as unavailable in
+  `DoctorDirectory` and `Bookings::slot()`.
+
+### ISS-101: No reminder before a scheduled session
+
+- **Logged:** 2026-11-17 · **Found during:** M10.1 · **Blocking:** no · **Status:** open
+- **Detail:** A scheduled consultation is accepted up to an hour before its slot and must be joined
+  within ten minutes of it, but nothing reminds either side as it nears. No handover asks for one.
+- **Plan:** a scheduler step sending a push to both sides fifteen minutes before, through the
+  `Notifier`, once M7 lands.
+
+### ISS-102: Only the Daily.co call adapter exists
+
+- **Logged:** 2026-11-17 · **Found during:** M10.4 · **Blocking:** no · **Status:** open
+- **Detail:** `CallProvider` has the mock and Daily.co. The contract also names `agora`; choosing it
+  refuses calls with `CALL_UNAVAILABLE` (HT-008 recommends Daily.co).
+- **Plan:** an `AgoraCallProvider` (a channel name and an RTC token) if Agora is chosen.
+
 ### ISS-090: Paystack may not accept the app's `elevenmed://` callback
 
 - **Logged:** 2026-11-17 · **Found during:** M9.1 · **Blocking:** no · **Status:** open
@@ -15,7 +40,7 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 
 ### ISS-080: Doctors are not told of review decisions yet
 
-- **Logged:** 2026-11-17 · **Found during:** M8.2 · **Blocking:** no · **Status:** partly resolved
+- **Logged:** 2026-11-17 · **Found during:** M8.2 · **Blocking:** no · **Status:** resolved
 - **Detail:** Portal handover §6 makes each decision a push to the doctor, and a suspension a
   message to patients with a booking in progress. M8 dispatches `DoctorReviewed` (with the previous
   status) and `DoctorDocumentReviewed`, but nothing sends yet: the `Notifier` is M7's and the
@@ -25,6 +50,8 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 - **Resolved (doctor side):** with M7's `Notifier` on main, `NotifyDoctorOfReview` sends each
   decision and each rejected document to the doctor (category `account`). The notice to patients
   with an open consultation when a doctor is suspended stays with M10.
+- **Update 2026-11-17 (M10):** suspending a doctor, or rejecting one who was approved, cancels and
+  refunds their bookings that have not begun and tells each patient.
 
 ### ISS-070: Push copy is English only
 
