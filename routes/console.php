@@ -20,3 +20,6 @@ Schedule::command('model:prune', ['--model' => [Media::class]])->hourly();
 
 // Doses sixty minutes past due without an answer become missed, once each (M6).
 Schedule::command('medications:settle-doses')->everyMinute()->withoutOverlapping();
+
+// Compliance reports are signed for minutes; their files are removed after a day (M6).
+Schedule::command('medications:prune-reports')->hourly();

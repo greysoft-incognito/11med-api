@@ -25,8 +25,6 @@
     "GET api/v1/labs/tests",
     "GET api/v1/labs/{labId}",
     "GET api/v1/labs/{labId}/tests",
-    "GET api/v1/medications/{userId}/compliance",
-    "GET api/v1/medications/{userId}/report",
     "GET api/v1/notifications/{userId}",
     "GET api/v1/notifications/{userId}/preferences",
     "GET api/v1/payments/{reference}",
