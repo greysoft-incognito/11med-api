@@ -14,6 +14,10 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
+        if ($request->is('api/v1', 'api/v1/*')) {
+            return null;
+        }
+
         return $request->expectsJson()
             ? Provider::response()->error([
                 'message' => 'please login to continue.',
