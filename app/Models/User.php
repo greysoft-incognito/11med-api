@@ -248,11 +248,16 @@ class User extends Authenticatable implements WalletOperations
     }
 
     /**
-     * Premium comes from a current subscription record. False until the Subscriptions module (M5) records one.
+     * Premium comes from the subscription record the team keeps, never from a flag on the user.
      */
     public function isPremium(): bool
     {
-        return false;
+        return $this->subscription?->isActive() ?? false;
+    }
+
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class);
     }
 
     public function devices(): HasMany
