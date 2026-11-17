@@ -13,6 +13,7 @@ use App\Services\Guide\GuideContext;
 use App\Services\Guide\GuideReply;
 use App\Services\Guide\GuideResponder;
 use App\Services\Identity\AccountEraser;
+use Database\Seeders\LabCatalogueSeeder;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
@@ -45,6 +46,8 @@ class GuideConversationTest extends TestCase
     public function test_a_message_returns_the_thread_with_the_reply(): void
     {
         $patient = $this->patient();
+
+        $this->seed(LabCatalogueSeeder::class);
 
         $this->actingAs($patient)
             ->postJson('api/v1/guide/conversation/messages', ['body' => '  I have had a fever for three days  '])

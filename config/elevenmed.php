@@ -99,6 +99,21 @@ return [
         'accept_attempts_per_hour' => 10,
     ],
 
+    // Partners (portal handover §6): applications per address an hour.
+    'partners' => [
+        'applications_per_hour' => 5,
+    ],
+
+    // Laboratories: bookings a patient may start in an hour, since each opens a payment.
+    'laboratories' => [
+        'bookings_per_hour' => 20,
+    ],
+
+    // Pharmacy: checkouts per patient an hour, each starting a gateway transaction.
+    'pharmacy' => [
+        'checkouts_per_hour' => 20,
+    ],
+
     // Medications and readings (M6): the dose rules (app `constants/dosing.ts`), the longest window
     // any list or score reads, and the compliance report's signed link and file life.
     'medications' => [

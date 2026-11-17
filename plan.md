@@ -71,18 +71,18 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [~] 10.4 Lab requests, call rooms through a provider adapter (lab requests wait on M12.2)
 - [x] 10.5 Earnings and 48-hourly payouts, the admin payout routes
 
-## M11 Partners and pharmacy `[ ]`
+## M11 Partners and pharmacy `[x]`
 
-- [ ] 11.1 Applications, approval with the welcome email, suspension
-- [ ] 11.2 The pharmacy portal: settings, summary, drugs
-- [ ] 11.3 The app's store, cart, checkout into one order per pharmacy
-- [ ] 11.4 Fulfilment, rider, cancellations, refunds
+- [x] 11.1 Applications, approval with the welcome email, suspension
+- [x] 11.2 The pharmacy portal: settings, summary, drugs
+- [x] 11.3 The app's store, cart, checkout into one order per pharmacy
+- [x] 11.4 Fulfilment, rider, cancellations, refunds
 
-## M12 Laboratories `[ ]`
+## M12 Laboratories `[x]`
 
-- [ ] 12.1 The catalogue (admin) and price lists (portal)
-- [ ] 12.2 The app's directory, requests and bookings
-- [ ] 12.3 The laboratory portal's bookings, results, cancellations
+- [x] 12.1 The catalogue (admin) and price lists (portal)
+- [x] 12.2 The app's directory, requests and bookings
+- [x] 12.3 The laboratory portal's bookings, results, cancellations
 
 ## M13 Guide and the servers `[~]`
 

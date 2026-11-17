@@ -46,6 +46,16 @@ class MedicalProfiles
     }
 
     /**
+     * The state the patient lives in, for ranking what is near them; null without a profile.
+     */
+    public function stateOf(User $user): ?string
+    {
+        return $user
+            ->medicalProfile()
+            ->value('state_of_residence');
+    }
+
+    /**
      * @param  array<string, mixed>  $data  `zCreateProfileRequest`, validated
      */
     public function create(User $user, array $data): MedicalProfile

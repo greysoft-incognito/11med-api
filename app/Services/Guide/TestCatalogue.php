@@ -2,13 +2,13 @@
 
 namespace App\Services\Guide;
 
+use App\Services\Laboratories\GuideTestCatalogue;
 use Illuminate\Container\Attributes\Bind;
 
 /**
- * The test catalogue, so a `find_test` action never names a test no laboratory can list. The
- * Laboratories module (M12) implements it.
+ * The test catalogue, so a `find_test` action never names a test no laboratory can list.
  */
-#[Bind(UncheckedTestCatalogue::class)]
+#[Bind(GuideTestCatalogue::class)]
 interface TestCatalogue
 {
     /**

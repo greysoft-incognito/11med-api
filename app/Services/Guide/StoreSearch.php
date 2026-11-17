@@ -2,12 +2,13 @@
 
 namespace App\Services\Guide;
 
+use App\Services\Pharmacy\StoreDrugSearch;
 use Illuminate\Container\Attributes\Bind;
 
 /**
- * The store's drug names, for recognising "buy X". The Pharmacy module (M11) implements it.
+ * The store's drug names, for recognising "buy X". The Pharmacy module implements it.
  */
-#[Bind(NoStoreSearch::class)]
+#[Bind(StoreDrugSearch::class)]
 interface StoreSearch
 {
     /**

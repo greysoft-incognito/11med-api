@@ -15,7 +15,7 @@ by id in [human_todo.md](../human_todo.md).
 | Redis | Queue and cache in production | M1 | Use `database` for both (fine for staging) | |
 | Two servers and GitHub environments `staging`, `production` | Deploys | M1 | No deploys | HT-001 |
 | KudiSMS account: API key and sender id | Phone codes, caregiver invitations | M2, M4 | Texts are written to the log only | HT-002 |
-| SMTP account and a from address | Email codes, portal password links | M2 | Mail is written to the log | HT-002 |
+| SMTP account and a from address | Email codes, portal password links, a partner's welcome and suspension emails | M2, M11 | Mail is written to the log | HT-002 |
 | Google OAuth web client id | Google sign-in | M2 | 422 `SOCIAL_UNAVAILABLE` for Google | HT-003 |
 | Apple bundle id | Apple sign-in | M2 | Defaults to `ng.elevenmed.app`, already right | HT-003 |
 | S3-compatible bucket and keys | Uploaded files | M3 | Files stay on the server's own disk | HT-005 |
@@ -147,8 +147,13 @@ php artisan key:generate                       # only if APP_KEY is empty
 php artisan dbconfig:sync                      # seeds the runtime settings
 php artisan dbconfig:set prefered_sms_channel KUDISMS
 php artisan app:create-admin you@example.com "Your Name"   # first team account; prints its link
+php artisan db:seed --class=LabCatalogueSeeder --force    # the starting test catalogue (M12)
 php artisan db:seed --class=DrugClassSeeder --force        # M10: the allergy classes; safe to run again
 ```
+
+The test catalogue (M12) starts empty, and a laboratory can only price tests that are in it. The
+seeder adds the twenty tests the app's mock uses, only those missing, so running it again never
+undoes the team's edits in the admin portal.
 
 Run the `DrugClassSeeder` line again after a release that changes the seed (it adds what is
 missing and never removes a class).
