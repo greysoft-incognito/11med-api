@@ -13,6 +13,19 @@ Logged as found, never deleted; a resolved issue is marked resolved.
   `PAYSTACK_CALLBACK_URL` at a small https page on the portals that opens `elevenmed://pay`, which
   needs no API change.
 
+### ISS-080: Doctors are not told of review decisions yet
+
+- **Logged:** 2026-11-17 · **Found during:** M8.2 · **Blocking:** no · **Status:** partly resolved
+- **Detail:** Portal handover §6 makes each decision a push to the doctor, and a suspension a
+  message to patients with a booking in progress. M8 dispatches `DoctorReviewed` (with the previous
+  status) and `DoctorDocumentReviewed`, but nothing sends yet: the `Notifier` is M7's and the
+  bookings are M10's.
+- **Plan:** M7 adds listeners that send through the `Notifier`; M10 adds the suspension listener
+  for open consultations.
+- **Resolved (doctor side):** with M7's `Notifier` on main, `NotifyDoctorOfReview` sends each
+  decision and each rejected document to the doctor (category `account`). The notice to patients
+  with an open consultation when a doctor is suspended stays with M10.
+
 ### ISS-070: Push copy is English only
 
 - **Logged:** 2026-11-21 · **Found during:** M7.2 · **Blocking:** no · **Status:** open

@@ -64,6 +64,35 @@ Newest first. Never edit an old entry.
 - Seam for M12: `App\Models\Organisation`, `Organisation::listed()`, `Organisations::of()` and
   `updateListing()`, and the `PartnerApproved`, `PartnerSuspended`, `PartnerReinstated` events.
 
+## 2026-11-17: M8 Doctors
+
+- 8.1 `GET` and `PATCH doctor/profile`, `POST doctor/documents`, `POST doctor/profile/submit`,
+  doctor role only. The record starts blank on first read. The `PATCH` rules mirror
+  `zUpdateDoctorProfileRequest`, plus server bounds and a window `end` after its `start`. The photo
+  is claimed as `doctor_photo`. The bank account is encrypted and masked to its last four. Setting
+  bank details marks the `bank_details` document uploaded. Documents are `doctor_document` uploads
+  (a new private media purpose), named by URL in `file.uri` (FE-080). Submit answers 422
+  `PROFILE_INCOMPLETE` with `meta.missing` in the app's names; approved and suspended doctors do
+  not resubmit; the MDCN number is fixed once submitted (FE-081).
+- 8.2 `GET portal/admin/doctors` (paged, submitted applications oldest first, `status`, `q` over
+  name, MDCN number and phone in either form), the detail with signed document links, document
+  review (a rejection reason of 12 to 300 characters) and the application decision. Both go
+  through `DoctorVerification`, which is the portal mock's lifecycle and codes. Rejecting or
+  suspending turns the live toggle off. `DoctorReviewed` and `DoctorDocumentReviewed` are
+  dispatched for M7's push (ISS-080).
+- 8.3 `GET doctors`, `doctors/{doctorId}` and `slots`, for patients and doctors. The directory is
+  approved doctors only and paged (FE-082), with filters by specialty, language (JSONB
+  containment), available now and a search over name and specialty. It is ordered in SQL by
+  availability, then the running rating, then id. A doctor the viewer is engaged with reads as
+  unavailable through the `EngagedDoctors` seam. Slots come from `DoctorSlots`, in Africa/Lagos,
+  less the `HeldSlots` seam. `DoctorDirectory::bookable()`, `DoctorSlots::offers()` and
+  `DoctorRatings::record()` are what M10 calls.
+- With M7 merged, `NotifyDoctorOfReview` tells the doctor of each decision and each rejected
+  document through the `Notifier` (ISS-080, doctor side).
+- `POST doctor/profile/review` was added to the mock-only list, so the inventory is 153 routes.
+- No new service or variable. `APP_KEY` now also protects payout account numbers (SETUP §3).
+- M8 is done: its 11 routes have left `pending-routes.json`.
+
 ## 2026-11-27: M13.1 The guide's conversation (admin summary and M13.2 open)
 
 - `GET guide/conversation` (opened with a greeting that names 112 on first read),
