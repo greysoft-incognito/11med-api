@@ -17,6 +17,12 @@ milestone that introduced it. The clients tick them; never delete.
   can take days; the mock marks it at once. The rider's phone comes back in the local `0…` form.
   `GET /portal/pharmacy/drugs` also takes `stock=in`. (M11.4)
 
+- [ ] **FE-051 · Subscription records exist only once recorded.** `GET /portal/admin/subscriptions`
+  lists patients the team has recorded premium for, not every patient; `POST` finds any verified
+  patient account by phone and creates the record. A lapsed record lists as `plan: 'free'` with its
+  last `premium_until`. The reference is unique across every recording ever made, not only the
+  current one. (M5.1)
+
 ## App (`11med`)
 
 - [ ] **FE-111 · The store's lists are paged.** `GET /pharmacy/pharmacies`, `GET /pharmacy/drugs`
@@ -73,8 +79,24 @@ milestone that introduced it. The clients tick them; never delete.
   team's approval is refused the same way if it became one meanwhile. The mock guards neither.
   `dev_set_password_link` is always null: the link goes by email only. (M11.1)
 
+- [ ] **FE-050 · A recorded premium does not renew.** `GET /subscriptions/:userId` answers
+  `status: 'active'`, `plan_id: 'premium'`, `current_period_end` (the start of the day after the
+  recorded end date, in Lagos) and `cancels_at_period_end: true`, because the team records a fixed
+  end date. The status screen shows "Renews {date}" for any active plan; it should say premium runs
+  until that date when `cancels_at_period_end` is true. A lapsed record reads `status: 'none'`. (M5.1)
+
+- [ ] **FE-070 · The notification list is paged.** `GET /notifications/:userId` answers
+  `{ items, next_cursor, total, unread_count, has_more }` and takes `cursor` and `limit` (FE-003).
+  `unread_count` counts every unread notification, not only the page; `has_more` is
+  `next_cursor !== null`. The bell and history screen should page with the cursor. (M7.1)
+- [ ] **FE-071 · Android push data arrives as strings.** FCM data values must be strings, so on
+  Android `zPushPayload` comes as string fields with `target_id` left out when null, and the whole
+  payload again as JSON under `body`. iOS sends it at the top level and under `body` as JSON
+  objects. `readPushPayload` should parse `data.body` when it is a JSON string, else accept an
+  absent `target_id` as null. To confirm on a device once HT-006 is cleared. (M7.2)
+
 ## Both
 
 - [ ] **FE-005 · Routes no contract has yet.** Consent records (registration: FE-006 adds it to the body; profile sharing),
   the QR access log, and the Paystack webhook (server-only, no client change). Contracts to be added
-  when their milestones land. (M2, M4, M9)
+  when their milestones land. (M2, M4, M9) The webhook is `POST payments/webhook/paystack` (M9).

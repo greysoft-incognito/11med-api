@@ -57,6 +57,18 @@ return [
     'RIDER_REQUIRED' => "Say who is bringing it. The patient sees the rider's name and number.",
     'DRUG_IN_OPEN_ORDER' => 'This medicine is in an order that has not been delivered. Mark it out of stock instead, and remove it once the order is done.',
 
+    // Payments
+    'PAYMENT_NOT_FOUND' => 'No payment with that reference.',
+    'LAB_BOOKING_NOT_FOUND' => 'That booking no longer exists.',
+    'CONSULTATION_NOT_FOUND' => 'That consultation no longer exists.',
+    'ALREADY_PAID' => 'This has already been paid for.',
+    'PAYMENTS_UNAVAILABLE' => 'Payments are not available yet. Try again later.',
+    'PAYMENT_GATEWAY_UNAVAILABLE' => 'We could not reach the payment service. Try again shortly.',
+    'PAYMENT_DECLINED' => 'The payment was declined. Try another card, or pay by transfer.',
+    'NOT_A_COUNTER_PAYMENT' => 'This is not paid at the counter.',
+    'REFUND_EXCEEDS_SHARE' => 'That refund is more than was paid for this.',
+    'INVALID_SIGNATURE' => 'The request signature is not valid.',
+
     'FORBIDDEN' => 'You do not have access to this.',
     'NOT_FOUND' => 'We could not find that.',
     'METHOD_NOT_ALLOWED' => 'That action is not available here.',
@@ -65,4 +77,7 @@ return [
 
     // Subscriptions
     'PREMIUM_REQUIRED' => 'This is part of premium.',
+    'MEDICATION_LIMIT_REACHED' => 'Free accounts can track 3 medications at a time.',
+    'PATIENT_NOT_FOUND' => 'No patient account has this phone number.',
+    'REFERENCE_USED' => 'This payment reference has already been recorded.',
 ];

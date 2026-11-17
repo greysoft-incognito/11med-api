@@ -17,3 +17,6 @@ Schedule::command('model:prune', ['--model' => [RefreshToken::class, OtpCode::cl
 
 // Uploads no record claimed within a day, with their files (app handover §12).
 Schedule::command('model:prune', ['--model' => [Media::class]])->hourly();
+
+// Payments: abandon gateway payments pending past the timeout, retry refunds never sent (app handover §16).
+Schedule::command('payments:sweep')->everyFiveMinutes()->withoutOverlapping();

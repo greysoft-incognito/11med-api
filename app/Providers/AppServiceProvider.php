@@ -83,6 +83,9 @@ class AppServiceProvider extends ServiceProvider
         // Pharmacy: each checkout starts a gateway transaction.
         RateLimiter::for('checkout', fn(Request $request) => Limit::perHour(config('elevenmed.pharmacy.checkouts_per_hour'))->by('checkout|' . $request->user()?->id));
 
+        // Payments: each start opens a gateway transaction.
+        RateLimiter::for('payments', fn(Request $request) => Limit::perMinute(config('elevenmed.payments.initialise_per_minute'))->by('payments|' . $request->user()?->id));
+
         Provider::rateLimitCodeRequests();
         Provider::startLogger();
     }
