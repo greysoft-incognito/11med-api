@@ -84,7 +84,7 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [ ] 12.2 The app's directory, requests and bookings
 - [ ] 12.3 The laboratory portal's bookings, results, cancellations
 
-## M13 Guide and the servers `[ ]`
+## M13 Guide and the servers `[~]`
 
-- [ ] 13.1 The guide's conversation with the emergency check first
-- [ ] 13.2 Staging and production running, scheduler and queue workers, both clients pointed at staging
+- [~] 13.1 The guide's conversation with the emergency check first (conversation done; admin summary waits on M5, M8, M10, M11)
+- [!] 13.2 Staging and production running, scheduler and queue workers, both clients pointed at staging

@@ -67,3 +67,14 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 - **Resolved:** 2026-11-17. `routes/api/auth.php` and `routes/api/account.php` are removed (sign-up,
   sign-in, reset, verification and account deletion all bypassed `/api/v1` and erasure); the kit's
   admin routes need the `admin` role. The kit's tests for the removed routes went with them.
+
+### ISS-130: The guide's test codes and the portals' catalogue seed disagree
+
+- **Logged:** 2026-11-27 · **Found during:** M13.1 · **Blocking:** no · **Status:** open
+- **Detail:** the app's guide rules point to `PT`, `GENOTYPE`, `BLOODGROUP`, `EUCR` and `STOOLMCS`;
+  the portals' seed catalogue has none of them (it says `KFT` where the guide says `EUCR`). The
+  real catalogue is the admin's (M12), so a `find_test` action naming a test it does not hold
+  leads to an empty list.
+- **Plan:** `ReplyGuard` already drops any test code `TestCatalogue::known()` does not return; once
+  M12 binds it to the catalogue table those actions disappear on their own. The admin should add
+  the missing tests, or the rules should name `KFT`, once the catalogue is seeded.
