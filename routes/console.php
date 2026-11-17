@@ -21,3 +21,6 @@ Schedule::command('model:prune', ['--model' => [Media::class]])->hourly();
 
 // Guide conversations idle past the retention period, with their messages (app handover §11).
 Schedule::command('model:prune', ['--model' => [GuideConversation::class]])->daily();
+
+// Payments: abandon gateway payments pending past the timeout, retry refunds never sent (app handover §16).
+Schedule::command('payments:sweep')->everyFiveMinutes()->withoutOverlapping();

@@ -80,6 +80,9 @@ class AppServiceProvider extends ServiceProvider
         // Guide
         RateLimiter::for('guide', fn(Request $request) => Limit::perHour(config('elevenmed.guide.messages_per_hour'))->by('guide|' . $request->user()?->id));
 
+        // Payments: each start opens a gateway transaction.
+        RateLimiter::for('payments', fn(Request $request) => Limit::perMinute(config('elevenmed.payments.initialise_per_minute'))->by('payments|' . $request->user()?->id));
+
         Provider::rateLimitCodeRequests();
         Provider::startLogger();
     }
