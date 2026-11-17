@@ -109,6 +109,21 @@ return [
         'checkouts_per_hour' => 20,
     ],
 
+    // Medications and readings (M6): the dose rules (app `constants/dosing.ts`), the longest window
+    // any list or score reads, and the compliance report's signed link and file life.
+    'medications' => [
+        'missed_after_minutes' => 60,
+        'max_snoozes' => 2,
+        'missed_notice_days' => 2,
+        'max_window_days' => 365,
+        'batch_max' => 200,
+        'future_tolerance_minutes' => 5,
+        'report_disk' => env('REPORT_DISK', 'local'),
+        'report_minutes' => 15,
+        'report_keep_hours' => 24,
+        'reports_per_hour' => 10,
+    ],
+
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 
