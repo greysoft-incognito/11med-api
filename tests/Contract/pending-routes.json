@@ -1,4 +1,1 @@
-[
-    "GET api/v1/doctor/consultations/{id}/lab-request",
-    "POST api/v1/doctor/consultations/{id}/lab-request"
-]
+[]

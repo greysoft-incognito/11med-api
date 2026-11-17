@@ -171,7 +171,8 @@ milestone that introduced it. The clients tick them; never delete.
   A call answers 422 `CALL_UNAVAILABLE` when no call provider is configured. A doctor suspended
   while a booking waits cancels it: the patient is refunded and told by push, and the
   consultation reads `cancelled`. Applying a prescription a second time answers the schedules
-  the first time made, not every medication the patient has. (M10.3, M10.4)
+  the first time made, not every medication the patient has. A lab request needs the session to
+  have started (422 `NOT_ACTIVE` before) and answers 201. (M10.3, M10.4)
 
 ## Portals (`11med-web`), payouts
 
