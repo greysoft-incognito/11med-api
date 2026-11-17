@@ -250,6 +250,14 @@ class User extends Authenticatable implements WalletOperations
         return false;
     }
 
+    /**
+     * The pharmacy or laboratory a portal account belongs to; null for the team and app accounts.
+     */
+    public function organisation(): BelongsTo
+    {
+        return $this->belongsTo(Organisation::class);
+    }
+
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);

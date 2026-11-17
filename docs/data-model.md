@@ -45,4 +45,11 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `qr_accesses` | Not soft deleted. One row per open of the emergency page: `qr_token_id`, `opened_at`, and nothing about the reader |
 | `caregivers` | A patient's invitation (`patient_id`, `phone` local form, `invite_code`, both unique among live rows) and, once accepted, `caregiver_user_id`, `status` `active`, `accepted_at`. Revoking soft deletes; erasing either account removes the row |
 
+### Partners and pharmacy (M11)
+
+| Table | Notes |
+| --- | --- |
+| `organisations` | A pharmacy or laboratory (`kind`): its application while `pending`, then the organisation its portal accounts belong to. `name`, `state`, `city`, `address`, `licence_number` (unique among live rows, case-insensitive), `licence_media_id`, the contact (`contact_name`, `contact_phone` local form, `contact_email` lower case), `status` (`pending`, `approved`, `suspended`), `notes` (the suspension reason), `applied_at`, `reviewed_at`. Only `approved` is listed in the app. Its `uuid` is the pharmacy's or laboratory's id in every contract |
+| `users` (extended) | `organisation_id`: a pharmacy or laboratory portal account's organisation, null for the team and app accounts |
+
 Domain tables are added here as each milestone lands.

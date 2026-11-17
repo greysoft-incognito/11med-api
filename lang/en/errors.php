@@ -32,6 +32,14 @@ return [
     'IMAGE_NOT_RESIZED' => 'Resize the picture to at most 1600 pixels on its long edge before uploading.',
     'MEDIA_NOT_FOUND' => 'Upload the file first.',
     'LINK_EXPIRED' => 'This link has expired. Open the file again from the app.',
+
+    // Partners
+    'LICENCE_APPLIED' => 'An application with this licence number already exists. If it is yours, the team will reply to it.',
+    'PARTNER_NOT_FOUND' => 'No application with that id.',
+    'PARTNER_NOT_PENDING' => 'Only a pending application is approved.',
+    'PARTNER_NOT_APPROVED' => 'Only an approved partner can be suspended.',
+    'PARTNER_NOT_SUSPENDED' => 'Only a suspended partner can be reinstated.',
+
     'FORBIDDEN' => 'You do not have access to this.',
     'NOT_FOUND' => 'We could not find that.',
     'METHOD_NOT_ALLOWED' => 'That action is not available here.',

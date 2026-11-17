@@ -55,6 +55,10 @@ milestone that introduced it. The clients tick them; never delete.
   that state. (M4)
 - [ ] **FE-014 · Caregiver lists are paged.** `GET /medications/caregivers` and
   `GET /medications/caregiving` answer `{ items, next_cursor, total }` (FE-003). (M4.3)
+- [ ] **FE-110 · A partner's contact email must be free.** `POST /partners/apply` is 409
+  `EMAIL_TAKEN` on `contact_email` when that address already signs in to an account, and the
+  team's approval is refused the same way if it became one meanwhile. The mock guards neither.
+  `dev_set_password_link` is always null: the link goes by email only. (M11.1)
 
 ## Both
 

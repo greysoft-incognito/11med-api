@@ -69,6 +69,11 @@ return [
         'accept_attempts_per_hour' => 10,
     ],
 
+    // Partners (portal handover §6): applications per address an hour.
+    'partners' => [
+        'applications_per_hour' => 5,
+    ],
+
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 

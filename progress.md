@@ -2,6 +2,24 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-25: M11.1 Partner applications
+
+- `POST partners/apply` (public, 201, five an hour per address): the portal's `zApplyPartnerRequest`
+  plus server bounds; the state must be one of the 37. 409 `LICENCE_APPLIED` on `licence_number`
+  (case-insensitive, among live rows), 409 `EMAIL_TAKEN` on `contact_email` when the address already
+  signs in (FE-110), 422 `MEDIA_NOT_FOUND` for a licence this form did not upload or another
+  application claimed.
+- `GET portal/admin/partners` (paged, `kind`, `status`, `q` over name, licence, state and contact,
+  oldest application first) and `POST portal/admin/partners/{id}/review`: `approved` from pending,
+  `suspended` with notes from approved, `reinstated` from suspended; 422 `PARTNER_NOT_PENDING`,
+  `PARTNER_NOT_APPROVED`, `PARTNER_NOT_SUSPENDED`; 404 `PARTNER_NOT_FOUND`.
+- Approval creates the contact's portal account with no password, linked by
+  `users.organisation_id`, and emails the week-long welcome link through `PortalAccounts::welcome()`;
+  `dev_set_password_link` is null. `PortalAccountResource` now carries `organisation_id` and
+  `organisation_name`. Suspension and reinstatement email the partner's accounts.
+- Seam for M12: `App\Models\Organisation`, `Organisation::listed()`, `Organisations::of()` and
+  `updateListing()`, and the `PartnerApproved`, `PartnerSuspended`, `PartnerReinstated` events.
+
 ## 2026-11-18: M4.3 Caregivers, M4 done
 
 - `POST medications/caregivers/invite` (201): the number in local form, a six-character code from

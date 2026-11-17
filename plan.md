@@ -71,9 +71,9 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [ ] 10.4 Lab requests, call rooms through a provider adapter
 - [ ] 10.5 Earnings and 48-hourly payouts, the admin payout routes
 
-## M11 Partners and pharmacy `[ ]`
+## M11 Partners and pharmacy `[~]`
 
-- [ ] 11.1 Applications, approval with the welcome email, suspension
+- [x] 11.1 Applications, approval with the welcome email, suspension
 - [ ] 11.2 The pharmacy portal: settings, summary, drugs
 - [ ] 11.3 The app's store, cart, checkout into one order per pharmacy
 - [ ] 11.4 Fulfilment, rider, cancellations, refunds
