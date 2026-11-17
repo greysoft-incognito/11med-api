@@ -52,4 +52,15 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `doctor_profiles` | One live row per doctor, started blank on first read. Professional fields, `languages` and `availability` (`[{ day, start, end }]`, Africa/Lagos) as JSONB with a GIN index on `languages`, `photo_media_id`, the three fees, `follow_up_fee_kobo`, `session_minutes`, `chat_window_hours`, `bank_name`, `bank_account_number` (encrypted with `APP_KEY`) and `bank_account_last4` for the mask, `is_available_now`, `verification_status`, `verification_notes`, `submitted_at` (the review queue's order), `reviewed_at`, and the running rating (`rating_total`, `rating_count`, `rating_mean`) the directory sorts on. Erasure cascades |
 | `doctor_documents` | One live row per profile and `kind`, created at the first upload: `status`, `media_id` (a private `doctor_document` upload; null for bank details, which are the payout fields), `uploaded_at`, `rejection_reason`, `reviewed_at`. A new upload replaces the file and returns the row to `uploaded` |
 
+### Payments (M9)
+
+Money records: erasure nulls `payments.user_id` and keeps the rows. Statuses change only through
+`Settlement` (pending to paid, failed or abandoned) and `Refunds` (shares, and paid to refunded).
+
+| Table | Notes |
+| --- | --- |
+| `payments` | One gateway transaction: `reference` (ours, unique), `user_id`, `purpose`, `channel` (null until known; `counter` never reaches the gateway), `status`, `amount_kobo` (the sum of its shares), `authorization_url` and `access_code` while pending, `paid_at`, `failure_reason` (Paystack's `gateway_response`), `checked_at` (last verify call) |
+| `payment_targets` | One target's share: `purpose` and `target_id` (the target's public id, no foreign key since the target's table belongs to another module), `target_reference` and `partner_name` copied for the desk, `amount_kobo`, `refunded_kobo`, `state` (`standing`, `released`, `refund_pending`, `refund_failed`, `refunded`). Indexed on `(purpose, target_id)` |
+| `payment_refunds` | A refund of one share: `amount_kobo`, `status` (`pending`, `processed`, `failed`), `gateway_refund_id`, `requested_at` (when Paystack accepted the request), `processed_at`, `failure_reason` |
+
 Domain tables are added here as each milestone lands.

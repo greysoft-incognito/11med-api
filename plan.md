@@ -58,10 +58,10 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 8.2 Admin review of documents and applications
 - [x] 8.3 The directory, availability, slots
 
-## M9 Payments `[ ]`
+## M9 Payments `[x]`
 
-- [ ] 9.1 `Payable`, Paystack initialise, `payments/:reference`
-- [ ] 9.2 The webhook, abandonment, refunds by share, the admin desk
+- [x] 9.1 `Payable`, Paystack initialise, `payments/:reference`
+- [x] 9.2 The webhook, abandonment, refunds by share, the admin desk
 
 ## M10 Consultations `[ ]`
 

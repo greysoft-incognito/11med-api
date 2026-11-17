@@ -84,4 +84,4 @@ milestone that introduced it. The clients tick them; never delete.
 
 - [ ] **FE-005 · Routes no contract has yet.** Consent records (registration: FE-006 adds it to the body; profile sharing),
   the QR access log, and the Paystack webhook (server-only, no client change). Contracts to be added
-  when their milestones land. (M2, M4, M9)
+  when their milestones land. (M2, M4, M9) The webhook is `POST payments/webhook/paystack` (M9).

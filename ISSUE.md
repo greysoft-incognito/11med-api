@@ -12,6 +12,17 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 - **Plan:** M7 adds listeners that send through the `Notifier`; M10 adds the suspension listener
   for open consultations.
 
+### ISS-090: Paystack may not accept the app's `elevenmed://` callback
+
+- **Logged:** 2026-11-17 · **Found during:** M9.1 · **Blocking:** no · **Status:** open
+- **Detail:** App handover §16 asks for `callback_url = elevenmed://pay?reference=…`. Paystack
+  documents `callback_url` as a web address, and whether its page redirects to a custom scheme is
+  unconfirmed. Payment itself does not depend on it: the webhook settles the payment and the app
+  reads it on return to the foreground.
+- **Plan:** try it with the test keys (HT-007). If Paystack refuses the scheme, point
+  `PAYSTACK_CALLBACK_URL` at a small https page on the portals that opens `elevenmed://pay`, which
+  needs no API change.
+
 ### ISS-005: No route verifies the emergency contact's number
 
 - **Logged:** 2026-11-18 · **Found during:** M4.1 · **Blocking:** no · **Status:** open

@@ -32,6 +32,21 @@ return [
     'IMAGE_NOT_RESIZED' => 'Resize the picture to at most 1600 pixels on its long edge before uploading.',
     'MEDIA_NOT_FOUND' => 'Upload the file first.',
     'LINK_EXPIRED' => 'This link has expired. Open the file again from the app.',
+
+    // Payments
+    'PAYMENT_NOT_FOUND' => 'No payment with that reference.',
+    'ORDER_NOT_FOUND' => 'That order no longer exists.',
+    'LAB_BOOKING_NOT_FOUND' => 'That booking no longer exists.',
+    'CONSULTATION_NOT_FOUND' => 'That consultation no longer exists.',
+    'ALREADY_PAID' => 'This has already been paid for.',
+    'PAYMENTS_UNAVAILABLE' => 'Payments are not available yet. Try again later.',
+    'PAYMENT_GATEWAY_UNAVAILABLE' => 'We could not reach the payment service. Try again shortly.',
+    'PAYMENT_DECLINED' => 'The payment was declined. Try another card, or pay by transfer.',
+    'COUNTER_IS_FOR_PICKUP' => 'Paying at the counter is only for orders you collect.',
+    'NOT_A_COUNTER_PAYMENT' => 'This is not paid at the counter.',
+    'REFUND_EXCEEDS_SHARE' => 'That refund is more than was paid for this.',
+    'INVALID_SIGNATURE' => 'The request signature is not valid.',
+
     'FORBIDDEN' => 'You do not have access to this.',
     'NOT_FOUND' => 'We could not find that.',
     'METHOD_NOT_ALLOWED' => 'That action is not available here.',
