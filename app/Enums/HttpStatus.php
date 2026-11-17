@@ -23,6 +23,7 @@ enum HttpStatus: int
     case LOCKED = 423;               // Locked
     case TOO_MANY_REQUESTS = 429;    // Too Many Requests
     case SERVER_ERROR = 500;         // Internal Server Error
+    case SERVICE_UNAVAILABLE = 503;  // Service Unavailable
 
     /**
      * Get the message for the provided code
