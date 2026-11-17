@@ -30,11 +30,16 @@ Not needed yet, listed so they are not a surprise: a Daily.co or Agora key (M10,
 ## 2. Server
 
 - **PHP 8.4** with `pdo_pgsql`, `pgsql`, `intl`, `zip`, `gd` (built with JPEG, PNG and WebP),
-  `exif`, `bcmath`, `mbstring`. Composer 2, Git, a web server with PHP-FPM.
+  `exif`, `bcmath`, `mbstring`, and `dom` (the compliance report's PDF renderer, M6). Composer 2, Git, a web server with PHP-FPM.
 - **Upload limits** (M3): `upload_max_filesize = 6M` and `post_max_size = 8M` in `php.ini`;
   `client_max_body_size 8m;` in nginx. The API refuses anything over 5 MB itself.
 - **Document root** `DEPLOY_PATH/public`; the PHP-FPM user can write `storage/` and `bootstrap/cache/`.
 - **Scheduler** (M2 onwards): a cron line for the PHP-FPM user. It prunes spent tokens and codes,
+  every hour removes uploads no record claimed (M3) and compliance report PDFs older than a day,
+  and **every minute marks doses missed sixty minutes after they were due** (M6,
+  `medications:settle-doses`). Without the cron, unanswered doses never count against
+  compliance and missed-dose notifications never go out.
+
   every hour removes uploads no record claimed (M3), every five minutes runs `payments:sweep`
   (M9), which settles or abandons gateway payments pending over an hour and re-sends refunds the
   gateway never received, and every day deletes guide conversations idle past
@@ -82,6 +87,8 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `REPORT_DISK` | `local` | Disk for compliance report PDFs, served by a 15-minute signed link and deleted after a day. A private `s3` disk once the bucket exists (HT-005); never a public one | M6 |
+
 | `GUIDE_RETENTION_DAYS` | `30` | Guide conversations idle this many days are deleted by the scheduler, with their messages (HT-130) | M13 |
 | `PAYSTACK_SECRET_KEY` | none | Paystack's secret key (`sk_test_…` on staging, `sk_live_…` on production). It also verifies the webhook's signature. Never give it to a client (HT-007) | M9 |
 | `PAYSTACK_CALLBACK_URL` | `elevenmed://pay` | Where Paystack's page sends the patient back; `?reference=` is added per payment. The app's pay screen (app CLAUDE.md, "Deep links"). See ISS-090 | M9 |
@@ -134,6 +141,9 @@ php artisan dbconfig:sync                      # seeds the runtime settings
 php artisan dbconfig:set prefered_sms_channel KUDISMS
 php artisan app:create-admin you@example.com "Your Name"   # first team account; prints its link
 ```
+
+The missed-dose job can be run by hand to check the scheduler is wired: `php artisan medications:settle-doses`
+prints how many doses it marked missed.
 
 ## 6. Local development
 

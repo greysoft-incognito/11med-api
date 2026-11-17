@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Collection;
  * Turns a prescription into the patient's schedules (app handover §1.2 and §1.3). The Medications
  * module (M6) implements it; Consultations (M10) calls it from the apply route.
  */
-#[Bind(NoPrescribedSchedules::class)]
+#[Bind(Prescriptions::class)]
 interface PrescribedSchedules
 {
     /**
