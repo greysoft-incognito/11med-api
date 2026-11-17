@@ -33,7 +33,8 @@ Paystack keys and webhook (M9, HT-007), a Daily.co or Agora key (M10, HT-008).
   `client_max_body_size 8m;` in nginx. The API refuses anything over 5 MB itself.
 - **Document root** `DEPLOY_PATH/public`; the PHP-FPM user can write `storage/` and `bootstrap/cache/`.
 - **Scheduler** (M2 onwards): a cron line for the PHP-FPM user. It prunes spent tokens and codes,
-  and every hour removes uploads no record claimed (M3).
+  every hour removes uploads no record claimed (M3), and every day deletes guide conversations idle
+  past `GUIDE_RETENTION_DAYS` (M13).
 
   ```
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
@@ -52,7 +53,7 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | Variable | Value |
 | --- | --- |
 | `APP_ENV` | `staging` or `production` |
-| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue |
+| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. It also encrypts guide messages (M13), which become unreadable too: start over clears them |
 | `APP_DEBUG` | `false` |
 | `APP_URL` | The API's public `https://` address. Upload URLs and signed file links are built from it (M3) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL. `DB_CONNECTION=pgsql` |
@@ -69,12 +70,14 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `GOOGLE_WEB_CLIENT_ID` | none | The app's `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, from the EAS `development` environment on expo.dev (HT-003) | M2 |
 | `APPLE_BUNDLE_ID` | `ng.elevenmed.app` | The audience Apple sign-in tokens are checked against | M2 |
 | `PORTALS_URL` | `http://localhost:3000` | Where the portals live; reset and welcome emails link to `PORTALS_URL/set-password?token=…` | M2 |
+| `CORS_ALLOWED_ORIGINS` | `PORTALS_URL` | Browser origins allowed to call the API, comma separated, e.g. the staging and local portals. The app is native and needs none | M13 |
 | `CONSENT_POLICY_VERSION` | `2026-07-01` | The policy version recorded when the app sends no consent record | M2 |
 | `MEDIA_PUBLIC_DISK` | `public` | Disk for photos and store pictures. Point at an `s3` disk with public read once the bucket exists (HT-005) | M3 |
 | `MEDIA_PRIVATE_DISK` | `local` | Disk for attachments, lab results and licences. A private `s3` disk once the bucket exists | M3 |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `GUIDE_RETENTION_DAYS` | `30` | Guide conversations idle this many days are deleted by the scheduler, with their messages (HT-130) | M13 |
 
 Development only: `ELEVENMED_APP_PATH` and `ELEVENMED_PORTALS_PATH` point at the client checkouts
 (default `../11med` and `../11med-web`) for `php artisan contract:routes`.
@@ -112,3 +115,25 @@ vendor/bin/pint --test
 
 Keep `../11med` and `../11med-web` checked out beside this repository: the route ratchet test reads
 their mocks, and skips that comparison when they are missing.
+
+## 7. Pointing the clients at a server
+
+Both clients run against in-browser or in-app mocks until told otherwise. To use a server (staging
+first), set these in the client, not here:
+
+| Client | Variables | Value for staging |
+| --- | --- | --- |
+| App (`../11med`) | `EXPO_PUBLIC_USE_MOCKS=false`, `EXPO_PUBLIC_API_URL` | The server's `APP_URL`, without `/api/v1` (the app adds it). Set in the EAS `development` environment on expo.dev, since builds and `npm run ship` read from there |
+| Portals (`../11med-web`) | `NEXT_PUBLIC_API_MODE=live`, `NEXT_PUBLIC_API_BASE_URL` | The same address, without `/api/v1` |
+
+On the server, `CORS_ALLOWED_ORIGINS` (or `PORTALS_URL`) must name the portals' origin, or the
+browser refuses every call. Check a server is ready with `curl https://<APP_URL>/api/v1/health`.
+
+## 8. A server is running when
+
+- The deploy workflow has run green for it (HT-001), and `/api/v1/health` answers.
+- `php artisan schedule:list` shows the jobs in section 2 and the cron line is installed.
+- A queue worker is up (`supervisorctl status`), so codes and invitations leave the queue.
+- SMS and mail are real or deliberately logged (HT-002), and uploads go to the bucket (HT-005).
+- The runtime settings and first admin from section 5 exist.
+
