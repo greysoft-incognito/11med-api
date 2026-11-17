@@ -29,7 +29,7 @@ class SeamsTest extends TestCase
 
         $this->assertNull(app(Notifier::class)->send($user, NotificationCategory::Order, 'Payment received', 'Your order is with the pharmacy.'));
 
-        $this->assertSame([], app(PrescribedSchedules::class)->apply($user, $user, 'prescription', []));
+        $this->assertTrue(app(PrescribedSchedules::class)->apply($user, $user, 'prescription', 'Malaria', [])->isEmpty());
     }
 
     public function test_a_free_account_gets_the_free_tier(): void

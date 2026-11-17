@@ -12,13 +12,17 @@ exists now with a stand-in bound by `#[Bind]`; the owning milestone swaps the bi
   is still false until M5 reads the subscription record.
 - `Notifier` (M7): `send(User, NotificationCategory, title, body, data): ?string` (the history
   row's id); stand-in `SilentNotifier`. `NotificationCategory` mirrors `zNotificationCategory`.
-- Payments (M9): `Payable` (on each paid record), `PayableTargets` (one per purpose, named in
+- Payments (M9): `Payable` (on each paid record, with `paymentReference` and
+  `paymentPartnerName` for the admin desk), `PayableTargets` (one per purpose, named in
   `elevenmed.payments.targets`: `OrderPayables` M11, `BookingPayables` M12,
-  `ConsultationPayables` M10), `Payments` (`summaryFor`, `openAtCounter`, `collectAtCounter`,
-  `refund`; stand-in `NoPayments`), events `PaymentSucceeded` and `PaymentRefunded`, and the
-  `PaymentPurpose`, `PaymentStatus` and `PaymentChannel` enums.
-- `PrescribedSchedules` (M6): `apply(patient, doctor, prescriptionId, drugs)`, idempotent, for
-  M10.3; stand-in `NoPrescribedSchedules`.
+  `ConsultationPayables` M10), `Payments` (`initialise(targets, payer, channel)`, `summaryFor`,
+  `summariesFor(purpose, ids)` for lists, `openAtCounter`, `collectAtCounter`,
+  `refund(target, kobo = all)`; stand-in `NoPayments`), events `PaymentSucceeded` and
+  `PaymentRefunded`, and the `PaymentPurpose`, `PaymentStatus` and `PaymentChannel` enums.
+  Summaries are `zPaymentSummary` arrays, `authorization_url` included while pending.
+- `PrescribedSchedules` (M6): `apply(patient, doctor, prescriptionId, diagnosis, drugs)` returning
+  the `Medication` collection, idempotent on patient and prescription, for M10.3; stand-in
+  `NoPrescribedSchedules`.
 - `tests/Feature/Foundation/SeamsTest.php`. Next: the milestones, each in its own thread.
 
 ## 2026-11-18: M4.3 Caregivers, M4 done
