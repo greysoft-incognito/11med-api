@@ -20,7 +20,7 @@ return [
     ],
 
     'apple' => [
-        'client_id' => env('APPLE_BUNDLE_ID'),
+        'client_id' => env('APPLE_BUNDLE_ID', 'ng.elevenmed.app'),
     ],
 
     'postmark' => [
