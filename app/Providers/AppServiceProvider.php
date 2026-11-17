@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Enums\MediaPurpose;
 use App\Helpers\Provider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Schema\Blueprint;
@@ -50,6 +51,16 @@ class AppServiceProvider extends ServiceProvider
         // Portal sign-in and reset emails, per address and email.
         RateLimiter::for('portal-auth', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip() . '|' . mb_strtolower((string) $request->input('email')));
+        });
+
+        // Uploads: a licence per address, since it needs no account; everything else per account.
+        RateLimiter::for('media', function (Request $request) {
+            $purpose = MediaPurpose::tryFrom((string) $request->input('purpose'));
+            $user = $request->user('sanctum');
+
+            return $purpose?->isPublicUpload() || $user === null
+                ? Limit::perHour(config('elevenmed.media.public_uploads_per_hour'))->by('media|' . $request->ip())
+                : Limit::perHour(config('elevenmed.media.uploads_per_hour'))->by('media|' . $user->id);
         });
 
         Provider::rateLimitCodeRequests();
