@@ -26,7 +26,7 @@ class SeamsTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $this->assertSame([], app(PrescribedSchedules::class)->apply($user, $user, 'prescription', []));
+        $this->assertTrue(app(PrescribedSchedules::class)->apply($user, $user, 'prescription', 'Malaria', [])->isEmpty());
     }
 
     public function test_a_free_account_gets_the_free_tier(): void
