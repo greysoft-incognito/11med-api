@@ -114,6 +114,16 @@ class Organisations
     }
 
     /**
+     * Applications waiting for the team's decision.
+     */
+    public function awaitingReview(): int
+    {
+        return Organisation::query()
+            ->where('status', PartnerStatus::Pending)
+            ->count();
+    }
+
+    /**
      * The partner's own account's organisation of a kind; 404 with `$notFound` when it has none.
      */
     public function of(User $account, PartnerKind $kind, string $notFound): Organisation

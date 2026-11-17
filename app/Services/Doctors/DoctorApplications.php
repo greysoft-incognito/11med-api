@@ -9,6 +9,7 @@ use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
 use App\Models\DoctorProfile;
 use App\Support\PhoneNumber;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -37,6 +38,28 @@ class DoctorApplications
             ->orderBy('id');
 
         return $list->paginate($query);
+    }
+
+    /**
+     * Applications waiting for a decision, and how many whole hours the oldest has waited. One query.
+     *
+     * @return array{count: int, oldest_hours: int|null}
+     */
+    public function awaitingReview(): array
+    {
+        $row = DoctorProfile::query()
+            ->whereNotNull('submitted_at')
+            ->where('verification_status', VerificationStatus::Pending)
+            ->selectRaw('count(*) as waiting, min(submitted_at) as oldest')
+            ->toBase()
+            ->first();
+
+        $oldest = $row->oldest === null ? null : CarbonImmutable::parse($row->oldest);
+
+        return [
+            'count' => (int) $row->waiting,
+            'oldest_hours' => $oldest === null ? null : max(0, (int) floor($oldest->diffInSeconds(now()) / 3600)),
+        ];
     }
 
     public function find(string $doctorId): DoctorProfile

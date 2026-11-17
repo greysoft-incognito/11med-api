@@ -54,6 +54,22 @@ class Payouts
     }
 
     /**
+     * Payouts not yet settled, and what they come to. One query.
+     *
+     * @return array{count: int, kobo: int}
+     */
+    public function pendingTotals(): array
+    {
+        $row = Payout::query()
+            ->where('status', PayoutStatus::Pending)
+            ->selectRaw('count(*) as pending, coalesce(sum(net_kobo), 0) as kobo')
+            ->toBase()
+            ->first();
+
+        return ['count' => (int) $row->pending, 'kobo' => (int) $row->kobo];
+    }
+
+    /**
      * @param  array{decision: string, reference?: string, reason?: string}  $data
      */
     public function settle(string $id, array $data): Payout
