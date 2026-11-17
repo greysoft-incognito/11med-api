@@ -46,6 +46,70 @@ Newest first. Never edit an old entry.
   (an erased doctor's requests). FE-120, FE-121. No new setup beyond the seeder command.
 - Built on `feat/partners` (M11.1) and `chore/seams`; merges once those and M9 are on `main`.
 
+## 2026-11-25: M11 The guide's store search
+
+- `StoreDrugSearch` implements the guide's `StoreSearch` seam (M14) in SQL: the longest name of a
+  listed medicine (approved pharmacy, not removed) found in the text, case-insensitive, names under
+  three characters ignored. `NoStoreSearch` is removed.
+
+## 2026-11-25: M11.4 Fulfilment, M11 done
+
+- `GET portal/pharmacy/orders[/{id}]` (paged, newest first, `status` including `open`, `q` over
+  the reference, the patient's name and phone in either form) lists only orders paid, refunded, or
+  to be paid at the counter; anything else, or another pharmacy's, is 404 `ORDER_NOT_FOUND`.
+  `prescription_verified` comes from `PrescribedDrugs`.
+- `POST portal/pharmacy/orders/{id}/advance`: one stage at a time, `OrderBook` the only code that
+  moves an order. A delivery handed to the rider needs `rider` (422 `RIDER_REQUIRED`) and takes
+  `estimated_delivery_at`, else the pharmacy's `delivery_minutes` or 45; `ready_at` and
+  `completed_at` are set as the steps are taken; collecting a counter pickup calls
+  `Payments::collectAtCounter()`. 422 `ORDER_CANCELLED`, `ORDER_FINAL`.
+- `POST portal/pharmacy/orders/{id}/cancel`: a reason of 3 to 200 characters, only before `ready`
+  (422 `ORDER_STARTED`), `Payments::refund()` of that order's share.
+- Each step and a pharmacy's cancellation push to the patient through `Notifier` (`OrderNotices`,
+  category `order`, the mock's wording, no medicine named), deduplicated per order and status.
+- M11 is done: 61 of 154 contract routes built (36 on main and 25 here), 93 pending.
+  Next: the owner's review; M12 builds on `organisations`.
+
+## 2026-11-25: M11.3 The app's store, cart and checkout
+
+- `GET pharmacy/pharmacies[/{id}]` and `GET pharmacy/drugs[/{id}]`, patient role, approved
+  pharmacies only. Ranked in SQL: the patient's profile state first, then rating with the unrated
+  last, then name; paged by keyset over a derived table (FE-111). Drugs default to in stock and
+  filter by `q`, `category`, `requires_prescription` and `pharmacy_id`.
+- `GET` and `PATCH pharmacy/cart`: zero removes; 404 `DRUG_NOT_FOUND` for an unlisted medicine,
+  422 `OUT_OF_STOCK`, 422 `CART_FULL` past 50 lines. Delivery is priced per pharmacy with its fee
+  waived over its threshold; `blocked_items` from `PrescribedDrugs` (seam, M10 implements).
+- `POST pharmacy/orders` (201, 20 an hour): one order per pharmacy sharing a `checkout_id`, lines
+  copied as sold, cart emptied, and one payment started for all of them through `Payments`
+  (`initialise`, or `openAtCounter` for a pickup paid at the counter). 422 `CART_EMPTY`,
+  `PRESCRIPTION_REQUIRED` (`meta.blocked_items`), `OUT_OF_STOCK` (`meta.drug_ids`),
+  `COUNTER_IS_FOR_PICKUP` on `channel`; 400 on `address` for a delivery without one.
+- `GET pharmacy/orders[/{id}]` (paged, newest first) and `POST pharmacy/orders/{id}/cancel`: only
+  while `placed` (422 `ORDER_CONFIRMED`), empty reason, `Payments::refund()`.
+- `App\Models\Order` is `Payable`; `OrderPayables` resolves the named order then its unpaid
+  siblings. `RecordOrderPayment` writes `payment_status` on `PaymentSucceeded` and
+  `PaymentRefunded`, and sends the "Payment received" push through `Notifier`, deduplicated per
+  payment reference.
+- Erasing a patient removes their cart and orders through the foreign keys; the payment record is
+  the Payments module's.
+
+## 2026-11-25: M11.2 The pharmacy portal
+
+- `GET` and `PATCH portal/pharmacy`, `GET portal/pharmacy/summary`, and `GET`, `POST`, `PATCH`,
+  `DELETE portal/pharmacy/drugs[/{id}]`, pharmacy role, scoped to the account's organisation
+  (404 `PHARMACY_NOT_FOUND` without one; another pharmacy's medicine is 404 `DRUG_NOT_FOUND`).
+- Approval opens the store: `OpenPharmacyStore` listens to `PartnerApproved` and makes the
+  `pharmacies` row with a ₦1,500 delivery fee. Name, state, city and address are the organisation's,
+  written through `Organisations::updateListing()`; logo, cover and delivery terms are the store's.
+- Pictures go through the new `MediaLibrary::replace()`: same URL keeps, null drops and discards,
+  else 422 `MEDIA_NOT_FOUND` unless it is the account's own upload for that purpose.
+- Medicines: the NAFDAC pattern from the portal's schema, 409 `DUPLICATE_NAFDAC` per pharmacy
+  (case-insensitive), paged list with `q`, `category` and `stock` (`in` or `out`), removal refused
+  with 422 `DRUG_IN_OPEN_ORDER` while an open order holds it.
+- The summary counts in SQL over the orders a pharmacy may see, "today" in Lagos.
+- The `orders`, `order_items` and `cart_items` tables land here because the summary and the removal
+  rule read them; their routes follow in 11.3 and 11.4.
+
 ## 2026-11-25: M11.1 Partner applications
 
 - `POST partners/apply` (public, 201, five an hour per address): the portal's `zApplyPartnerRequest`
@@ -63,6 +127,7 @@ Newest first. Never edit an old entry.
   `organisation_name`. Suspension and reinstatement email the partner's accounts.
 - Seam for M12: `App\Models\Organisation`, `Organisation::listed()`, `Organisations::of()` and
   `updateListing()`, and the `PartnerApproved`, `PartnerSuspended`, `PartnerReinstated` events.
+
 ## 2026-11-20: M6 Medications and readings, done
 
 - 6.1 `POST`, `PATCH`, `DELETE medications`, `pause`, `resume`, `GET medications/{userId}` (paged,

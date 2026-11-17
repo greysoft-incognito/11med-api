@@ -109,6 +109,11 @@ return [
         'bookings_per_hour' => 20,
     ],
 
+    // Pharmacy: checkouts per patient an hour, each starting a gateway transaction.
+    'pharmacy' => [
+        'checkouts_per_hour' => 20,
+    ],
+
     // Medications and readings (M6): the dose rules (app `constants/dosing.ts`), the longest window
     // any list or score reads, and the compliance report's signed link and file life.
     'medications' => [
