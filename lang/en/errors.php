@@ -40,6 +40,12 @@ return [
     'PARTNER_NOT_APPROVED' => 'Only an approved partner can be suspended.',
     'PARTNER_NOT_SUSPENDED' => 'Only a suspended partner can be reinstated.',
 
+    // Pharmacy
+    'PHARMACY_NOT_FOUND' => 'That pharmacy is no longer listed.',
+    'DRUG_NOT_FOUND' => 'That medicine is no longer listed.',
+    'DUPLICATE_NAFDAC' => 'A medicine with this NAFDAC number is already on your list.',
+    'DRUG_IN_OPEN_ORDER' => 'This medicine is in an order that has not been delivered. Mark it out of stock instead, and remove it once the order is done.',
+
     'FORBIDDEN' => 'You do not have access to this.',
     'NOT_FOUND' => 'We could not find that.',
     'METHOD_NOT_ALLOWED' => 'That action is not available here.',

@@ -74,7 +74,7 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 ## M11 Partners and pharmacy `[~]`
 
 - [x] 11.1 Applications, approval with the welcome email, suspension
-- [ ] 11.2 The pharmacy portal: settings, summary, drugs
+- [x] 11.2 The pharmacy portal: settings, summary, drugs
 - [ ] 11.3 The app's store, cart, checkout into one order per pharmacy
 - [ ] 11.4 Fulfilment, rider, cancellations, refunds
 

@@ -2,6 +2,23 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-25: M11.2 The pharmacy portal
+
+- `GET` and `PATCH portal/pharmacy`, `GET portal/pharmacy/summary`, and `GET`, `POST`, `PATCH`,
+  `DELETE portal/pharmacy/drugs[/{id}]`, pharmacy role, scoped to the account's organisation
+  (404 `PHARMACY_NOT_FOUND` without one; another pharmacy's medicine is 404 `DRUG_NOT_FOUND`).
+- Approval opens the store: `OpenPharmacyStore` listens to `PartnerApproved` and makes the
+  `pharmacies` row with a ₦1,500 delivery fee. Name, state, city and address are the organisation's,
+  written through `Organisations::updateListing()`; logo, cover and delivery terms are the store's.
+- Pictures go through the new `MediaLibrary::replace()`: same URL keeps, null drops and discards,
+  else 422 `MEDIA_NOT_FOUND` unless it is the account's own upload for that purpose.
+- Medicines: the NAFDAC pattern from the portal's schema, 409 `DUPLICATE_NAFDAC` per pharmacy
+  (case-insensitive), paged list with `q`, `category` and `stock` (`in` or `out`), removal refused
+  with 422 `DRUG_IN_OPEN_ORDER` while an open order holds it.
+- The summary counts in SQL over the orders a pharmacy may see, "today" in Lagos.
+- The `orders`, `order_items` and `cart_items` tables land here because the summary and the removal
+  rule read them; their routes follow in 11.3 and 11.4.
+
 ## 2026-11-25: M11.1 Partner applications
 
 - `POST partners/apply` (public, 201, five an hour per address): the portal's `zApplyPartnerRequest`
