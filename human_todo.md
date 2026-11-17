@@ -25,8 +25,12 @@ Things only the owner can do or decide. Each says whether it blocks and what.
   `MEDIA_PRIVATE_DISK` pointed at an `s3` disk (a public-read bucket or prefix for pictures, a
   private one for attachments, results and licences). Until then files go to the server's
   `storage/` (`php artisan storage:link` for the public ones). **Blocks:** M3 going live.
-- [ ] **HT-006 · Push credentials.** The APNs key (`.p8`), key id and team id; an FCM service account. **Blocks:** M7 going live.
-- [ ] **HT-007 · Paystack.** Test and live secret keys, and the webhook URL set on the dashboard. **Blocks:** M9 going live.
+- [ ] **HT-006 · Push credentials.** The APNs key (`.p8`), key id and team id; an FCM service account JSON for the Firebase project the Android app is built with. Place both files on each server outside `public/` and set the `PUSH_ENABLED`, `APNS_*` and `FCM_CREDENTIALS_PATH` variables (`docs/SETUP.md` §3). **Blocks:** M7 going live; until then pushes are logged.
+- [ ] **HT-007 · Paystack.** Test and live secret keys, and the webhook URL set on the dashboard. Set
+  `PAYSTACK_SECRET_KEY` in each server's `.env` (test key on staging, live on production) and the
+  webhook URL `https://<API>/api/v1/payments/webhook/paystack` on that Paystack account; leave its
+  callback URL empty (`docs/SETUP.md` §3). Until then `POST payments` answers 422
+  `PAYMENTS_UNAVAILABLE`. **Blocks:** M9 going live.
 - [ ] **HT-008 · Call provider.** A Daily.co (recommended) or Agora account and API key. **Blocks:** M10.4 going live.
 - [ ] **HT-009 · Allergy classes.** A clinician to review the drug class seed. **Blocks:** nothing; M10.3 ships the seed marked unreviewed.
 - [x] **HT-010 · Test server database.** Answered 2026-11-17: PHP 8.4.27, PostgreSQL 14.23 client; CI now matches. **Blocks:** the first staging deploy.
@@ -37,3 +41,7 @@ Things only the owner can do or decide. Each says whether it blocks and what.
   link in the caregiver invitation SMS (default `https://11med.ng/app`; it should open the right
   store). `EMERGENCY_URL` is where a QR code points (default `https://11med.ng/profile/view`, the
   portals' public page). **Blocks:** caregiver invitations and QR codes going live.
+- [ ] **HT-130 · The guide's safety and retention.** A clinician to review the emergency patterns in
+  `app/Services/Guide/EmergencyCheck.php` and the symptom rules (app spec item 29), and a legal
+  answer on how long an idle conversation is kept (`GUIDE_RETENTION_DAYS`, default 30). **Blocks:**
+  the guide going live; it ships with the app mock's rules.

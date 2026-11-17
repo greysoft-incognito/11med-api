@@ -15,7 +15,7 @@ use Illuminate\Container\Attributes\Bind;
  * A summary is the `zPaymentSummary` shape: `reference`, `status`, `channel`, `amount_kobo`,
  * `authorization_url` (while pending, never at the counter) and `paid_at`.
  */
-#[Bind(NoPayments::class)]
+#[Bind(GatewayPayments::class)]
 interface Payments
 {
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\GuideConversation;
 use App\Models\Media;
 use App\Models\OtpCode;
 use App\Models\PasswordLink;
@@ -23,3 +24,9 @@ Schedule::command('medications:settle-doses')->everyMinute()->withoutOverlapping
 
 // Compliance reports are signed for minutes; their files are removed after a day (M6).
 Schedule::command('medications:prune-reports')->hourly();
+
+// Guide conversations idle past the retention period, with their messages (app handover §11).
+Schedule::command('model:prune', ['--model' => [GuideConversation::class]])->daily();
+
+// Payments: abandon gateway payments pending past the timeout, retry refunds never sent (app handover §16).
+Schedule::command('payments:sweep')->everyFiveMinutes()->withoutOverlapping();

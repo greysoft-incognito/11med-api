@@ -80,6 +80,12 @@ class AppServiceProvider extends ServiceProvider
         // Medications (M6): a compliance report renders a PDF, so it is rationed per account.
         RateLimiter::for('compliance-report', fn(Request $request) => Limit::perHour(config('elevenmed.medications.reports_per_hour'))->by('compliance-report|' . $request->user()?->id));
 
+        // Guide
+        RateLimiter::for('guide', fn(Request $request) => Limit::perHour(config('elevenmed.guide.messages_per_hour'))->by('guide|' . $request->user()?->id));
+
+        // Payments: each start opens a gateway transaction.
+        RateLimiter::for('payments', fn(Request $request) => Limit::perMinute(config('elevenmed.payments.initialise_per_minute'))->by('payments|' . $request->user()?->id));
+
         Provider::rateLimitCodeRequests();
         Provider::startLogger();
     }

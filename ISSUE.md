@@ -2,6 +2,26 @@
 
 Logged as found, never deleted; a resolved issue is marked resolved.
 
+### ISS-090: Paystack may not accept the app's `elevenmed://` callback
+
+- **Logged:** 2026-11-17 · **Found during:** M9.1 · **Blocking:** no · **Status:** open
+- **Detail:** App handover §16 asks for `callback_url = elevenmed://pay?reference=…`. Paystack
+  documents `callback_url` as a web address, and whether its page redirects to a custom scheme is
+  unconfirmed. Payment itself does not depend on it: the webhook settles the payment and the app
+  reads it on return to the foreground.
+- **Plan:** try it with the test keys (HT-007). If Paystack refuses the scheme, point
+  `PAYSTACK_CALLBACK_URL` at a small https page on the portals that opens `elevenmed://pay`, which
+  needs no API change.
+
+### ISS-070: Push copy is English only
+
+- **Logged:** 2026-11-21 · **Found during:** M7.2 · **Blocking:** no · **Status:** open
+- **Detail:** App handover §8.2 asks for titles and bodies in the locale the device registered with,
+  and devices carry `locale`, but `Notifier::send()` takes finished English strings and the API has
+  only `lang/en`. A Yorùbá, Hausa or Igbo user gets English pushes and history rows.
+- **Plan:** once the app's translations are reviewed, let callers pass a `lang/` key with
+  parameters, and render it per device for the push and in the user's locale for the history row.
+
 ### ISS-005: No route verifies the emergency contact's number
 
 - **Logged:** 2026-11-18 · **Found during:** M4.1 · **Blocking:** no · **Status:** open
@@ -47,3 +67,14 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 - **Resolved:** 2026-11-17. `routes/api/auth.php` and `routes/api/account.php` are removed (sign-up,
   sign-in, reset, verification and account deletion all bypassed `/api/v1` and erasure); the kit's
   admin routes need the `admin` role. The kit's tests for the removed routes went with them.
+
+### ISS-130: The guide's test codes and the portals' catalogue seed disagree
+
+- **Logged:** 2026-11-27 · **Found during:** M13.1 · **Blocking:** no · **Status:** open
+- **Detail:** the app's guide rules point to `PT`, `GENOTYPE`, `BLOODGROUP`, `EUCR` and `STOOLMCS`;
+  the portals' seed catalogue has none of them (it says `KFT` where the guide says `EUCR`). The
+  real catalogue is the admin's (M12), so a `find_test` action naming a test it does not hold
+  leads to an empty list.
+- **Plan:** `ReplyGuard` already drops any test code `TestCatalogue::known()` does not return; once
+  M12 binds it to the catalogue table those actions disappear on their own. The admin should add
+  the missing tests, or the rules should name `KFT`, once the catalogue is seeded.

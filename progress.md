@@ -26,6 +26,129 @@ Newest first. Never edit an old entry.
 - Built on the seams PR (#9) for `Entitlements` and `PrescribedSchedules`.
 - 53 of 154 contract routes built.
 
+## 2026-11-27: M13.1 The guide's conversation (admin summary and M13.2 open)
+
+- `GET guide/conversation` (opened with a greeting that names 112 on first read),
+  `POST guide/conversation/messages` (`{ body }`, 1 to 1000 characters, 60 an hour, answers the
+  whole thread) and `DELETE guide/conversation` (start over). Patient role only; `no-store`.
+- `App\Services\Guide`: `EmergencyCheck` runs before anything else and wins; `RuleResponder`
+  (with `PlatformRules`, `TestRules`, `SymptomRules`) is the app mock's rule engine, ported;
+  `ReplyGuard` keeps only allow-listed actions and puts the 112 call first on an emergency, so a
+  future model behind `GuideResponder` cannot route anywhere else.
+- `StoreSearch` (M11) and `TestCatalogue` (M12) are seams with stand-ins: no drug names yet, every
+  test code accepted.
+- Retention: bodies encrypted; start over and erasure delete for real; idle 30 days pruned daily;
+  newest 100 messages kept. Guide text is never logged.
+- Not built: `GET portal/admin/summary`, which counts M5, M8, M10 and M11 tables; it lands once
+  those merge. M13.2 waits on HT-001, HT-002, HT-005. 39 of 154 contract routes built on this
+  branch.
+
+## 2026-11-23: M9 Payments
+
+- 9.1 `POST payments` (201, ten a minute per patient) and `GET payments/{reference}`, patient only.
+  `{ purpose, target_id }` is resolved by the purpose's `PayableTargets` (the seams of PR #9, named in
+  `elevenmed.payments.targets`) through `PayableResolver`; until a module lands, its purpose answers
+  its 404 (`ORDER_NOT_FOUND`, `LAB_BOOKING_NOT_FOUND`, `CONSULTATION_NOT_FOUND`). The module's
+  `Payable::assertPayable()` throws its own 422 (`ORDER_CANCELLED`, `BOOKING_CANCELLED`,
+  `CONSULTATION_CLOSED`); 422 `ALREADY_PAID` is checked here as well.
+- `GatewayPayments` implements the `Payments` seam and replaces `NoPayments` in its `#[Bind]`. One
+  payment covers every unpaid target `resolve()` returns (an order's checkout), with one
+  `payment_targets` row per target holding its share, reference and partner. Restarting abandons
+  any pending payment for those targets. The reference is ours (`11M-` and 16 characters). Modules
+  may start a payment themselves with `initialise()` (checkout, booking) and read it with
+  `summaryFor()` or, for lists, `summariesFor()` in one query.
+- Paystack is called through `PaymentGateway` (`PaystackGateway`, Laravel's HTTP client rather than
+  the kit's `toneflix/paystack-php`, so tests fake it with `Http::fake`): `transaction/initialize`
+  with kobo, NGN, the channel as a hint, the callback with the reference, and metadata naming the
+  purpose and target ids only. An account with no email is sent as `<uuid>@customers.11med.ng`,
+  not its phone number. No key: 422 `PAYMENTS_UNAVAILABLE`; Paystack down: 503
+  `PAYMENT_GATEWAY_UNAVAILABLE` (adds `HttpStatus::SERVICE_UNAVAILABLE`). `counter` never reaches
+  Paystack and is only for orders (422 `COUNTER_IS_FOR_PICKUP` otherwise); `collectAtCounter()`
+  marks it paid on collection.
+- `GET payments/{reference}` reads; a pending gateway payment is checked with `transaction/verify`
+  at most every 15 seconds, since a late webhook would otherwise leave the app's poll pending.
+  Paystack's own verify is authoritative; the client's word never is.
+- 9.2 `POST payments/webhook/paystack`, signature checked (HMAC SHA-512, 401 `INVALID_SIGNATURE`):
+  `charge.success` settles (ignored when short of the amount); `refund.processed` and `refund.failed`
+  close a refund. Unknown references are acknowledged. A charge on an abandoned payment still counts;
+  a second charge for targets already paid is refunded in full at once.
+- `payments:sweep` every five minutes: gateway payments pending over an hour are verified once more,
+  then settled or abandoned; refunds never sent are sent again. Counter payments are never swept.
+- `Payments::refund(Payable, ?kobo)`: a paid share is refunded by its amount through a queued
+  `RequestRefund` (retried with backoff) and reads `refunded` only when Paystack confirms; a sibling
+  share stays `paid`; the payment is `refunded` once no share stands. A pending share is released
+  (reads `abandoned`), and the payment abandoned when none is left. A refused refund leaves the share
+  paid (`refund_failed`) for the team.
+- `GET portal/admin/payments`: one row per order or booking share (consultations are not on the
+  desk, as the contract's enum says), `status` per share and `q` over reference, target, partner,
+  patient name and phone, in SQL, paged, newest first. `amount_kobo` is the share, not the checkout
+  total the mock shows, so the rows add up to what was taken. An erased patient's payments are kept
+  with `user_id` null (a money record) and drop off the desk, which needs a patient's name.
+- Events, once per target and after commit, carrying the target's `Payable` as its module resolves
+  it: `PaymentSucceeded` and `PaymentRefunded` (the seams), plus `PaymentFailed` and
+  `PaymentAbandoned`. No push is sent here: the receipt and the doctor's request push belong to the
+  target's module.
+- The seams in PR #9 were amended with M9's additions (`paymentReference`, `paymentPartnerName`,
+  `initialise`, `summariesFor`, a partial `refund`), agreed with the M10, M11 and M12 threads.
+- ISS-090 (the `elevenmed://` callback on Paystack's page); HT-007 now lists the exact settings.
+  4 routes built (3 contract routes left `pending-routes.json`; the webhook has no client contract,
+  FE-005).
+## 2026-11-21: M7 Notifications and push
+
+- 7.1: `GET notifications/{userId}` pages the history newest first (FE-003) and adds the contract's
+  `unread_count` (all unread, not the page's) and `has_more` (FE-070). `PATCH read/{id}` keeps the
+  first read time; `PATCH read-all` is one `UPDATE`. `GET` and `PATCH preferences` answer every
+  category in the contract's order, saved or defaulted (push and in-app on, SMS off), so a category
+  added later appears for a user who saved before it existed (app handover §8.3); a PATCH saves only
+  the categories it names. Patient and doctor accounts; another account's id is 404. Tables
+  `app_notifications` (the kit already has `notifications`) and `notification_preferences`.
+- 7.2: `DeliveringNotifier` replaces `SilentNotifier` as the `Notifier` binding. It reads the
+  category's preference, writes the history row when in-app is on (a repeated `dedupe_key` writes
+  and pushes nothing, by a partial unique index and `ON CONFLICT DO NOTHING`), and queues
+  `DeliverPush` after commit when push is on and the caller did not pass `push: false`. With in-app
+  off the push carries a fresh id, as the mock does. `DeliverPush` reads the user's devices in
+  batches through `Devices::eachOf()` and sends with `ApnsSender` (HTTP/2, ES256 provider token
+  cached 40 minutes, sandbox or production host) or `FcmSender` (HTTP v1, service-account OAuth
+  token cached 50 minutes, Android channel `updates`). A token the provider reports unregistered
+  or malformed is dropped by `Devices::dropInvalidToken()`, unless the install registered a new one
+  meanwhile. Until `PUSH_ENABLED` and a provider's credentials are set, `LogPushSender` logs ids
+  only (HT-006). Payload `zPushPayload`; FCM data values are strings, so a null `target_id` is left
+  out and the payload is repeated as JSON under `body` (FE-071). Uses `firebase/php-jwt`, already a
+  dependency. `SilentNotifier` stays for contexts that must notify nobody.
+- 7.3: `NotifyMissedDose` listens for `App\Events\Medications\DoseMissed`, which M6's auto-miss job
+  dispatches once per dose (agreed with M6; the event file is identical on both branches). History
+  only, never pushed, keyed `missed_dose:<medication>:<scheduled_for>`, wording in
+  `lang/en/notifications.php` as the mock's. Push copy is English only (ISS-070).
+- Next: Obi's review. Callers (M6, M8, M10, M11, M12) send through `Notifier` unchanged.
+
+## 2026-11-19: M5.2 Entitlements, M5 done
+
+- `App\Services\Subscriptions\Entitlements` holds every free-tier gate, reading premium from the
+  record: `caregiverLimit()` (1 or 5), `medicationLimit()` (3 or null), `ensureCanAddMedication()`
+  (422 `MEDICATION_LIMIT_REACHED`, `meta.limit` and `meta.active` as the mock sends them; a
+  prescribed medication is exempt), `historyDays()` and `readingsDays()` (7 or null),
+  `historyFrom()` and `readingsFrom()` (the first Lagos day a free account may read), and
+  `requirePremium()` (403 `PREMIUM_REQUIRED`) for the report and insights. M6 calls these; no
+  route of its own. The free numbers are `config('elevenmed.free_tier')`.
+- M5 is done: 39 of 154 contract routes built, 115 pending.
+
+## 2026-11-19: M5.1 Subscriptions
+
+- `GET subscriptions/{userId}` for patients and doctors, their own only (404 otherwise): `none`
+  without a current record; `active`, `plan_id: 'premium'`, `current_period_end` the start of the
+  day after `premium_until` in Lagos, and `cancels_at_period_end: true`, since a recorded premium
+  does not renew (FE-050).
+- `User::isPremium()` reads the `subscription` relation: premium while `premium_until` is today or
+  later in Lagos. It lapses on its own with nothing written, so no job runs.
+- `GET portal/admin/subscriptions` is paged, newest change first, with `q` over the patient's name,
+  phone (either spelling) and the reference, in SQL. `POST` records `{ phone, premium_until,
+  reference }` (200): 400 `VALIDATION_FAILED` on `premium_until` unless after today in Lagos, 404
+  `PATIENT_NOT_FOUND` on `phone` (a verified patient account only), 409 `REFERENCE_USED` on
+  `reference` for any reference ever recorded. Recording again replaces the end date (FE-051).
+- Two tables: `subscriptions` (one per patient, the current state) and `subscription_payments`
+  (every recording, by reference, with the admin who recorded it). Erasure removes the first and
+  keeps the second without the person, so a reference can never be recorded twice.
+- `Subscriptions::activeCount()` is the premium count M13's admin summary will read.
 ## 2026-11-19: The seams between M5 to M13
 
 So the remaining milestones can be built in parallel, each interface one module owns and others call
