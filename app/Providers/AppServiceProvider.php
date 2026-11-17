@@ -63,6 +63,16 @@ class AppServiceProvider extends ServiceProvider
                 : Limit::perHour(config('elevenmed.media.uploads_per_hour'))->by('media|' . $user->id);
         });
 
+        // The emergency page needs no sign-in, so it is limited by token and by address (portal handover §7).
+        RateLimiter::for('emergency', function (Request $request) {
+            $token = hash('sha256', (string) $request->query('token'));
+
+            return [
+                Limit::perHour(config('elevenmed.emergency.opens_per_hour_per_token'))->by('emergency|token|' . $token),
+                Limit::perHour(config('elevenmed.emergency.opens_per_hour_per_address'))->by('emergency|ip|' . $request->ip()),
+            ];
+        });
+
         Provider::rateLimitCodeRequests();
         Provider::startLogger();
     }

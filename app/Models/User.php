@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -229,11 +230,16 @@ class User extends Authenticatable implements WalletOperations
     }
 
     /**
-     * Whether the medical profile's required core exists. False until the Profile module (M4) stores one.
+     * Whether the medical profile's required core exists.
      */
     public function hasMedicalProfile(): bool
     {
-        return false;
+        return $this->medicalProfile()->exists();
+    }
+
+    public function medicalProfile(): HasOne
+    {
+        return $this->hasOne(MedicalProfile::class);
     }
 
     /**
