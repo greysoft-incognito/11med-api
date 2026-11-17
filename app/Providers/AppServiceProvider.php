@@ -82,6 +82,10 @@ class AppServiceProvider extends ServiceProvider
 
         // Partners: the public application, per address, since it needs no account.
         RateLimiter::for('partner-apply', fn(Request $request) => Limit::perHour(config('elevenmed.partners.applications_per_hour'))->by('partner-apply|' . $request->ip()));
+
+        // Guide
+        RateLimiter::for('guide', fn(Request $request) => Limit::perHour(config('elevenmed.guide.messages_per_hour'))->by('guide|' . $request->user()?->id));
+
         // Payments: each start opens a gateway transaction.
         RateLimiter::for('payments', fn(Request $request) => Limit::perMinute(config('elevenmed.payments.initialise_per_minute'))->by('payments|' . $request->user()?->id));
 

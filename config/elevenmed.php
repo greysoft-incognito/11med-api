@@ -117,6 +117,14 @@ return [
         'policy_version' => env('CONSENT_POLICY_VERSION', '2026-07-01'),
     ],
 
+    // Guide: conversations idle this long are deleted, a conversation keeps only its newest
+    // messages, and a patient may send this many an hour (app handover §11).
+    'guide' => [
+        'retention_days' => (int) env('GUIDE_RETENTION_DAYS', 30),
+        'max_messages' => 100,
+        'messages_per_hour' => 60,
+    ],
+
     // Payments (app handover §16). Paystack's keys are in config/services.php. The callback is the app's pay
     // screen; accounts with no email are given one at this domain for Paystack's sake.
     'payments' => [

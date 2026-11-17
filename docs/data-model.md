@@ -61,6 +61,11 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `laboratory_tests` | A price list entry: `laboratory_id`, `lab_test_id` (unique pair among live rows), `price_kobo`, `available`. Removing a test soft deletes it. Reads always join the catalogue row, so an edit there shows on every list |
 | `lab_requests` | A doctor's request: `patient_id` (cascades on erasure), `doctor_id` (nulled on the doctor's erasure), `consultation_id` (the consultation's public uuid, unique among live rows; no foreign key until M10's table lands, ISS-120), `doctor_name` and `mdcn_number` as signed, `tests` JSONB (`test_code`, `test_name`, `reason`), `notes`, `issued_at`. Medical data: never logged |
 | `lab_bookings` | `reference` (`11L-` and eight characters), `patient_id`, `laboratory_id`, `lab_request_id` (one live, uncancelled booking per request, by partial unique index), `tests` JSONB as priced (`test_code`, `test_name`, `price_kobo`; GIN-indexed for the open-booking check), `tests_kobo`, `collection`, `collection_fee_kobo`, `total_kobo`, `address` JSONB for home collection, `scheduled_for`, `fasting_hours` (the longest of the tests), `status`, `booked_at`, `paid_at` (set by `PaymentSucceeded`; the laboratory sees only rows with it), `results_media_id`, `results_name`, `results_at`, `cancelled_at`, `cancelled_by`, `cancellation_reason`. Erasing the patient removes the rows and their results files. Medical data: never logged |
+
+### Guide (M13)
+
+| `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
+| `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 ### Payments (M9)
 
 Money records: erasure nulls `payments.user_id` and keeps the rows. Statuses change only through
