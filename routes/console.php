@@ -17,3 +17,6 @@ Schedule::command('model:prune', ['--model' => [RefreshToken::class, OtpCode::cl
 
 // Uploads no record claimed within a day, with their files (app handover §12).
 Schedule::command('model:prune', ['--model' => [Media::class]])->hourly();
+
+// Doses sixty minutes past due without an answer become missed, once each (M6).
+Schedule::command('medications:settle-doses')->everyMinute()->withoutOverlapping();
