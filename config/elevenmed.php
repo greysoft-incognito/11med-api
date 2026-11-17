@@ -94,6 +94,11 @@ return [
         'applications_per_hour' => 5,
     ],
 
+    // Laboratories: bookings a patient may start in an hour, since each opens a payment.
+    'laboratories' => [
+        'bookings_per_hour' => 20,
+    ],
+
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 
