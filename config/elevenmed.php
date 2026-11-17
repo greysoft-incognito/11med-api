@@ -40,6 +40,19 @@ return [
         'retention_years' => 6,
     ],
 
+    // Uploads (app handover §12, portal handover §3). Pictures arrive resized; the server checks,
+    // re-encodes without metadata and stores. Private purposes are served by signed links.
+    'media' => [
+        'public_disk' => env('MEDIA_PUBLIC_DISK', 'public'),
+        'private_disk' => env('MEDIA_PRIVATE_DISK', 'local'),
+        'max_bytes' => 5 * 1024 * 1024,
+        'max_edge' => 1600,
+        'signed_minutes' => 15,
+        'orphan_hours' => 24,
+        'uploads_per_hour' => 120,
+        'public_uploads_per_hour' => 10,
+    ],
+
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 

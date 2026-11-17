@@ -2,6 +2,44 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M3.2 Ownership, signed links, orphans, M3 done
+
+- `MediaLibrary::claim($owner, $url, $purpose, $field)` is the rule every record that carries a
+  file will call (M4 profile photo, M8 doctor photo, M10 attachments, M11 store and laboratory
+  pictures, results and the licence): the URL must name the caller's own upload for that purpose,
+  signed or not, else 422 `MEDIA_NOT_FOUND` on `$field`. A licence has no owner and is claimed by one
+  application only. Claiming sets `claimed_at`.
+- Records keep the media row, not the URL: `MediaLibrary::url()` writes the URL when a response is
+  written, so a signed link is always fresh. Private purposes (`message_attachment`, `lab_results`,
+  `partner_licence`) are served by `GET media/{id}/file`, a signed route that lapses in 15 minutes
+  (403 `LINK_EXPIRED` after), `nosniff`, a sandboxing CSP, private cache. Store pictures and photos
+  are plain public URLs.
+- Orphans: `Media` is `Prunable`; `model:prune` runs hourly and removes unclaimed uploads older than
+  a day with their files. `discard()` removes a file a record drops; `ForgetErasedMedia` removes an
+  erased account's uploads and files after the erasure commits.
+- M3 Media is done: 25 of 154 contract routes built, 129 pending. Next: M4 Profile and caregiving,
+  on the owner's go-ahead.
+
+## 2026-11-17: M3.1 `POST media`
+
+- One route for all ten purposes (the app's three, the portals' seven). The purpose decides the
+  role (patient, doctor, pharmacy, laboratory; a licence needs no account), the types (pictures;
+  PDF for attachments, results and licences) and whether the file is private.
+- The bearer is read without the auth middleware so the licence can arrive signed out; every other
+  purpose without one is 401 (`TOKEN_EXPIRED` when it lapsed), another role's purpose 403.
+- The bytes decide: `UploadInspector` sniffs the type (415 `UNSUPPORTED_MEDIA_TYPE` on `file`),
+  measures (413 `FILE_TOO_LARGE` over 5 MB, read or declared, and for a body over PHP's limit), reads
+  a picture's size from its header before decoding it, and refuses one over 1600 px or whose size
+  differs from the `width` and `height` sent (422 `IMAGE_NOT_RESIZED`). The picture is re-encoded
+  from its pixels with GD, so no EXIF or GPS survives (app handover §3.5). A PDF must start `%PDF-`
+  and carry no `/JavaScript`, `/JS`, `/Launch`, `/EmbeddedFile` or `/RichMedia` (415); a real
+  scanner is HT-011.
+- Stored at `media/<purpose>/<uuid>.<ext>` on `MEDIA_PUBLIC_DISK` or `MEDIA_PRIVATE_DISK`. Uploads
+  are limited to 120 an hour per account and 10 an hour per address for a licence (429
+  `RATE_LIMITED`).
+- `intervention/image` ^3.11 is now required directly; it was already installed through the kit's
+  `toneflix/laravel-fileable`, and the re-encode depends on it.
+
 ## 2026-11-17: M2.8 Account erasure, M2 done
 
 - `DELETE auth/account` confirms with the password (422 `PASSWORD_INCORRECT` on `password`), then

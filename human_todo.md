@@ -20,9 +20,15 @@ Things only the owner can do or decide. Each says whether it blocks and what.
 - [ ] **HT-004 · What survives account deletion, and for how long.** A legal answer (app spec item 19).
   The placeholder is `elevenmed.erasure` in `config/elevenmed.php`: consent records and the erasure
   record itself, severed from the person, for six years. **Blocks:** nothing; erasure ships with it.
-- [ ] **HT-005 · Object storage.** An S3-compatible bucket and keys. **Blocks:** M3 going live (local disk until then).
+- [ ] **HT-005 · Object storage.** An S3-compatible bucket and keys, then `MEDIA_PUBLIC_DISK` and
+  `MEDIA_PRIVATE_DISK` pointed at an `s3` disk (a public-read bucket or prefix for pictures, a
+  private one for attachments, results and licences). Until then files go to the server's
+  `storage/` (`php artisan storage:link` for the public ones). **Blocks:** M3 going live.
 - [ ] **HT-006 · Push credentials.** The APNs key (`.p8`), key id and team id; an FCM service account. **Blocks:** M7 going live.
 - [ ] **HT-007 · Paystack.** Test and live secret keys, and the webhook URL set on the dashboard. **Blocks:** M9 going live.
 - [ ] **HT-008 · Call provider.** A Daily.co (recommended) or Agora account and API key. **Blocks:** M10.4 going live.
 - [ ] **HT-009 · Allergy classes.** A clinician to review the drug class seed. **Blocks:** nothing; M10.3 ships the seed marked unreviewed.
 - [x] **HT-010 · Test server database.** Answered 2026-11-17: PHP 8.4.27, PostgreSQL 14.23 client; CI now matches. **Blocks:** the first staging deploy.
+- [ ] **HT-011 · A malware scanner for PDFs.** ClamAV on the server, or a scanning service, for
+  attachments, results and licences (app handover §12). Until then a PDF with scripts, launch
+  actions or embedded files is refused and the rest is stored as sent. **Blocks:** nothing.

@@ -8,8 +8,10 @@ use App\Support\Envelope;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Exceptions\InvalidSignatureException;
 use Illuminate\Validation\ValidationException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -53,6 +55,8 @@ final class ApiExceptionRenderer
             $e instanceof NotFoundHttpException => ApiException::notFound(),
             $e instanceof MethodNotAllowedHttpException => new ApiException(HttpStatus::METHOD_NOT_ALLOWED, 'METHOD_NOT_ALLOWED'),
             $e instanceof ThrottleRequestsException => self::throttled($e),
+            $e instanceof PostTooLargeException => new ApiException(HttpStatus::PAYLOAD_TOO_LARGE, 'FILE_TOO_LARGE', null, 'file'),
+            $e instanceof InvalidSignatureException => ApiException::forbidden('LINK_EXPIRED'),
             $e instanceof HttpExceptionInterface => self::http($e),
             default => new ApiException(HttpStatus::SERVER_ERROR, 'SERVER_ERROR'),
         };

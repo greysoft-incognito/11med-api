@@ -8,6 +8,10 @@ milestone that introduced it. The clients tick them; never delete.
 - [ ] **FE-001 · Validation code.** Every 400 validation refusal is `VALIDATION_FAILED`, the app's
   spelling; the portals' mock answers `VALIDATION`. No screen branches on it, so only the mock and
   the handover's §8 table change. (M1)
+- [ ] **FE-012 · Results and licence links lapse.** `lab_results` and `partner_licence` URLs are
+  signed for 15 minutes (403 `LINK_EXPIRED` after), re-signed each time the record is read. Open
+  them from a fresh read. Store pictures are plain URLs. A licence URL is accepted by one
+  application only. (M3.2)
 
 ## App (`11med`)
 
@@ -36,6 +40,15 @@ milestone that introduced it. The clients tick them; never delete.
 - [ ] **FE-009 · Social sign-in refusals.** `POST /auth/social` answers 401 `SOCIAL_TOKEN_INVALID`
   for a token that fails verification and 422 `SOCIAL_UNAVAILABLE` (field `provider`) while the
   server has no audience configured for that provider. The mock knew neither. (M2.5)
+
+- [ ] **FE-010 · Attachment links lapse.** A `message_attachment` URL is signed for 15 minutes; after
+  that it answers 403 `LINK_EXPIRED`. Re-read the message for a fresh URL rather than keeping the
+  old one, and do not let `expo-image` key its cache on the signature (use `cacheKey` set to the
+  media id). Profile and doctor photos are plain URLs. (M3.2)
+- [ ] **FE-011 · Upload refusals the mock does not make.** The type comes from the bytes, not the
+  name (415); a PDF with scripts or embedded files is 415; a picture whose pixels differ from the
+  `width` and `height` sent is 422 `IMAGE_NOT_RESIZED`. `src/lib/images.ts` already sends the
+  encoded size, so nothing changes unless that does. (M3.1)
 
 ## Both
 

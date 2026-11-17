@@ -101,7 +101,6 @@
     "POST api/v1/guide/conversation/messages",
     "POST api/v1/labs/bookings",
     "POST api/v1/labs/bookings/{bookingId}/cancel",
-    "POST api/v1/media",
     "POST api/v1/medications",
     "POST api/v1/medications/caregivers/accept",
     "POST api/v1/medications/caregivers/invite",

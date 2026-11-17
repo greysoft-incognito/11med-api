@@ -2,6 +2,15 @@
 
 Logged as found, never deleted; a resolved issue is marked resolved.
 
+### ISS-004: One stored size for every picture
+
+- **Logged:** 2026-11-17 · **Found during:** M3.1 · **Blocking:** no · **Status:** open
+- **Detail:** The handover suggests a 400 px square for avatars beside the 1600 px original. Every
+  contract carries one `url`, so the API stores the uploaded picture only, up to 1600 px. A doctor
+  list showing photos then downloads full-size pictures, which costs data.
+- **Plan:** when a list screen needs it, add a `thumbnail_url` to the contract (an FE item) and a
+  rendition at upload.
+
 ### ISS-001: The kit's route bindings compare a string to the integer `id`
 
 - **Logged:** 2026-11-16 · **Found during:** M1.1 · **Blocking:** yes · **Status:** resolved (M1.1)

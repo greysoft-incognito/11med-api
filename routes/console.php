@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Media;
 use App\Models\OtpCode;
 use App\Models\PasswordLink;
 use App\Models\RefreshToken;
@@ -13,3 +14,6 @@ Artisan::command('inspire', function () {
 
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 Schedule::command('model:prune', ['--model' => [RefreshToken::class, OtpCode::class, PasswordLink::class]])->daily();
+
+// Uploads no record claimed within a day, with their files (app handover §12).
+Schedule::command('model:prune', ['--model' => [Media::class]])->hourly();

@@ -17,6 +17,8 @@ enum HttpStatus: int
     case NOT_FOUND = 404;            // Not Found
     case METHOD_NOT_ALLOWED = 405;   // Method Not Allowed
     case CONFLICT = 409;             // Conflict
+    case PAYLOAD_TOO_LARGE = 413;    // Content Too Large
+    case UNSUPPORTED_MEDIA_TYPE = 415; // Unsupported Media Type
     case UNPROCESSABLE_ENTITY = 422; // Unprocessable Entity
     case LOCKED = 423;               // Locked
     case TOO_MANY_REQUESTS = 429;    // Too Many Requests
