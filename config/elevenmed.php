@@ -94,6 +94,11 @@ return [
         'applications_per_hour' => 5,
     ],
 
+    // Pharmacy: checkouts per patient an hour, each starting a gateway transaction.
+    'pharmacy' => [
+        'checkouts_per_hour' => 20,
+    ],
+
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 

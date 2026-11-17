@@ -2,6 +2,29 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-25: M11.3 The app's store, cart and checkout
+
+- `GET pharmacy/pharmacies[/{id}]` and `GET pharmacy/drugs[/{id}]`, patient role, approved
+  pharmacies only. Ranked in SQL: the patient's profile state first, then rating with the unrated
+  last, then name; paged by keyset over a derived table (FE-111). Drugs default to in stock and
+  filter by `q`, `category`, `requires_prescription` and `pharmacy_id`.
+- `GET` and `PATCH pharmacy/cart`: zero removes; 404 `DRUG_NOT_FOUND` for an unlisted medicine,
+  422 `OUT_OF_STOCK`, 422 `CART_FULL` past 50 lines. Delivery is priced per pharmacy with its fee
+  waived over its threshold; `blocked_items` from `PrescribedDrugs` (seam, M10 implements).
+- `POST pharmacy/orders` (201, 20 an hour): one order per pharmacy sharing a `checkout_id`, lines
+  copied as sold, cart emptied, and one payment started for all of them through `Payments`
+  (`initialise`, or `openAtCounter` for a pickup paid at the counter). 422 `CART_EMPTY`,
+  `PRESCRIPTION_REQUIRED` (`meta.blocked_items`), `OUT_OF_STOCK` (`meta.drug_ids`),
+  `COUNTER_IS_FOR_PICKUP` on `channel`; 400 on `address` for a delivery without one.
+- `GET pharmacy/orders[/{id}]` (paged, newest first) and `POST pharmacy/orders/{id}/cancel`: only
+  while `placed` (422 `ORDER_CONFIRMED`), empty reason, `Payments::refund()`.
+- `App\Models\Order` is `Payable`; `OrderPayables` resolves the named order then its unpaid
+  siblings. `RecordOrderPayment` writes `payment_status` on `PaymentSucceeded` and
+  `PaymentRefunded`, and sends the "Payment received" push through `Notifier`, deduplicated per
+  payment reference.
+- Erasing a patient removes their cart and orders through the foreign keys; the payment record is
+  the Payments module's.
+
 ## 2026-11-25: M11.2 The pharmacy portal
 
 - `GET` and `PATCH portal/pharmacy`, `GET portal/pharmacy/summary`, and `GET`, `POST`, `PATCH`,

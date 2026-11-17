@@ -15,6 +15,15 @@ milestone that introduced it. The clients tick them; never delete.
 
 ## App (`11med`)
 
+- [ ] **FE-111 · The store's lists are paged.** `GET /pharmacy/pharmacies`, `GET /pharmacy/drugs`
+  and `GET /pharmacy/orders` answer `{ items, next_cursor, total }` (FE-003), in the same order the
+  mock ranks them. (M11.3)
+- [ ] **FE-112 · Store refusals the mock does not make.** A cart holds at most 50 lines (422
+  `CART_FULL`, `meta.limit`) of at most 99 each; checkout refuses an out-of-stock line (422
+  `OUT_OF_STOCK`, `meta.drug_ids`) instead of ordering it; the order reference is `ORD-` and eight
+  characters. The live store lists only approved pharmacies, so a suspended pharmacy's medicines
+  drop out of the cart. (M11.3)
+
 - [ ] **FE-002 · `scheduled_for` is an instant.** A dose's `scheduled_for` is a real UTC instant
   computed in Africa/Lagos, so `formatScheduledTime` must read it as local time like
   `formatLoggedTime`, and the mock must compose it the same way. Spec item 12. (M6)
