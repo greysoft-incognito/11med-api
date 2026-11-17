@@ -39,6 +39,8 @@ return [
     'SERVER_ERROR' => 'Something went wrong on our side. Try again shortly.',
 
     // Subscriptions
+    'PREMIUM_REQUIRED' => 'This is part of premium.',
+    'MEDICATION_LIMIT_REACHED' => 'Free accounts can track 3 medications at a time.',
     'PATIENT_NOT_FOUND' => 'No patient account has this phone number.',
     'REFERENCE_USED' => 'This payment reference has already been recorded.',
 ];

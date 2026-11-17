@@ -70,6 +70,14 @@ return [
         'accept_attempts_per_hour' => 10,
     ],
 
+    // Subscriptions: what the free tier allows (app CLAUDE.md "Free vs premium gates"). Premium is
+    // recorded by the team and lifts every one; caregivers keep their own block above.
+    'free_tier' => [
+        'medications' => 3,
+        'history_days' => 7,
+        'readings_days' => 7,
+    ],
+
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 

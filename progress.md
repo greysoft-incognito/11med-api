@@ -2,6 +2,17 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-19: M5.2 Entitlements, M5 done
+
+- `App\Services\Subscriptions\Entitlements` holds every free-tier gate, reading premium from the
+  record: `caregiverLimit()` (1 or 5), `medicationLimit()` (3 or null), `ensureCanAddMedication()`
+  (422 `MEDICATION_LIMIT_REACHED`, `meta.limit` and `meta.active` as the mock sends them; a
+  prescribed medication is exempt), `historyDays()` and `readingsDays()` (7 or null),
+  `historyFrom()` and `readingsFrom()` (the first Lagos day a free account may read), and
+  `requirePremium()` (403 `PREMIUM_REQUIRED`) for the report and insights. M6 calls these; no
+  route of its own. The free numbers are `config('elevenmed.free_tier')`.
+- M5 is done: 39 of 154 contract routes built, 115 pending.
+
 ## 2026-11-19: M5.1 Subscriptions
 
 - `GET subscriptions/{userId}` for patients and doctors, their own only (404 otherwise): `none`
