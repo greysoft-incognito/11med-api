@@ -46,3 +46,7 @@ Things only the owner can do or decide. Each says whether it blocks and what.
   link in the caregiver invitation SMS (default `https://11med.ng/app`; it should open the right
   store). `EMERGENCY_URL` is where a QR code points (default `https://11med.ng/profile/view`, the
   portals' public page). **Blocks:** caregiver invitations and QR codes going live.
+- [ ] **HT-130 · The guide's safety and retention.** A clinician to review the emergency patterns in
+  `app/Services/Guide/EmergencyCheck.php` and the symptom rules (app spec item 29), and a legal
+  answer on how long an idle conversation is kept (`GUIDE_RETENTION_DAYS`, default 30). **Blocks:**
+  the guide going live; it ships with the app mock's rules.

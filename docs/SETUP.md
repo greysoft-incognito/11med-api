@@ -35,9 +35,10 @@ by id in [human_todo.md](../human_todo.md).
   `client_max_body_size 8m;` in nginx. The API refuses anything over 5 MB itself.
 - **Document root** `DEPLOY_PATH/public`; the PHP-FPM user can write `storage/` and `bootstrap/cache/`.
 - **Scheduler** (M2 onwards): a cron line for the PHP-FPM user. It prunes spent tokens and codes,
-  every hour removes uploads no record claimed (M3), and every five minutes runs `payments:sweep`
+  every hour removes uploads no record claimed (M3), every five minutes runs `payments:sweep`
   (M9), which settles or abandons gateway payments pending over an hour and re-sends refunds the
-  gateway never received. Since M10 it also runs `consultations:settle` every minute (a request not
+  gateway never received, and every day deletes guide conversations idle past
+  `GUIDE_RETENTION_DAYS` (M13). Since M10 it also runs `consultations:settle` every minute (a request not
   accepted in 5 minutes, or a session not joined in 10, expires and is refunded; a chat closes at
   the end of its window) and `consultations:payouts` at 02:00 every other day (doctors' payouts).
   Without the scheduler, consultations never expire and patients are never refunded for them.
@@ -60,7 +61,7 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | Variable | Value |
 | --- | --- |
 | `APP_ENV` | `staging` or `production` |
-| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. Since M8 it also encrypts doctors' payout account numbers, which a changed key would lose: doctors would have to enter them again before a payout |
+| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. It also encrypts guide messages (M13), which become unreadable too: start over clears them. Since M8 it also encrypts doctors' payout account numbers, which a changed key would lose: doctors would have to enter them again before a payout |
 | `APP_DEBUG` | `false` |
 | `APP_URL` | The API's public `https://` address. Upload URLs and signed file links are built from it (M3) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL. `DB_CONNECTION=pgsql` |
@@ -77,12 +78,14 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `GOOGLE_WEB_CLIENT_ID` | none | The app's `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, from the EAS `development` environment on expo.dev (HT-003) | M2 |
 | `APPLE_BUNDLE_ID` | `ng.elevenmed.app` | The audience Apple sign-in tokens are checked against | M2 |
 | `PORTALS_URL` | `http://localhost:3000` | Where the portals live; reset and welcome emails link to `PORTALS_URL/set-password?token=…` | M2 |
+| `CORS_ALLOWED_ORIGINS` | `PORTALS_URL` | Browser origins allowed to call the API, comma separated, e.g. the staging and local portals. The app is native and needs none | M13 |
 | `CONSENT_POLICY_VERSION` | `2026-07-01` | The policy version recorded when the app sends no consent record | M2 |
 | `MEDIA_PUBLIC_DISK` | `public` | Disk for photos and store pictures. Point at an `s3` disk with public read once the bucket exists (HT-005) | M3 |
 | `MEDIA_PRIVATE_DISK` | `local` | Disk for attachments, lab results and licences. A private `s3` disk once the bucket exists | M3 |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `GUIDE_RETENTION_DAYS` | `30` | Guide conversations idle this many days are deleted by the scheduler, with their messages (HT-130) | M13 |
 | `PAYSTACK_SECRET_KEY` | none | Paystack's secret key (`sk_test_…` on staging, `sk_live_…` on production). It also verifies the webhook's signature. Never give it to a client (HT-007) | M9 |
 | `PAYSTACK_CALLBACK_URL` | `elevenmed://pay` | Where Paystack's page sends the patient back; `?reference=` is added per payment. The app's pay screen (app CLAUDE.md, "Deep links"). See ISS-090 | M9 |
 | `PAYMENTS_EMAIL_DOMAIN` | `customers.11med.ng` | Paystack needs an email; an account without one is sent as `<account id>@<this domain>`. No mail is ever sent there | M9 |
@@ -156,3 +159,25 @@ vendor/bin/pint --test
 
 Keep `../11med` and `../11med-web` checked out beside this repository: the route ratchet test reads
 their mocks, and skips that comparison when they are missing.
+
+## 7. Pointing the clients at a server
+
+Both clients run against in-browser or in-app mocks until told otherwise. To use a server (staging
+first), set these in the client, not here:
+
+| Client | Variables | Value for staging |
+| --- | --- | --- |
+| App (`../11med`) | `EXPO_PUBLIC_USE_MOCKS=false`, `EXPO_PUBLIC_API_URL` | The server's `APP_URL`, without `/api/v1` (the app adds it). Set in the EAS `development` environment on expo.dev, since builds and `npm run ship` read from there |
+| Portals (`../11med-web`) | `NEXT_PUBLIC_API_MODE=live`, `NEXT_PUBLIC_API_BASE_URL` | The same address, without `/api/v1` |
+
+On the server, `CORS_ALLOWED_ORIGINS` (or `PORTALS_URL`) must name the portals' origin, or the
+browser refuses every call. Check a server is ready with `curl https://<APP_URL>/api/v1/health`.
+
+## 8. A server is running when
+
+- The deploy workflow has run green for it (HT-001), and `/api/v1/health` answers.
+- `php artisan schedule:list` shows the jobs in section 2 and the cron line is installed.
+- A queue worker is up (`supervisorctl status`), so codes and invitations leave the queue.
+- SMS and mail are real or deliberately logged (HT-002), and uploads go to the bucket (HT-005).
+- The runtime settings and first admin from section 5 exist.
+
