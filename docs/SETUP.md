@@ -28,12 +28,15 @@ Paystack keys and webhook (M9, HT-007), a Daily.co or Agora key (M10, HT-008).
 ## 2. Server
 
 - **PHP 8.4** with `pdo_pgsql`, `pgsql`, `intl`, `zip`, `gd` (built with JPEG, PNG and WebP),
-  `exif`, `bcmath`, `mbstring`. Composer 2, Git, a web server with PHP-FPM.
+  `exif`, `bcmath`, `mbstring`, and `dom` (the compliance report's PDF renderer, M6). Composer 2, Git, a web server with PHP-FPM.
 - **Upload limits** (M3): `upload_max_filesize = 6M` and `post_max_size = 8M` in `php.ini`;
   `client_max_body_size 8m;` in nginx. The API refuses anything over 5 MB itself.
 - **Document root** `DEPLOY_PATH/public`; the PHP-FPM user can write `storage/` and `bootstrap/cache/`.
 - **Scheduler** (M2 onwards): a cron line for the PHP-FPM user. It prunes spent tokens and codes,
-  and every hour removes uploads no record claimed (M3).
+  every hour removes uploads no record claimed (M3) and compliance report PDFs older than a day,
+  and **every minute marks doses missed sixty minutes after they were due** (M6,
+  `medications:settle-doses`). Without the cron, unanswered doses never count against
+  compliance and missed-dose notifications never go out.
 
   ```
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
@@ -75,6 +78,7 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `REPORT_DISK` | `local` | Disk for compliance report PDFs, served by a 15-minute signed link and deleted after a day. A private `s3` disk once the bucket exists (HT-005); never a public one | M6 |
 
 Development only: `ELEVENMED_APP_PATH` and `ELEVENMED_PORTALS_PATH` point at the client checkouts
 (default `../11med` and `../11med-web`) for `php artisan contract:routes`.
@@ -98,6 +102,9 @@ php artisan dbconfig:sync                      # seeds the runtime settings
 php artisan dbconfig:set prefered_sms_channel KUDISMS
 php artisan app:create-admin you@example.com "Your Name"   # first team account; prints its link
 ```
+
+The missed-dose job can be run by hand to check the scheduler is wired: `php artisan medications:settle-doses`
+prints how many doses it marked missed.
 
 ## 6. Local development
 

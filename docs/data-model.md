@@ -45,4 +45,14 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `qr_accesses` | Not soft deleted. One row per open of the emergency page: `qr_token_id`, `opened_at`, and nothing about the reader |
 | `caregivers` | A patient's invitation (`patient_id`, `phone` local form, `invite_code`, both unique among live rows) and, once accepted, `caregiver_user_id`, `status` `active`, `accepted_at`. Revoking soft deletes; erasing either account removes the row |
 
+### Medications and readings (M6)
+
+| Table | Notes |
+| --- | --- |
+| `medications` | A schedule (`zMedication`): drug, strength, form, `dose_quantity` (numeric) and `dose_unit`, `frequency_type`, `specific_times` (JSONB `HH:MM`, read in Africa/Lagos), `start_date`, `end_date`, the reminder flags, `paused_at`, and `settled_through`: the instant up to which every dose has a `dose_logs` row. Doses after it are derived from the schedule. `prescribed_by_doctor_id` (nulled if the doctor's account is erased) and `prescription_id` (the consultation's prescription, indexed; applying is idempotent on it) mark a prescribed schedule, which the cap never counts. Medical data: never logged |
+| `dose_logs` | One live row per `(medication_id, scheduled_for)` (partial unique index): `state`, `skip_reason`, `logged_at` (null when the job marked it missed), `snooze_count`. Written by the patient, or by `medications:settle-doses` sixty minutes past due. A retraction soft deletes the row and, for a dose past its hour, writes a `missed` one in its place. `user_id` is denormalised for the per-patient reads |
+| `readings` | A home reading (`zReading`): `type`, then `systolic`, `diastolic`, `pulse` for blood pressure, `mmol_l` and `context` for sugar, `kg` for weight (the other columns null), `taken_at`, `note`. Indexed by `(user_id, taken_at)` and `(user_id, type, taken_at)` |
+
+All three cascade on account erasure.
+
 Domain tables are added here as each milestone lands.
