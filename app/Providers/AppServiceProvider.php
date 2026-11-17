@@ -77,6 +77,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('caregiver-invite', fn(Request $request) => Limit::perDay(config('elevenmed.caregivers.invites_per_day'))->by('caregiver-invite|' . $request->user()?->id));
         RateLimiter::for('caregiver-accept', fn(Request $request) => Limit::perHour(config('elevenmed.caregivers.accept_attempts_per_hour'))->by('caregiver-accept|' . $request->user()?->id));
 
+        // Guide
+        RateLimiter::for('guide', fn(Request $request) => Limit::perHour(config('elevenmed.guide.messages_per_hour'))->by('guide|' . $request->user()?->id));
+
         // Payments: each start opens a gateway transaction.
         RateLimiter::for('payments', fn(Request $request) => Limit::perMinute(config('elevenmed.payments.initialise_per_minute'))->by('payments|' . $request->user()?->id));
 

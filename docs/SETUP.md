@@ -21,11 +21,11 @@ by id in [human_todo.md](../human_todo.md).
 | S3-compatible bucket and keys | Uploaded files | M3 | Files stay on the server's own disk | HT-005 |
 | A malware scanner (ClamAV or a service) | PDFs | M3 | PDFs with scripts or embedded files are refused; others stored as sent | HT-011, optional |
 | The real store link and emergency page address | Caregiver SMS, QR codes | M4 | The defaults below are used | HT-012 |
+| Apple Push Notifications key (`.p8`), its key id and the team id | Push to iPhones | M7 | Pushes are written to the log (ids only) | HT-006 |
+| Firebase project service account JSON (role Firebase Cloud Messaging API Admin, with the FCM HTTP v1 API enabled) | Push to Android | M7 | Pushes are written to the log (ids only) | HT-006 |
 | Paystack account: secret key (test on staging, live on production) and the webhook URL on its dashboard | Paying for orders, lab bookings and consultations | M9 | `POST payments` answers 422 `PAYMENTS_UNAVAILABLE`; paying at the counter still works | HT-007 |
 | Daily.co account and API key | Voice and video consultations | M10 | `CALL_PROVIDER=mock` answers made-up rooms only the app's stand-in can open; chat consultations work | HT-008 |
 | A clinician's review of the drug class seed | The allergy check at prescribing | M10 | The seed ships unreviewed; doctors can still prescribe past a warning | HT-009, optional |
-
-Not needed yet, listed so they are not a surprise: APNs key and FCM service account (M7, HT-006).
 
 ## 2. Server
 
@@ -35,9 +35,10 @@ Not needed yet, listed so they are not a surprise: APNs key and FCM service acco
   `client_max_body_size 8m;` in nginx. The API refuses anything over 5 MB itself.
 - **Document root** `DEPLOY_PATH/public`; the PHP-FPM user can write `storage/` and `bootstrap/cache/`.
 - **Scheduler** (M2 onwards): a cron line for the PHP-FPM user. It prunes spent tokens and codes,
-  every hour removes uploads no record claimed (M3), and every five minutes runs `payments:sweep`
+  every hour removes uploads no record claimed (M3), every five minutes runs `payments:sweep`
   (M9), which settles or abandons gateway payments pending over an hour and re-sends refunds the
-  gateway never received. Since M10 it also runs `consultations:settle` every minute (a request not
+  gateway never received, and every day deletes guide conversations idle past
+  `GUIDE_RETENTION_DAYS` (M13). Since M10 it also runs `consultations:settle` every minute (a request not
   accepted in 5 minutes, or a session not joined in 10, expires and is refunded; a chat closes at
   the end of its window) and `consultations:payouts` at 02:00 every other day (doctors' payouts).
   Without the scheduler, consultations never expire and patients are never refunded for them.
@@ -46,8 +47,8 @@ Not needed yet, listed so they are not a surprise: APNs key and FCM service acco
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
   ```
 
-- **Queue worker** (M2 onwards): every SMS and email is queued, and so is every refund sent to
-  Paystack (M9), so without a worker nothing is sent.
+- **Queue worker** (M2 onwards): every SMS, email, push (M7) and refund sent to Paystack (M9) is
+  queued, so without a worker nothing is sent.
   Run `php artisan queue:work` under Supervisor or systemd;
   `scripts/generate-supervisor-config.sh <user> [processes] [driver]` writes the Supervisor program.
 
@@ -60,7 +61,7 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | Variable | Value |
 | --- | --- |
 | `APP_ENV` | `staging` or `production` |
-| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. Since M8 it also encrypts doctors' payout account numbers, which a changed key would lose: doctors would have to enter them again before a payout |
+| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. It also encrypts guide messages (M13), which become unreadable too: start over clears them. Since M8 it also encrypts doctors' payout account numbers, which a changed key would lose: doctors would have to enter them again before a payout |
 | `APP_DEBUG` | `false` |
 | `APP_URL` | The API's public `https://` address. Upload URLs and signed file links are built from it (M3) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL. `DB_CONNECTION=pgsql` |
@@ -77,17 +78,25 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `GOOGLE_WEB_CLIENT_ID` | none | The app's `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, from the EAS `development` environment on expo.dev (HT-003) | M2 |
 | `APPLE_BUNDLE_ID` | `ng.elevenmed.app` | The audience Apple sign-in tokens are checked against | M2 |
 | `PORTALS_URL` | `http://localhost:3000` | Where the portals live; reset and welcome emails link to `PORTALS_URL/set-password?token=…` | M2 |
+| `CORS_ALLOWED_ORIGINS` | `PORTALS_URL` | Browser origins allowed to call the API, comma separated, e.g. the staging and local portals. The app is native and needs none | M13 |
 | `CONSENT_POLICY_VERSION` | `2026-07-01` | The policy version recorded when the app sends no consent record | M2 |
 | `MEDIA_PUBLIC_DISK` | `public` | Disk for photos and store pictures. Point at an `s3` disk with public read once the bucket exists (HT-005) | M3 |
 | `MEDIA_PRIVATE_DISK` | `local` | Disk for attachments, lab results and licences. A private `s3` disk once the bucket exists | M3 |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `GUIDE_RETENTION_DAYS` | `30` | Guide conversations idle this many days are deleted by the scheduler, with their messages (HT-130) | M13 |
 | `PAYSTACK_SECRET_KEY` | none | Paystack's secret key (`sk_test_…` on staging, `sk_live_…` on production). It also verifies the webhook's signature. Never give it to a client (HT-007) | M9 |
 | `PAYSTACK_CALLBACK_URL` | `elevenmed://pay` | Where Paystack's page sends the patient back; `?reference=` is added per payment. The app's pay screen (app CLAUDE.md, "Deep links"). See ISS-090 | M9 |
 | `PAYMENTS_EMAIL_DOMAIN` | `customers.11med.ng` | Paystack needs an email; an account without one is sent as `<account id>@<this domain>`. No mail is ever sent there | M9 |
 | `PAYMENTS_ABANDON_AFTER_MINUTES` | `60` | How long a gateway payment may stay pending before the sweep asks Paystack once more and abandons it | M9 |
 | `PAYSTACK_BASE_URL` | `https://api.paystack.co` | Only for pointing tests at a stand-in | M9 |
+| `PUSH_ENABLED` | `false` | `true` sends pushes through APNs and FCM for each provider whose credentials are set; otherwise ids are logged | M7 |
+| `APNS_KEY_PATH` | none | Absolute path to the `.p8` key file, outside `public/`, readable by the PHP-FPM and queue user (HT-006) | M7 |
+| `APNS_KEY_ID`, `APNS_TEAM_ID` | none | The key's 10-character id and the Apple team id (HT-006) | M7 |
+| `APNS_BUNDLE_ID` | `ng.elevenmed.app` | The app's bundle id, sent as `apns-topic` | M7 |
+| `APNS_PRODUCTION` | `false` | `false` on staging, whose phones run development builds with sandbox tokens; `true` on production for App Store and TestFlight builds. The wrong value makes Apple refuse every token, and refused tokens are deleted | M7 |
+| `FCM_CREDENTIALS_PATH` | none | Absolute path to the Firebase service account JSON, outside `public/` (HT-006). The project id is read from it | M7 |
 | `CONSULTATION_COMMISSION_PERCENT` | `15` | The platform's share of each consultation fee, taken when a payout is made. A payout keeps the percentage it was made with | M10 |
 | `CALL_PROVIDER` | `mock` | `daily` once the Daily.co key exists (HT-008). `mock` answers made-up rooms; anything else refuses calls with 422 `CALL_UNAVAILABLE` | M10 |
 | `DAILY_API_KEY` | none | The Daily.co API key. Never give it to a client: the API mints a token per participant | M10 |
@@ -116,6 +125,10 @@ Kept in the database (`laravel-dbconfig`), changed with Artisan, no deploy neede
 | Setting | Value | Command |
 | --- | --- | --- |
 | `prefered_sms_channel` | `KUDISMS` (the kit's default is Twilio) | `php artisan dbconfig:set prefered_sms_channel KUDISMS` |
+
+The free tier's limits (3 medications, 1 caregiver, 7 days of history and readings) are code
+config in `config/elevenmed.php` (`free_tier`, `caregivers`), changed by a deploy, not here. Premium
+needs no service or credential: the team records it in the admin portal (M5).
 
 ## 5. Commands, once per server
 
@@ -146,3 +159,25 @@ vendor/bin/pint --test
 
 Keep `../11med` and `../11med-web` checked out beside this repository: the route ratchet test reads
 their mocks, and skips that comparison when they are missing.
+
+## 7. Pointing the clients at a server
+
+Both clients run against in-browser or in-app mocks until told otherwise. To use a server (staging
+first), set these in the client, not here:
+
+| Client | Variables | Value for staging |
+| --- | --- | --- |
+| App (`../11med`) | `EXPO_PUBLIC_USE_MOCKS=false`, `EXPO_PUBLIC_API_URL` | The server's `APP_URL`, without `/api/v1` (the app adds it). Set in the EAS `development` environment on expo.dev, since builds and `npm run ship` read from there |
+| Portals (`../11med-web`) | `NEXT_PUBLIC_API_MODE=live`, `NEXT_PUBLIC_API_BASE_URL` | The same address, without `/api/v1` |
+
+On the server, `CORS_ALLOWED_ORIGINS` (or `PORTALS_URL`) must name the portals' origin, or the
+browser refuses every call. Check a server is ready with `curl https://<APP_URL>/api/v1/health`.
+
+## 8. A server is running when
+
+- The deploy workflow has run green for it (HT-001), and `/api/v1/health` answers.
+- `php artisan schedule:list` shows the jobs in section 2 and the cron line is installed.
+- A queue worker is up (`supervisorctl status`), so codes and invitations leave the queue.
+- SMS and mail are real or deliberately logged (HT-002), and uploads go to the bucket (HT-005).
+- The runtime settings and first admin from section 5 exist.
+
