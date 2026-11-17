@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Payments;
 
+use App\Enums\PaymentChannel;
 use App\Enums\PaymentPurpose;
-use App\Enums\PaymentStatus;
 use App\Enums\Role;
 use App\Events\Payments\PaymentSucceeded;
 use App\Models\User;
@@ -109,7 +109,7 @@ class ReadPaymentTest extends TestCase
             'amount_kobo' => 470000,
             'authorization_url' => 'https://checkout.paystack.com/' . $reference,
             'paid_at' => null,
-        ], $summaries[$second->id]->toArray());
+        ], $summaries[$second->id]);
 
         $this->assertNull(app(Payments::class)->summaryFor($this->order($patient, 100)));
     }
@@ -125,13 +125,31 @@ class ReadPaymentTest extends TestCase
             ->postJson('api/v1/payments', ['purpose' => 'order', 'target_id' => $order->id, 'channel' => 'counter'])
             ->assertCreated();
 
-        $payment = app(Payments::class)->settleAtCounter($order);
+        app(Payments::class)->collectAtCounter($order);
 
-        $this->assertSame(PaymentStatus::Paid, $payment->status);
-        $this->assertSame('paid', app(Payments::class)->summaryFor($order)->toArray()['status']);
-        $this->assertSame('counter', app(Payments::class)->summaryFor($order)->toArray()['channel']);
+        $this->assertSame('paid', app(Payments::class)->summaryFor($order)['status']);
+        $this->assertSame('counter', app(Payments::class)->summaryFor($order)['channel']);
 
-        Event::assertDispatched(PaymentSucceeded::class);
+        Event::assertDispatched(PaymentSucceeded::class, fn(PaymentSucceeded $e) => $e->target === $order && $e->channel === PaymentChannel::Counter);
+    }
+
+    public function test_a_module_opens_a_counter_payment_and_starts_a_checkout_itself(): void
+    {
+        $patient = $this->patient();
+        $pickup = $this->order($patient, 350000, 'ORD-1');
+        $first = $this->order($patient, 200000, 'ORD-2');
+        $second = $this->order($patient, 100000, 'ORD-3');
+
+        app(Payments::class)->openAtCounter($pickup);
+        app(Payments::class)->initialise([$first, $second], $patient, PaymentChannel::Card);
+
+        $this->assertSame('counter', app(Payments::class)->summaryFor($pickup)['channel']);
+        $this->assertNull(app(Payments::class)->summaryFor($pickup)['authorization_url']);
+        $this->assertSame(300000, app(Payments::class)->summaryFor($second)['amount_kobo']);
+        $this->assertSame(
+            app(Payments::class)->summaryFor($first)['reference'],
+            app(Payments::class)->summaryFor($second)['reference'],
+        );
     }
 
     private function start(User $patient, string $targetId): string

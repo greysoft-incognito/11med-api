@@ -45,7 +45,7 @@ class PaystackWebhookTest extends TestCase
             ->assertJsonPath('data.paid_at', '2026-11-17T10:00:00.000Z');
 
         Event::assertDispatchedTimes(PaymentSucceeded::class, 1);
-        Event::assertDispatched(PaymentSucceeded::class, fn(PaymentSucceeded $e) => $e->payment->targetIds() === [$order->id]);
+        Event::assertDispatched(PaymentSucceeded::class, fn(PaymentSucceeded $e) => $e->target === $order && $e->reference === $reference);
     }
 
     public function test_a_bad_signature_is_refused_and_unknown_references_are_acknowledged(): void

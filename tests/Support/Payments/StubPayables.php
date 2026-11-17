@@ -2,14 +2,14 @@
 
 namespace Tests\Support\Payments;
 
+use App\Exceptions\ApiException;
 use App\Models\User;
-use App\Services\Payments\Payable;
-use App\Services\Payments\PayableSource;
+use App\Services\Payments\PayableTargets;
 
 /**
- * The source the tests bind in place of a module's: finds stub targets by id, the patient's own only.
+ * The targets the tests bind in place of a module's: a stub by id with its siblings, the payer's own only.
  */
-class StubPayables implements PayableSource
+class StubPayables implements PayableTargets
 {
     /**
      * @var array<string, StubPayable>
@@ -23,10 +23,14 @@ class StubPayables implements PayableSource
         }
     }
 
-    public function find(User $patient, string $targetId): ?Payable
+    public function resolve(string $targetId, User $payer): array
     {
         $target = $this->targets[$targetId] ?? null;
 
-        return $target?->patient->is($patient) ? $target : null;
+        if ($target === null || ! $target->patient->is($payer)) {
+            throw ApiException::notFound($target?->purpose->notFoundCode() ?? 'NOT_FOUND');
+        }
+
+        return [$target, ...$target->siblings];
     }
 }

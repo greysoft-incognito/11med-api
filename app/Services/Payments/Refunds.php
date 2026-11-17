@@ -6,7 +6,6 @@ use App\Enums\PaymentShareState;
 use App\Enums\PaymentStatus;
 use App\Enums\RefundStatus;
 use App\Events\Payments\PaymentAbandoned;
-use App\Events\Payments\PaymentRefunded;
 use App\Exceptions\ApiException;
 use App\Jobs\Payments\RequestRefund;
 use App\Models\Payment;
@@ -25,10 +24,12 @@ class Refunds
     public function __construct(
         private readonly PaymentShares $shares,
         private readonly PaymentGateway $gateway,
+        private readonly PaymentEvents $events,
     ) {}
 
     /**
      * Refunds a target's share, all of it unless an amount is named. Idempotent while a refund is open.
+     * A share not yet paid for is released and announced abandoned.
      */
     public function refund(Payable $target, ?int $kobo = null): void
     {
@@ -38,12 +39,12 @@ class Refunds
             return;
         }
 
-        DB::transaction(function () use ($current, $kobo) {
+        DB::transaction(function () use ($current, $kobo, $target) {
             $payment = $this->lockPayment($current->payment_id);
             $share = $this->lockShare($current->id);
 
             match ($payment->status) {
-                PaymentStatus::Pending => $this->release($payment, $share),
+                PaymentStatus::Pending => $this->release($payment, $share, $target),
                 PaymentStatus::Paid => $this->open($payment, $share, $kobo),
                 default => null,
             };
@@ -110,7 +111,7 @@ class Refunds
 
             $this->closeIfSettled($payment);
 
-            PaymentRefunded::dispatch($payment->load('targets'), $share->purpose, $share->target_id, $refund->amount_kobo);
+            $this->events->refunded($payment, $share, $refund->amount_kobo);
         });
     }
 
@@ -175,9 +176,15 @@ class Refunds
     /**
      * A target cancelled before it was paid for leaves the payment; one with nothing left is abandoned.
      */
-    private function release(Payment $payment, PaymentTarget $share): void
+    private function release(Payment $payment, PaymentTarget $share, Payable $target): void
     {
+        if ($share->state === PaymentShareState::Released) {
+            return;
+        }
+
         $share->forceFill(['state' => PaymentShareState::Released])->save();
+
+        PaymentAbandoned::dispatch($target, $payment->reference);
 
         $standing = $payment
             ->targets()
@@ -192,8 +199,6 @@ class Refunds
             'status' => PaymentStatus::Abandoned,
             'authorization_url' => null,
         ])->save();
-
-        PaymentAbandoned::dispatch($payment->load('targets'));
     }
 
     /**

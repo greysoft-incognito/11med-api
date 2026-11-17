@@ -5,21 +5,24 @@ Newest first. Never edit an old entry.
 ## 2026-11-23: M9 Payments
 
 - 9.1 `POST payments` (201, ten a minute per patient) and `GET payments/{reference}`, patient only.
-  `{ purpose, target_id }` is resolved by the purpose's module through a `PayableSource` at a fixed
-  class name (`PaymentPurpose::sourceClass()`), so M10, M11 and M12 add a class and edit nothing
-  shared; until one exists, that purpose answers its 404 (`ORDER_NOT_FOUND`, `LAB_BOOKING_NOT_FOUND`,
-  `CONSULTATION_NOT_FOUND`). The module's `Payable::ensurePayable()` throws its own 422
-  (`ORDER_CANCELLED`, `BOOKING_CANCELLED`, `CONSULTATION_CLOSED`); 422 `ALREADY_PAID` is ours.
-- One payment covers every unpaid target `Payable::paymentTargets()` names (an order's checkout),
-  with one `payment_targets` row per target holding its share, reference and partner. Restarting
-  abandons any pending payment for those targets. The reference is ours (`11M-` and 16 characters).
+  `{ purpose, target_id }` is resolved by the purpose's `PayableTargets` (the seams of PR #9, named in
+  `elevenmed.payments.targets`) through `PayableResolver`; until a module lands, its purpose answers
+  its 404 (`ORDER_NOT_FOUND`, `LAB_BOOKING_NOT_FOUND`, `CONSULTATION_NOT_FOUND`). The module's
+  `Payable::assertPayable()` throws its own 422 (`ORDER_CANCELLED`, `BOOKING_CANCELLED`,
+  `CONSULTATION_CLOSED`); 422 `ALREADY_PAID` is checked here as well.
+- `GatewayPayments` implements the `Payments` seam and replaces `NoPayments` in its `#[Bind]`. One
+  payment covers every unpaid target `resolve()` returns (an order's checkout), with one
+  `payment_targets` row per target holding its share, reference and partner. Restarting abandons
+  any pending payment for those targets. The reference is ours (`11M-` and 16 characters). Modules
+  may start a payment themselves with `initialise()` (checkout, booking) and read it with
+  `summaryFor()` or, for lists, `summariesFor()` in one query.
 - Paystack is called through `PaymentGateway` (`PaystackGateway`, Laravel's HTTP client rather than
   the kit's `toneflix/paystack-php`, so tests fake it with `Http::fake`): `transaction/initialize`
   with kobo, NGN, the channel as a hint, the callback with the reference, and metadata naming the
   purpose and target ids only. An account with no email is sent as `<uuid>@customers.11med.ng`,
   not its phone number. No key: 422 `PAYMENTS_UNAVAILABLE`; Paystack down: 503
   `PAYMENT_GATEWAY_UNAVAILABLE` (adds `HttpStatus::SERVICE_UNAVAILABLE`). `counter` never reaches
-  Paystack and is only for orders (422 `COUNTER_IS_FOR_PICKUP` otherwise); `Payments::settleAtCounter`
+  Paystack and is only for orders (422 `COUNTER_IS_FOR_PICKUP` otherwise); `collectAtCounter()`
   marks it paid on collection.
 - `GET payments/{reference}` reads; a pending gateway payment is checked with `transaction/verify`
   at most every 15 seconds, since a late webhook would otherwise leave the app's poll pending.
@@ -30,7 +33,7 @@ Newest first. Never edit an old entry.
   a second charge for targets already paid is refunded in full at once.
 - `payments:sweep` every five minutes: gateway payments pending over an hour are verified once more,
   then settled or abandoned; refunds never sent are sent again. Counter payments are never swept.
-- `Refunds::refund(Payable, ?kobo)`: a paid share is refunded by its amount through a queued
+- `Payments::refund(Payable, ?kobo)`: a paid share is refunded by its amount through a queued
   `RequestRefund` (retried with backoff) and reads `refunded` only when Paystack confirms; a sibling
   share stays `paid`; the payment is `refunded` once no share stands. A pending share is released
   (reads `abandoned`), and the payment abandoned when none is left. A refused refund leaves the share
@@ -40,10 +43,12 @@ Newest first. Never edit an old entry.
   patient name and phone, in SQL, paged, newest first. `amount_kobo` is the share, not the checkout
   total the mock shows, so the rows add up to what was taken. An erased patient's payments are kept
   with `user_id` null (a money record) and drop off the desk, which needs a patient's name.
-- Events, after commit: `PaymentSucceeded`, `PaymentFailed`, `PaymentAbandoned`, `PaymentRefunded`.
-  No push is sent here: the receipt and the doctor's request push belong to the target's module.
-- Agreed with the M10, M11 and M12 threads: the `Payable`, `PayableSource`, `Payments`, `Refunds` and
-  event signatures above.
+- Events, once per target and after commit, carrying the target's `Payable` as its module resolves
+  it: `PaymentSucceeded` and `PaymentRefunded` (the seams), plus `PaymentFailed` and
+  `PaymentAbandoned`. No push is sent here: the receipt and the doctor's request push belong to the
+  target's module.
+- The seams in PR #9 were amended with M9's additions (`paymentReference`, `paymentPartnerName`,
+  `initialise`, `summariesFor`, a partial `refund`), agreed with the M10, M11 and M12 threads.
 - ISS-090 (the `elevenmed://` callback on Paystack's page); HT-007 now lists the exact settings.
   4 routes built (3 contract routes left `pending-routes.json`; the webhook has no client contract,
   FE-005).

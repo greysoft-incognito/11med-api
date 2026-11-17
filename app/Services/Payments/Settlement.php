@@ -5,9 +5,6 @@ namespace App\Services\Payments;
 use App\Enums\PaymentChannel;
 use App\Enums\PaymentPurpose;
 use App\Enums\PaymentStatus;
-use App\Events\Payments\PaymentAbandoned;
-use App\Events\Payments\PaymentFailed;
-use App\Events\Payments\PaymentSucceeded;
 use App\Models\Payment;
 use App\Services\Payments\Gateway\GatewayUnavailable;
 use App\Services\Payments\Gateway\GatewayVerdict;
@@ -26,6 +23,7 @@ class Settlement
         private readonly PaymentGateway $gateway,
         private readonly Refunds $refunds,
         private readonly PaymentShares $shares,
+        private readonly PaymentEvents $events,
     ) {}
 
     public function apply(Payment $payment, GatewayVerdict $verdict): Payment
@@ -107,7 +105,7 @@ class Settlement
 
             $this->abandonPendingFor($payment->purpose, $payment->targetIds(), $payment->id);
 
-            PaymentSucceeded::dispatch($payment);
+            $this->events->succeeded($payment);
 
             return $payment;
         });
@@ -129,7 +127,7 @@ class Settlement
 
             $payment->load('targets');
 
-            PaymentSucceeded::dispatch($payment);
+            $this->events->succeeded($payment);
 
             return $payment;
         });
@@ -152,7 +150,7 @@ class Settlement
 
             $payment->load('targets');
 
-            PaymentFailed::dispatch($payment);
+            $this->events->failed($payment);
 
             return $payment;
         });
@@ -174,7 +172,7 @@ class Settlement
 
             $payment->load('targets');
 
-            PaymentAbandoned::dispatch($payment);
+            $this->events->abandoned($payment);
 
             return $payment;
         });

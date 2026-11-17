@@ -42,17 +42,17 @@ class StubPayable implements Payable
         return $this->id;
     }
 
-    public function paymentPatient(): User
+    public function payer(): User
     {
         return $this->patient;
     }
 
-    public function paymentAmountKobo(): int
+    public function amountKobo(): int
     {
         return $this->amount;
     }
 
-    public function paymentTargetReference(): string
+    public function paymentReference(): string
     {
         return $this->reference;
     }
@@ -62,15 +62,10 @@ class StubPayable implements Payable
         return $this->partner;
     }
 
-    public function ensurePayable(): void
+    public function assertPayable(): void
     {
         if ($this->refusal !== null) {
             throw ApiException::unprocessable($this->refusal);
         }
-    }
-
-    public function paymentTargets(): array
-    {
-        return [$this, ...$this->siblings];
     }
 }

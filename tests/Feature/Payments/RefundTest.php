@@ -50,8 +50,8 @@ class RefundTest extends TestCase
         $this->assertSame('paid', $this->summary($second)['status']);
         $this->assertSame('paid', $this->statusOf($reference));
 
-        Event::assertDispatched(PaymentRefunded::class, fn(PaymentRefunded $e) => $e->targetId === $first->id
-            && $e->purpose === PaymentPurpose::Order
+        Event::assertDispatched(PaymentRefunded::class, fn(PaymentRefunded $e) => $e->target === $first
+            && $e->reference === $reference
             && $e->amountKobo === 350000);
 
         app(Refunds::class)->refund($second);
@@ -96,12 +96,12 @@ class RefundTest extends TestCase
 
         $this->assertSame('abandoned', $this->summary($first)['status']);
         $this->assertSame('pending', $this->summary($second)['status']);
-        Event::assertNotDispatched(PaymentAbandoned::class);
+        Event::assertDispatchedTimes(PaymentAbandoned::class, 1);
 
         app(Refunds::class)->refund($second);
 
         $this->assertSame('abandoned', $this->statusOf($reference));
-        Event::assertDispatched(PaymentAbandoned::class);
+        Event::assertDispatchedTimes(PaymentAbandoned::class, 2);
         Http::assertNotSent(fn(Request $request) => str_ends_with($request->url(), '/refund'));
     }
 
@@ -141,7 +141,7 @@ class RefundTest extends TestCase
      */
     private function summary(StubPayable $target): array
     {
-        return app(Payments::class)->summaryFor($target)->toArray();
+        return app(Payments::class)->summaryFor($target);
     }
 
     private function start(User $patient, StubPayable $target): string

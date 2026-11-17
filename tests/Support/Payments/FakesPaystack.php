@@ -28,7 +28,7 @@ trait FakesPaystack
         $this->payables = new StubPayables;
 
         foreach ([PaymentPurpose::Order, PaymentPurpose::Consultation] as $purpose) {
-            $this->app->instance($purpose->sourceClass(), $this->payables);
+            $this->app->instance(config("elevenmed.payments.targets.{$purpose->value}"), $this->payables);
         }
 
         Http::fake([

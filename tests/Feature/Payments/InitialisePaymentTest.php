@@ -80,7 +80,7 @@ class InitialisePaymentTest extends TestCase
             ->assertJsonPath('data.status', 'abandoned')
             ->assertJsonPath('data.authorization_url', null);
 
-        Event::assertDispatched(PaymentAbandoned::class, fn(PaymentAbandoned $e) => $e->payment->reference === $first);
+        Event::assertDispatched(PaymentAbandoned::class, fn(PaymentAbandoned $e) => $e->reference === $first && $e->target->paymentTargetId() === $order->id);
     }
 
     public function test_a_paid_target_cannot_be_paid_again_and_drops_out_of_its_checkout(): void

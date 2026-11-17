@@ -6,7 +6,7 @@ use App\Enums\HttpStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Payments\InitialisePaymentRequest;
 use App\Http\Resources\Payments\PaymentResource;
-use App\Services\Payments\Payments;
+use App\Services\Payments\GatewayPayments;
 use App\Services\Payments\PaymentStarter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 class PaymentController extends Controller
 {
     public function __construct(
-        private readonly Payments $payments,
+        private readonly GatewayPayments $payments,
         private readonly PaymentStarter $starter,
     ) {}
 
@@ -29,7 +29,7 @@ class PaymentController extends Controller
 
     public function show(Request $request, string $reference): PaymentResource
     {
-        $payment = $this->payments->forPatient($request->user(), $reference);
+        $payment = $this->payments->forPayer($request->user(), $reference);
 
         return new PaymentResource($payment);
     }

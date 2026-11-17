@@ -2,18 +2,19 @@
 
 namespace App\Events\Payments;
 
-use App\Models\Payment;
+use App\Services\Payments\Payable;
 use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Foundation\Events\Dispatchable;
 
 /**
- * The gateway refused a payment. Listeners filter on `$payment->purpose`.
+ * The gateway refused this target's payment. Announced once per target.
  */
 class PaymentFailed implements ShouldDispatchAfterCommit
 {
     use Dispatchable;
 
     public function __construct(
-        public readonly Payment $payment,
+        public readonly Payable $target,
+        public readonly string $reference,
     ) {}
 }
