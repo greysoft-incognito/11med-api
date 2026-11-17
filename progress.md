@@ -2,6 +2,11 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-26: M12, the guide's test catalogue
+
+- `GuideTestCatalogue` (Laboratories) now backs the guide's `TestCatalogue` seam in place of the
+  unchecked stand-in, so a `find_test` action survives only when its code is in `lab_tests`.
+
 ## 2026-11-26: M12 Laboratories
 
 - **12.1** `lab_tests`, `laboratories`, `laboratory_tests`. `GET`, `POST portal/admin/catalogue` and
