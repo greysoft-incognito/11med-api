@@ -2,6 +2,16 @@
 
 Logged as found, never deleted; a resolved issue is marked resolved.
 
+### ISS-005: No route verifies the emergency contact's number
+
+- **Logged:** 2026-11-18 · **Found during:** M4.1 · **Blocking:** no · **Status:** open
+- **Detail:** App spec §3.2.5 asks for an OTP to the emergency contact's number on first save, and
+  `zEmergencyContact.is_verified` reports it, but no contract has a route to send or confirm that
+  code. The API stores `contact_verified_at` and resets it when the number changes, so the field is
+  always false today, as in the mock.
+- **Plan:** when product wants it, a send and a confirm route under `profile/` using `OneTimeCodes`
+  with a `contact:` target, added to the app's contracts first.
+
 ### ISS-004: One stored size for every picture
 
 - **Logged:** 2026-11-17 · **Found during:** M3.1 · **Blocking:** no · **Status:** open
