@@ -3,7 +3,7 @@
 namespace App\Enums;
 
 /**
- * A medication's `dosage_form` (app `DOSAGE_FORMS`).
+ * A medicine's form (app and portal `DOSAGE_FORMS`).
  */
 enum DosageForm: string
 {
