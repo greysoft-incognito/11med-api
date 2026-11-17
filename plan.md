@@ -52,11 +52,11 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 7.2 The `Notifier`, APNs and FCM senders, invalid-token cleanup
 - [x] 7.3 The missed-dose notification with dedupe (fires when M6's auto-miss dispatches `DoseMissed`)
 
-## M8 Doctors `[ ]`
+## M8 Doctors `[x]`
 
-- [ ] 8.1 Doctor profile, documents, submit, verification states
-- [ ] 8.2 Admin review of documents and applications
-- [ ] 8.3 The directory, availability, slots
+- [x] 8.1 Doctor profile, documents, submit, verification states
+- [x] 8.2 Admin review of documents and applications
+- [x] 8.3 The directory, availability, slots
 
 ## M9 Payments `[x]`
 

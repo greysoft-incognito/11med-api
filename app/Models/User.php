@@ -242,6 +242,11 @@ class User extends Authenticatable implements WalletOperations
         return $this->hasOne(MedicalProfile::class);
     }
 
+    public function doctorProfile(): HasOne
+    {
+        return $this->hasOne(DoctorProfile::class);
+    }
+
     /**
      * Premium comes from the subscription record the team keeps, never from a flag on the user.
      */

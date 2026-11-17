@@ -53,6 +53,17 @@ return [
     'RATE_LIMITED' => 'Too many attempts. Wait a moment and try again.',
     'SERVER_ERROR' => 'Something went wrong on our side. Try again shortly.',
 
+    // Doctors (M8)
+    'DOCTOR_NOT_FOUND' => 'That doctor is no longer listed.',
+    'PROFILE_INCOMPLETE' => 'Some things are still needed before this can be reviewed.',
+    'MDCN_NUMBER_LOCKED' => 'Your MDCN number cannot change while it is under review or verified. Contact the team.',
+    'DOCUMENT_NOT_UPLOADED' => 'Nothing has been uploaded for this document yet.',
+    'DOCUMENTS_OUTSTANDING' => 'Every required document must be accepted before approval.',
+    'DOCTOR_SUSPENDED' => 'A suspended doctor is reinstated, not approved or resubmitted.',
+    'DOCTOR_APPROVED' => 'An approved doctor is suspended, not rejected or resubmitted.',
+    'DOCTOR_NOT_APPROVED' => 'Only an approved doctor can be suspended.',
+    'DOCTOR_NOT_SUSPENDED' => 'Only a suspended doctor can be reinstated.',
+
     // Subscriptions
     'PREMIUM_REQUIRED' => 'This is part of premium.',
     'PATIENT_NOT_FOUND' => 'No patient account has this phone number.',

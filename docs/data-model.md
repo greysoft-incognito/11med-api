@@ -47,6 +47,15 @@ null, and later modules remove their own rows on `AccountErasing`.
 
 ### Medications and readings (M6)
 
+### Doctors (M8)
+
+| Table | Notes |
+| --- | --- |
+| `doctor_profiles` | One live row per doctor, started blank on first read. Professional fields, `languages` and `availability` (`[{ day, start, end }]`, Africa/Lagos) as JSONB with a GIN index on `languages`, `photo_media_id`, the three fees, `follow_up_fee_kobo`, `session_minutes`, `chat_window_hours`, `bank_name`, `bank_account_number` (encrypted with `APP_KEY`) and `bank_account_last4` for the mask, `is_available_now`, `verification_status`, `verification_notes`, `submitted_at` (the review queue's order), `reviewed_at`, and the running rating (`rating_total`, `rating_count`, `rating_mean`) the directory sorts on. Erasure cascades |
+| `doctor_documents` | One live row per profile and `kind`, created at the first upload: `status`, `media_id` (a private `doctor_document` upload; null for bank details, which are the payout fields), `uploaded_at`, `rejection_reason`, `reviewed_at`. A new upload replaces the file and returns the row to `uploaded` |
+
+### Guide (M13)
+
 | Table | Notes |
 | --- | --- |
 | `medications` | A schedule (`zMedication`): drug, strength, form, `dose_quantity` (numeric) and `dose_unit`, `frequency_type`, `specific_times` (JSONB `HH:MM`, read in Africa/Lagos), `start_date`, `end_date`, the reminder flags, `paused_at`, and `settled_through`: the instant up to which every dose has a `dose_logs` row. Doses after it are derived from the schedule. `prescribed_by_doctor_id` (nulled if the doctor's account is erased) and `prescription_id` (the consultation's prescription, indexed; applying is idempotent on it) mark a prescribed schedule, which the cap never counts. Medical data: never logged |
