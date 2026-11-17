@@ -27,19 +27,6 @@ Logged as found, never deleted; a resolved issue is marked resolved.
   refuses calls with `CALL_UNAVAILABLE` (HT-008 recommends Daily.co).
 - **Plan:** an `AgoraCallProvider` (a channel name and an RTC token) if Agora is chosen.
 
-### ISS-080: Doctors are not told of review decisions yet
-
-- **Logged:** 2026-11-17 · **Found during:** M8.2 · **Blocking:** no · **Status:** open
-- **Detail:** Portal handover §6 makes each decision a push to the doctor, and a suspension a
-  message to patients with a booking in progress. M8 dispatches `DoctorReviewed` (with the previous
-  status) and `DoctorDocumentReviewed`, but nothing sends yet: the `Notifier` is M7's and the
-  bookings are M10's.
-- **Plan:** M7 adds listeners that send through the `Notifier`; M10 adds the suspension listener
-  for open consultations.
-- **Update 2026-11-17 (M10):** suspending a doctor, or rejecting one who was approved, cancels and
-  refunds their bookings that have not begun and tells each patient. The doctor's own push still
-  waits on M7.
-
 ### ISS-090: Paystack may not accept the app's `elevenmed://` callback
 
 - **Logged:** 2026-11-17 · **Found during:** M9.1 · **Blocking:** no · **Status:** open
@@ -50,6 +37,21 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 - **Plan:** try it with the test keys (HT-007). If Paystack refuses the scheme, point
   `PAYSTACK_CALLBACK_URL` at a small https page on the portals that opens `elevenmed://pay`, which
   needs no API change.
+
+### ISS-080: Doctors are not told of review decisions yet
+
+- **Logged:** 2026-11-17 · **Found during:** M8.2 · **Blocking:** no · **Status:** resolved
+- **Detail:** Portal handover §6 makes each decision a push to the doctor, and a suspension a
+  message to patients with a booking in progress. M8 dispatches `DoctorReviewed` (with the previous
+  status) and `DoctorDocumentReviewed`, but nothing sends yet: the `Notifier` is M7's and the
+  bookings are M10's.
+- **Plan:** M7 adds listeners that send through the `Notifier`; M10 adds the suspension listener
+  for open consultations.
+- **Resolved (doctor side):** with M7's `Notifier` on main, `NotifyDoctorOfReview` sends each
+  decision and each rejected document to the doctor (category `account`). The notice to patients
+  with an open consultation when a doctor is suspended stays with M10.
+- **Update 2026-11-17 (M10):** suspending a doctor, or rejecting one who was approved, cancels and
+  refunds their bookings that have not begun and tells each patient.
 
 ### ISS-070: Push copy is English only
 

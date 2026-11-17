@@ -166,9 +166,9 @@ return [
         'portals' => env('ELEVENMED_PORTALS_PATH', base_path('../11med-web')),
     ],
 
-    // Routes the mocks register for development only; the handovers say not to build them. The doctor's
-    // self-review stands in for the admin portal, which now decides (M8). The patient's
-    // prescription route stands in for the doctor's own (M10).
+    // Routes the mocks register for development only; the handovers say not to build them. A doctor's
+    // review is the admin portal's decision, never the doctor's own. The patient's prescription route
+    // stands in for the doctor's own (M10).
     'mock_only_routes' => [
         'POST api/v1/consultations/{id}/accept',
         'POST api/v1/consultations/{id}/start',
