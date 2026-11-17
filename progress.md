@@ -2,6 +2,12 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-25: M11 The guide's store search
+
+- `StoreDrugSearch` implements the guide's `StoreSearch` seam (M14) in SQL: the longest name of a
+  listed medicine (approved pharmacy, not removed) found in the text, case-insensitive, names under
+  three characters ignored. `NoStoreSearch` is removed.
+
 ## 2026-11-25: M11.4 Fulfilment, M11 done
 
 - `GET portal/pharmacy/orders[/{id}]` (paged, newest first, `status` including `open`, `q` over
