@@ -45,6 +45,30 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `qr_accesses` | Not soft deleted. One row per open of the emergency page: `qr_token_id`, `opened_at`, and nothing about the reader |
 | `caregivers` | A patient's invitation (`patient_id`, `phone` local form, `invite_code`, both unique among live rows) and, once accepted, `caregiver_user_id`, `status` `active`, `accepted_at`. Revoking soft deletes; erasing either account removes the row |
 
+### Subscriptions (M5)
+
+| Table | Notes |
+| --- | --- |
+| `subscriptions` | One live row per patient once the team records premium: `user_id`, `premium_until` (a Lagos calendar day, indexed for the premium count), the latest `reference`, `recorded_by` (the admin, null once erased). Premium holds while `premium_until` is today or later in Lagos; nothing is written when it lapses. `is_premium` is read from here, never stored on the user. Erasing the patient removes the row |
+| `subscription_payments` | Every recording: `user_id` (null once the patient is erased, so the reference stays used), `reference` (unique among live rows, checked across trashed ones too), `premium_until`, `recorded_by`, `recorded_at` |
+
+### Medications and readings (M6)
+
+| Table | Notes |
+| --- | --- |
+| `medications` | A schedule (`zMedication`): drug, strength, form, `dose_quantity` (numeric) and `dose_unit`, `frequency_type`, `specific_times` (JSONB `HH:MM`, read in Africa/Lagos), `start_date`, `end_date`, the reminder flags, `paused_at`, and `settled_through`: the instant up to which every dose has a `dose_logs` row. Doses after it are derived from the schedule. `prescribed_by_doctor_id` (nulled if the doctor's account is erased) and `prescription_id` (the consultation's prescription, indexed; applying is idempotent on it) mark a prescribed schedule, which the cap never counts. Medical data: never logged |
+| `dose_logs` | One live row per `(medication_id, scheduled_for)` (partial unique index): `state`, `skip_reason`, `logged_at` (null when the job marked it missed), `snooze_count`. Written by the patient, or by `medications:settle-doses` sixty minutes past due. A retraction soft deletes the row and, for a dose past its hour, writes a `missed` one in its place. `user_id` is denormalised for the per-patient reads |
+| `readings` | A home reading (`zReading`): `type`, then `systolic`, `diastolic`, `pulse` for blood pressure, `mmol_l` and `context` for sugar, `kg` for weight (the other columns null), `taken_at`, `note`. Indexed by `(user_id, taken_at)` and `(user_id, type, taken_at)` |
+
+All three cascade on account erasure.
+
+### Notifications (M7)
+
+| Table | Notes |
+| --- | --- |
+| `app_notifications` | A user's notification history (`zNotification`): `category`, `title`, `body`, `target_id` (the record a tap opens), `read_at` (the first read), an optional `dedupe_key` unique per user among live rows, so a repeated event writes nothing. Indexed `(user_id, created_at, id)` for the newest-first page and partially on unread rows for the count. Missed-dose titles name the medicine: never logged. Erasure removes the rows with the user |
+| `notification_preferences` | A saved choice per category: `push`, `sms`, `in_app`, `(user_id, category)` unique among live rows. A category with no row is on, SMS off |
+
 ### Doctors (M8)
 
 | Table | Notes |
@@ -52,10 +76,6 @@ null, and later modules remove their own rows on `AccountErasing`.
 | `doctor_profiles` | One live row per doctor, started blank on first read. Professional fields, `languages` and `availability` (`[{ day, start, end }]`, Africa/Lagos) as JSONB with a GIN index on `languages`, `photo_media_id`, the three fees, `follow_up_fee_kobo`, `session_minutes`, `chat_window_hours`, `bank_name`, `bank_account_number` (encrypted with `APP_KEY`) and `bank_account_last4` for the mask, `is_available_now`, `verification_status`, `verification_notes`, `submitted_at` (the review queue's order), `reviewed_at`, and the running rating (`rating_total`, `rating_count`, `rating_mean`) the directory sorts on. Erasure cascades |
 | `doctor_documents` | One live row per profile and `kind`, created at the first upload: `status`, `media_id` (a private `doctor_document` upload; null for bank details, which are the payout fields), `uploaded_at`, `rejection_reason`, `reviewed_at`. A new upload replaces the file and returns the row to `uploaded` |
 
-### Guide (M13)
-
-| `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
-| `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 ### Payments (M9)
 
 Money records: erasure nulls `payments.user_id` and keeps the rows. Statuses change only through
@@ -81,14 +101,11 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | `drug_classes`, `drug_class_members` | Seeded by `DrugClassSeeder` (HT-009): a class's `code`, `name` and `reviewed_at`; its members' lower-case names, generic and brand, indexed for the allergy check |
 | `payouts` | One per doctor per run: `doctor_name`, `bank_name` and `bank_account_masked` copied, `gross_kobo`, `commission_percent` as it was, `commission_kobo`, `net_kobo`, `consultation_count`, `status` (`pending`, `paid`, `failed`), `period_start`, `period_end`, `paid_at`, `note` (the transfer reference or the failure reason). A generated `status_rank` orders the desk. A failed payout releases its consultations to the next |
 
-### Subscriptions (M5)
+### Guide (M13)
 
-| `subscriptions` | One live row per patient once the team records premium: `user_id`, `premium_until` (a Lagos calendar day, indexed for the premium count), the latest `reference`, `recorded_by` (the admin, null once erased). Premium holds while `premium_until` is today or later in Lagos; nothing is written when it lapses. `is_premium` is read from here, never stored on the user. Erasing the patient removes the row |
-| `subscription_payments` | Every recording: `user_id` (null once the patient is erased, so the reference stays used), `reference` (unique among live rows, checked across trashed ones too), `premium_until`, `recorded_by`, `recorded_at` |
-
-### Notifications (M7)
-
-| `app_notifications` | A user's notification history (`zNotification`): `category`, `title`, `body`, `target_id` (the record a tap opens), `read_at` (the first read), an optional `dedupe_key` unique per user among live rows, so a repeated event writes nothing. Indexed `(user_id, created_at, id)` for the newest-first page and partially on unread rows for the count. Missed-dose titles name the medicine: never logged. Erasure removes the rows with the user |
-| `notification_preferences` | A saved choice per category: `push`, `sms`, `in_app`, `(user_id, category)` unique among live rows. A category with no row is on, SMS off |
+| Table | Notes |
+| --- | --- |
+| `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
+| `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 
 Domain tables are added here as each milestone lands.

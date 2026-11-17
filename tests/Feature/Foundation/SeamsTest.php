@@ -4,8 +4,6 @@ namespace Tests\Feature\Foundation;
 
 use App\Exceptions\ApiException;
 use App\Models\User;
-use App\Services\Medications\NoPrescribedSchedules;
-use App\Services\Medications\PrescribedSchedules;
 use App\Services\Notifications\DeliveringNotifier;
 use App\Services\Notifications\Notifier;
 use App\Services\Payments\GatewayPayments;
@@ -15,18 +13,10 @@ use Tests\TestCase;
 
 class SeamsTest extends TestCase
 {
-    public function test_each_seam_resolves_to_its_stand_in(): void
+    public function test_each_seam_resolves_to_its_owner(): void
     {
         $this->assertInstanceOf(DeliveringNotifier::class, app(Notifier::class));
         $this->assertInstanceOf(GatewayPayments::class, app(Payments::class));
-        $this->assertInstanceOf(NoPrescribedSchedules::class, app(PrescribedSchedules::class));
-    }
-
-    public function test_the_stand_ins_do_nothing(): void
-    {
-        $user = User::factory()->create();
-
-        $this->assertTrue(app(PrescribedSchedules::class)->apply($user, $user, 'prescription', 'Malaria', [])->isEmpty());
     }
 
     public function test_a_free_account_gets_the_free_tier(): void
