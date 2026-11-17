@@ -2,6 +2,20 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-17: M2.3 App sign-up and sign-in
+
+- `POST auth/register`, `verify-otp`, `resend-otp`, `login`, `refresh`, `logout` and
+  `GET auth/session`, through `AppAccounts`, `OneTimeCodes` and `LoginGuard`. Phones are stored in
+  the local `0…` form, as the app's mock compares them.
+- Codes: six digits, ten minutes, five tries, three resends in thirty minutes with `retry_after_ms`.
+  `OTP_FIXED_CODE` lets staging run before SMS is enabled; production ignores it. SMS go through the
+  kit's gateway when `SMS_ENABLED` is on and to the log otherwise (HT-002).
+- Lockouts per number: 401 with `attempts_remaining`, 423 with `locked_for_ms` after five, 423 with
+  `requires_email_unlock` after ten, cleared by a reset (FE-007).
+- A number held by an account that never verified it is released to a new sign-up, so an abandoned
+  registration cannot block its owner. Registration records consent (FE-006).
+- Departure: `POST auth/refresh` was in no sub-section's list; it is built here with the rest.
+
 ## 2026-11-17: M2.2 Token pairs
 
 - `SessionTokens` issues a pair (Sanctum access token, 15 minutes; refresh token, 30 days), rotates

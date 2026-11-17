@@ -228,6 +228,22 @@ class User extends Authenticatable implements WalletOperations
         return $name === null ? null : Role::tryFrom($name);
     }
 
+    /**
+     * Whether the medical profile's required core exists. False until the Profile module (M4) stores one.
+     */
+    public function hasMedicalProfile(): bool
+    {
+        return false;
+    }
+
+    /**
+     * Premium comes from a current subscription record. False until the Subscriptions module (M5) records one.
+     */
+    public function isPremium(): bool
+    {
+        return false;
+    }
+
     public function devices(): HasMany
     {
         return $this->hasMany(Device::class);

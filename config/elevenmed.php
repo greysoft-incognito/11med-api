@@ -10,6 +10,32 @@ return [
         'refresh_days' => 30,
     ],
 
+    // Phone and email codes (app spec §2.1.1). A fixed code lets staging run without SMS; production ignores it.
+    'otp' => [
+        'ttl_seconds' => 600,
+        'max_resends' => 3,
+        'resend_window_minutes' => 30,
+        'max_attempts' => 5,
+        'fixed_code' => env('OTP_FIXED_CODE'),
+    ],
+
+    // Failed sign-ins per phone number (app spec §2.1.4).
+    'login' => [
+        'lock_after' => 5,
+        'lock_minutes' => 15,
+        'hard_lock_after' => 10,
+    ],
+
+    // SMS go through the kit's gateway once enabled; until then they are logged (HT-002).
+    'sms' => [
+        'enabled' => (bool) env('SMS_ENABLED', false),
+    ],
+
+    // The policy version consent is recorded against when a client does not name one.
+    'consent' => [
+        'policy_version' => env('CONSENT_POLICY_VERSION', '2026-07-01'),
+    ],
+
     // The client checkouts the route inventory is read from (`php artisan contract:routes`).
     'clients' => [
         'app' => env('ELEVENMED_APP_PATH', base_path('../11med')),

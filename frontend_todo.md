@@ -21,6 +21,15 @@ milestone that introduced it. The clients tick them; never delete.
 - [ ] **FE-004 · Compliance date.** `GET /medications/:userId/compliance` accepts `date`
   (`YYYY-MM-DD`, the patient's local day); send it. Spec item 13. (M6)
 
+- [ ] **FE-006 · Send consent with the account.** `POST /auth/register` and `POST /auth/social/phone`
+  accept an optional `consent: { policy_version, accepted_at }`, the record `src/lib/consent.ts`
+  holds. Send it and clear the pending record on success. Without it the server records the
+  current policy version (`CONSENT_POLICY_VERSION`, `2026-07-01`) at the time of the request. (M2.3)
+- [ ] **FE-007 · The hard lock clears by phone.** After ten failed sign-ins the API answers 423
+  `AUTH_ACCOUNT_LOCKED` with `requires_email_unlock: true`, as the mock does, but no contract has an
+  email unlock route. A password reset by phone code (`forgot-password`, `reset-password`) clears
+  the lock. The locked screen should point there, not to email. (M2.3)
+
 ## Both
 
 - [ ] **FE-005 · Routes no contract has yet.** Consent records (registration and profile sharing),
