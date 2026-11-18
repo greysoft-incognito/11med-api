@@ -158,6 +158,15 @@ The test catalogue (M12) starts empty, and a laboratory can only price tests tha
 seeder adds the twenty tests the app's mock uses, only those missing, so running it again never
 undoes the team's edits in the admin portal.
 
+On a test server only, `php artisan db:seed --class=DemoSeeder --force` loads the app mock's
+demo data so the app and portals open on real screens: the demo patient `08030000001` and doctor
+`08030000003` (password `Password1`, the app's "Sign in as the demo" buttons), five more approved
+doctors, and five pharmacies and five laboratories whose portal accounts are
+`<name-slug>@example.com` with the same password (`harbourview-pharmacy@example.com`,
+`clinix-diagnostics@example.com`, ...). It runs once (nothing happens when the demo patient
+exists) and fetches its pictures from Unsplash and Pexels, so the server needs outbound HTTPS;
+a picture it cannot fetch is left out. Never run it on production: the passwords are public.
+
 The missed-dose job can be run by hand to check the scheduler is wired: `php artisan medications:settle-doses`
 prints how many doses it marked missed.
 
