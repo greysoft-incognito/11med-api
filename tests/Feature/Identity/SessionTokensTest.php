@@ -54,6 +54,22 @@ class SessionTokensTest extends TestCase
             ->assertJsonPath('error.code', 'UNAUTHENTICATED');
     }
 
+    public function test_a_request_that_does_not_ask_for_json_is_still_answered_with_a_401(): void
+    {
+        $pair = $this->tokens->issue($this->user, AuthClient::App);
+
+        $this->get('api/v1/_probe')
+            ->assertUnauthorized()
+            ->assertJsonPath('error.code', 'UNAUTHENTICATED');
+
+        $this->travel(16)->minutes();
+
+        $this->withToken($pair->accessToken)
+            ->get('api/v1/_probe')
+            ->assertUnauthorized()
+            ->assertJsonPath('error.code', 'TOKEN_EXPIRED');
+    }
+
     public function test_rotation_kills_the_old_pair_and_keeps_the_family(): void
     {
         $first = $this->tokens->issue($this->user, AuthClient::App, 'c1a5e2a8-1111-4a4a-8a8a-000000000001');
