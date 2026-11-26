@@ -92,6 +92,44 @@ class Organisations
     }
 
     /**
+     * Send an approved partner's contact a new welcome link while they have not set a password.
+     */
+    public function resendWelcome(string $id): Organisation
+    {
+        return DB::transaction(function () use ($id) {
+            $organisation = Organisation::query()
+                ->where('uuid', $id)
+                ->lockForUpdate()
+                ->first();
+
+            if ($organisation === null) {
+                throw ApiException::notFound(Organisation::NOT_FOUND);
+            }
+
+            if ($organisation->status !== PartnerStatus::Approved) {
+                throw ApiException::unprocessable('WELCOME_NOT_APPROVED');
+            }
+
+            $account = $organisation
+                ->accounts()
+                ->whereRaw('lower(email) = ?', [mb_strtolower($organisation->contact_email)])
+                ->first();
+
+            if ($account === null) {
+                throw ApiException::notFound(Organisation::NOT_FOUND);
+            }
+
+            if ($account->password !== null) {
+                throw ApiException::unprocessable('WELCOME_ALREADY_USED');
+            }
+
+            $this->accounts->welcome($account);
+
+            return $organisation;
+        });
+    }
+
+    /**
      * @param  array{kind?: string|null, status?: string|null, q?: string|null}  $filters
      */
     public function list(array $filters, ListQuery $list): Page

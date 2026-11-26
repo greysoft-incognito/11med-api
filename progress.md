@@ -2,6 +2,14 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-26: Resending a partner's welcome email
+
+- `POST portal/admin/partners/{id}/welcome` (admin only) emails an approved partner's contact a new
+  seven-day first-password link, answering `zPartner`. `PortalAccounts::welcome()` retires any
+  earlier unused welcome link. 422 `WELCOME_NOT_APPROVED` unless the partner is approved,
+  `WELCOME_ALREADY_USED` once the contact has set a password (Forgot password covers that), 404
+  `PARTNER_NOT_FOUND`. The portal's mock and button come with 11med-web's matching change.
+
 ## 2026-11-17: M13.1 The admin summary
 
 - `GET portal/admin/summary` (admin only), the portal's `zAdminSummary`. `DeskSummary` asks each

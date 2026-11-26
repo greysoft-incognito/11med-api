@@ -133,6 +133,7 @@
     "POST api/v1/portal/admin/doctors/{id}/documents/review",
     "POST api/v1/portal/admin/doctors/{id}/review",
     "POST api/v1/portal/admin/partners/{id}/review",
+    "POST api/v1/portal/admin/partners/{id}/welcome",
     "POST api/v1/portal/admin/payouts/{id}/settle",
     "POST api/v1/portal/admin/subscriptions",
     "POST api/v1/portal/auth/forgot",
