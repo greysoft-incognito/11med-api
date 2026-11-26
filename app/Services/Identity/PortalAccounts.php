@@ -66,10 +66,16 @@ class PortalAccounts
     }
 
     /**
-     * Email a new account its first-password link; returns the link.
+     * Email a new account its first-password link, retiring any earlier unused one; returns the link.
      */
     public function welcome(User $account): string
     {
+        PasswordLink::query()
+            ->where('user_id', $account->id)
+            ->where('kind', PasswordLink::WELCOME)
+            ->whereNull('used_at')
+            ->update(['used_at' => now()]);
+
         return $this->sendLink($account, PasswordLink::WELCOME);
     }
 

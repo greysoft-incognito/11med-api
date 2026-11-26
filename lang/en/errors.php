@@ -39,6 +39,8 @@ return [
     'PARTNER_NOT_PENDING' => 'Only a pending application is approved.',
     'PARTNER_NOT_APPROVED' => 'Only an approved partner can be suspended.',
     'PARTNER_NOT_SUSPENDED' => 'Only a suspended partner can be reinstated.',
+    'WELCOME_NOT_APPROVED' => 'Only an approved partner is sent a welcome email.',
+    'WELCOME_ALREADY_USED' => 'The contact has already set a password. They can use Forgot password on the sign-in page.',
 
     // Pharmacy
     'PHARMACY_NOT_FOUND' => 'That pharmacy is no longer listed.',

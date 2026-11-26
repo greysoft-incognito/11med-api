@@ -10,4 +10,5 @@ Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
     ->group(function () {
         Route::get('/', [AdminPartnerController::class, 'index'])->name('index');
         Route::post('{id}/review', [AdminPartnerController::class, 'review'])->whereUuid('id')->name('review');
+        Route::post('{id}/welcome', [AdminPartnerController::class, 'resendWelcome'])->whereUuid('id')->name('welcome');
     });

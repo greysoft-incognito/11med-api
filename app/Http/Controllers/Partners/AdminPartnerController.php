@@ -29,4 +29,11 @@ class AdminPartnerController extends Controller
 
         return new PartnerResource($partner);
     }
+
+    public function resendWelcome(string $id): PartnerResource
+    {
+        $partner = $this->organisations->resendWelcome($id);
+
+        return new PartnerResource($partner);
+    }
 }
