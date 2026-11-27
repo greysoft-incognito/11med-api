@@ -2,6 +2,13 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-26: Email through Resend
+
+- `resend/resend-laravel` adds a `resend` mailer: `MAIL_MAILER=resend` with `RESEND_API_KEY` sends
+  every email (codes, portal password links, partner welcome and status emails) through Resend's
+  API. `MAIL_FROM_ADDRESS` must be on a domain verified in Resend. The package's webhook route stays
+  off (`config/resend.php`, `RESEND_ROUTES`). Setup in `docs/SETUP.md`; HT-002 updated.
+
 ## 2026-11-26: Resending a partner's welcome email
 
 - `POST portal/admin/partners/{id}/welcome` (admin only) emails an approved partner's contact a new
