@@ -61,6 +61,10 @@ by id in [human_todo.md](../human_todo.md).
 
 Set in the server's `.env` (copied from `.env.example`). The deploy never writes it.
 
+The deploy caches config and keeps queue workers running, so an edit to `.env` takes effect only after
+`php artisan config:cache && php artisan queue:restart` in the API folder. Queued work (every email, SMS
+and push) runs in the workers, so skipping the restart leaves them on the old values.
+
 ### Laravel
 
 | Variable | Value |
@@ -85,7 +89,7 @@ Set in the server's `.env` (copied from `.env.example`). The deploy never writes
 | `OTP_FIXED_CODE` | none | Staging only: every phone and email code is this value, so testers can sign up before SMS works. Ignored in production | M2 |
 | `GOOGLE_WEB_CLIENT_ID` | none | The app's `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID`, from the EAS `development` environment on expo.dev (HT-003) | M2 |
 | `APPLE_BUNDLE_ID` | `ng.elevenmed.app` | The audience Apple sign-in tokens are checked against | M2 |
-| `PORTALS_URL` | `http://localhost:3000` | Where the portals live; reset and welcome emails link to `PORTALS_URL/set-password?token=…` | M2 |
+| `PORTALS_URL` | `http://localhost:3000` | Where the portals live, e.g. the deployed portal's `https://…` origin with no trailing path. Reset and welcome emails link to `PORTALS_URL/set-password?token=…`, so on a server it must be set or the links point at localhost | M2 |
 | `CORS_ALLOWED_ORIGINS` | `PORTALS_URL` | Browser origins allowed to call the API, comma separated, e.g. the staging and local portals. The app is native and needs none | M13 |
 | `CONSENT_POLICY_VERSION` | `2026-07-01` | The policy version recorded when the app sends no consent record | M2 |
 | `MEDIA_PUBLIC_DISK` | `public` | Disk for photos and store pictures. Point at an `s3` disk with public read once the bucket exists (HT-005) | M3 |
