@@ -124,4 +124,10 @@ return [
     'DOSE_NOT_ANSWERED' => 'That dose has not been answered.',
     'SNOOZE_LIMIT_REACHED' => 'You have used every snooze for this dose.',
     'READING_NOT_FOUND' => 'That reading is not here.',
+
+    // Admin operations (M17)
+    'ACCOUNT_SUSPENDED' => 'This account is suspended. Contact the 11med team.',
+    'ALREADY_SUSPENDED' => 'This account is already suspended.',
+    'NOT_SUSPENDED' => 'This account is not suspended.',
+    'PHONE_VERIFIED' => 'That phone number is already confirmed.',
 ];

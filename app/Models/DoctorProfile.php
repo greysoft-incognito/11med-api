@@ -112,6 +112,8 @@ class DoctorProfile extends Model
 
     public function scopeListed(Builder $query): void
     {
-        $query->where('verification_status', VerificationStatus::Approved);
+        $query
+            ->where('verification_status', VerificationStatus::Approved)
+            ->whereIn('user_id', User::query()->whereNull('suspended_at')->select('id'));
     }
 }

@@ -20,6 +20,10 @@ class SessionTokens
 {
     public function issue(User $user, AuthClient $client, ?string $installId = null, ?string $family = null): TokenPair
     {
+        if ($user->isSuspended()) {
+            throw ApiException::forbidden('ACCOUNT_SUSPENDED');
+        }
+
         $family ??= (string) Str::uuid7();
         $refresh = Str::random(64);
 

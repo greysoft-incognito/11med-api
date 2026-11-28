@@ -130,4 +130,10 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
 | `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 
+### Admin operations (M17)
+
+| Table | Notes |
+| --- | --- |
+| `users` (extended) | `suspended_at` (indexed) and `suspension_reason`: a patient or doctor account the team suspended. No session is issued while set |
+
 Domain tables are added here as each milestone lands.

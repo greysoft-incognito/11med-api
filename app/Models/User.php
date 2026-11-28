@@ -112,6 +112,7 @@ class User extends Authenticatable implements WalletOperations
             'last_attempt' => 'datetime',
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            'suspended_at' => 'datetime',
         ];
     }
 
@@ -158,6 +159,11 @@ class User extends Authenticatable implements WalletOperations
                 ->filter()
                 ->join(' '),
         );
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
     }
 
     public function hasVerifiedPhone()

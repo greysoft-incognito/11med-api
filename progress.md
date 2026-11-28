@@ -2,6 +2,21 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-01: M17.1 The user directory
+
+- `GET portal/admin/users` (`users.view`): patient and doctor accounts, newest first, paged, `q` over
+  name, phone (either spelling) and email, `role` and `status` (`active`, `suspended`) filters.
+  `GET portal/admin/users/{id}` adds counts of orders, lab bookings and consultations. Account data
+  only: no profile, medications, readings or guide text. Last active is the newest refresh token.
+- `POST .../suspend` with a reason (`users.manage`) sets `users.suspended_at`, ends every session
+  through M14's `Sessions::revokeAll()`, texts the person and dispatches `AccountSuspended`: a
+  doctor goes unavailable, leaves the directory (`DoctorProfile::listed()` skips suspended
+  accounts) and their unstarted bookings are withdrawn and refunded. `SessionTokens::issue()`
+  refuses a suspended account with 403 `ACCOUNT_SUSPENDED`, so every sign-in path and refresh does.
+  `POST .../reinstate`, `.../sign-out`, `.../verification` (`phone` or `email`) and
+  `.../password-reset` reuse `AppAccounts`, `EmailAddresses` and `Passwords`, inside the person's
+  own resend budget; the code never reaches the team. Every action calls `AuditLog::record()`.
+
 ## 2026-11-26: Email through Resend
 
 - `resend/resend-laravel` adds a `resend` mailer: `MAIL_MAILER=resend` with `RESEND_API_KEY` sends

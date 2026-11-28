@@ -88,3 +88,10 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 
 - [x] 13.1 The guide's conversation with the emergency check first, the admin summary
 - [!] 13.2 Staging and production running, scheduler and queue workers, both clients pointed at staging
+
+## M17 Admin operations `[~]`
+
+- [x] 17.1 The user directory: search, account view, suspend and reinstate, force sign-out, resend codes
+- [ ] 17.2 Oversight of orders, lab bookings and consultations, cancel with a reason and refund
+- [ ] 17.3 Platform settings the team edits at runtime
+- [ ] 17.4 Announcements to app and portal users
