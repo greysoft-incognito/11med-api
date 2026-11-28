@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\DataExport;
 use App\Models\GuideConversation;
 use App\Models\Media;
 use App\Models\OtpCode;
@@ -18,8 +19,8 @@ Artisan::command('inspire', function () {
 Schedule::command('sanctum:prune-expired --hours=24')->daily();
 Schedule::command('model:prune', ['--model' => [RefreshToken::class, SignIn::class, TwoFactorChallenge::class, OtpCode::class, PasswordLink::class]])->daily();
 
-// Uploads no record claimed within a day, with their files (app handover §12).
-Schedule::command('model:prune', ['--model' => [Media::class]])->hourly();
+// Uploads no record claimed within a day, with their files (app handover §12), and lapsed data exports (M14).
+Schedule::command('model:prune', ['--model' => [Media::class, DataExport::class]])->hourly();
 
 // Doses sixty minutes past due without an answer become missed, once each (M6).
 Schedule::command('medications:settle-doses')->everyMinute()->withoutOverlapping();

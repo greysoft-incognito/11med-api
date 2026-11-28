@@ -33,6 +33,15 @@ return [
         'recovery_codes' => 10,
     ],
 
+    // Download my data (M14, NDPR right of access): one request a day, built by a queued job, kept
+    // for two days on a private disk and emailed as a signed link that lapses with it.
+    'data_export' => [
+        'disk' => env('DATA_EXPORT_DISK', 'local'),
+        'keep_hours' => 48,
+        'every_hours' => 24,
+        'link_minutes' => 15,
+    ],
+
     // Failed sign-ins per phone number (app spec §2.1.4).
     'login' => [
         'lock_after' => 5,

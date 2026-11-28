@@ -134,4 +134,5 @@ return [
     'TWO_FACTOR_SETUP_REQUIRED' => 'Turn on two-step verification on your account page to use the team desk.',
     'PHONE_UNCHANGED' => 'That is already your number.',
     'PHONE_CHANGE_NOT_STARTED' => 'Enter your new number first, and we will text it a code.',
+    'DATA_EXPORT_LIMIT' => 'You can ask for a copy of your data once a day.',
 ];

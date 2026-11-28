@@ -2,11 +2,12 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\Identity\AppPhoneController;
+use App\Http\Controllers\Identity\DataExportController;
 use App\Http\Controllers\Identity\SessionController;
 use App\Http\Controllers\Identity\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
-// The app account's security: signed-in devices, two-step verification, the phone number (M14).
+// The app account's security: signed-in devices, two-step verification, the phone number, a copy of their data (M14).
 Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::app()))])
     ->prefix('auth')
     ->name('auth.')
@@ -23,7 +24,16 @@ Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::app
 
         Route::post('phone', [AppPhoneController::class, 'update'])->middleware('throttle:auth')->name('phone.update');
         Route::post('phone/verify', [AppPhoneController::class, 'verify'])->middleware('throttle:auth')->name('phone.verify');
+
+        Route::get('data-export', [DataExportController::class, 'show'])->name('data-export.show');
+        Route::post('data-export', [DataExportController::class, 'store'])->name('data-export.store');
     });
+
+// A data export's zip, behind a signed link.
+Route::get('data-exports/{export}/file', [DataExportController::class, 'file'])
+    ->middleware('signed')
+    ->whereUuid('export')
+    ->name('data-exports.file');
 
 Route::middleware('throttle:auth')
     ->post('auth/two-factor/verify', [TwoFactorController::class, 'verifyApp'])

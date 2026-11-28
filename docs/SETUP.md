@@ -99,6 +99,7 @@ and push) runs in the workers, so skipping the restart leaves them on the old va
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
 | `REPORT_DISK` | `local` | Disk for compliance report PDFs, served by a 15-minute signed link and deleted after a day. A private `s3` disk once the bucket exists (HT-005); never a public one | M6 |
 
+| `DATA_EXPORT_DISK` | `local` | Disk for "download my data" zips (M14): the person's whole record, kept 48 hours and served only by signed links. A private `s3` disk once the bucket exists (HT-005); never a public one. The queue worker builds them, writing temporary files under `storage/app/tmp` | M14 |
 | `ADMIN_2FA_REQUIRED` | `true` | The team's accounts must turn on two-step verification (an authenticator app) before any admin route answers; until then they get 403 `TWO_FACTOR_SETUP_REQUIRED` and the portal sends them to their account page. `false` makes it optional for admins too. Pharmacy, laboratory, patient and doctor accounts may always choose it | M14 |
 | `TWO_FACTOR_ISSUER` | `11med` | The name an authenticator app shows beside the code | M14 |
 | `GUIDE_RETENTION_DAYS` | `30` | Guide conversations idle this many days are deleted by the scheduler, with their messages (HT-130) | M13 |

@@ -29,4 +29,10 @@ return [
         'advice' => 'If this was you, there is nothing to do. If it was not, change your password, which signs out every other device, and turn on two-step verification.',
         'unknown_device' => 'a new device',
     ],
+    'data_export' => [
+        'subject' => 'Your 11med data is ready',
+        'line' => 'The copy of your data you asked for is ready. It holds your medical record, so download it to a device only you use.',
+        'action' => 'Download my data',
+        'expiry' => 'The link works until :until, when the copy is deleted. You can ask for a new one in Settings.',
+    ],
 ];
