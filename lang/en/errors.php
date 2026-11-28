@@ -124,4 +124,5 @@ return [
     'DOSE_NOT_ANSWERED' => 'That dose has not been answered.',
     'SNOOZE_LIMIT_REACHED' => 'You have used every snooze for this dose.',
     'READING_NOT_FOUND' => 'That reading is not here.',
+    'SESSION_NOT_FOUND' => 'That device is no longer signed in.',
 ];

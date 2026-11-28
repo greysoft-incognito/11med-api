@@ -6,6 +6,7 @@ use App\Enums\AuthClient;
 use App\Events\Identity\SessionsEnded;
 use App\Exceptions\ApiException;
 use App\Models\RefreshToken;
+use App\Models\SignIn;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -18,10 +19,18 @@ use Laravel\Sanctum\PersonalAccessToken;
  */
 class SessionTokens
 {
-    public function issue(User $user, AuthClient $client, ?string $installId = null, ?string $family = null): TokenPair
+    /**
+     * A new pair. Without a family this is a sign-in, and it opens a session row for the device.
+     */
+    public function issue(User $user, AuthClient $client, ?string $installId = null, ?string $family = null, ?DeviceInfo $device = null): TokenPair
     {
-        $family ??= (string) Str::uuid7();
         $refresh = Str::random(64);
+
+        if ($family === null) {
+            $family = (string) Str::uuid7();
+
+            $this->open($user, $client, $family, $installId, $device ?? DeviceInfo::fromRequest(request(), $installId));
+        }
 
         $access = $user->createToken(
             $client->value,
@@ -67,6 +76,10 @@ class SessionTokens
             }
 
             $row->update(['used_at' => now()]);
+
+            SignIn::query()
+                ->where('family', $row->family)
+                ->update(['last_used_at' => now()]);
 
             PersonalAccessToken::whereKey($row->access_token_id)->delete();
 
@@ -143,12 +156,32 @@ class SessionTokens
             ->whereNull('revoked_at')
             ->update(['revoked_at' => now()]);
 
+        SignIn::query()
+            ->where('family', $family)
+            ->whereNull('ended_at')
+            ->update(['ended_at' => now()]);
+
         $user = User::find($rows->first()->user_id);
         $installs = $rows->pluck('install_id')->filter()->unique()->values()->all();
 
         if ($user !== null && $installs !== []) {
             SessionsEnded::dispatch($user, $installs);
         }
+    }
+
+    private function open(User $user, AuthClient $client, string $family, ?string $installId, DeviceInfo $device): SignIn
+    {
+        return SignIn::create([
+            'user_id' => $user->id,
+            'family' => $family,
+            'client' => $client,
+            'install_id' => $installId,
+            'device_key' => $device->key,
+            'device_name' => $device->name,
+            'platform' => $device->platform,
+            'signed_in_at' => now(),
+            'last_used_at' => now(),
+        ]);
     }
 
     private static function hash(string $token): string

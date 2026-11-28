@@ -130,4 +130,10 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
 | `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 
+### Account security (M14)
+
+| Table | Notes |
+| --- | --- |
+| `sign_ins` | Not soft deleted (a credential). One per sign-in: `family` (the refresh-token family, unique), `client`, `install_id`, `device_key` (SHA-256 of the install id, or of the browser's user agent), `device_name` and `platform` as the client named them or as read from the user agent, `signed_in_at`, `last_used_at` (moved on each refresh), `ended_at` (set when the family is revoked). Cascades on erasure; pruned a month after it ends |
+
 Domain tables are added here as each milestone lands.
