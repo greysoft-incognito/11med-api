@@ -1,12 +1,12 @@
 <?php
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Http\Controllers\Documents\AdminDocumentController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The terms and privacy documents, edited by the team.
-Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::staff()])
     ->prefix('portal/admin/documents')
     ->name('portal.admin.documents.')
     ->group(function () {

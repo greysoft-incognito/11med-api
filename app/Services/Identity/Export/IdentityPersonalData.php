@@ -2,6 +2,7 @@
 
 namespace App\Services\Identity\Export;
 
+use App\Enums\AccountKind;
 use App\Models\ConsentRecord;
 use App\Models\SignIn;
 use App\Models\User;
@@ -19,7 +20,7 @@ class IdentityPersonalData implements PersonalData
             'phone_number' => $user->phone,
             'email' => $user->email,
             'email_verified' => $user->email_verified_at !== null,
-            'role' => $user->role()?->value,
+            'kinds' => AccountKind::values($user->kinds()),
             'two_factor_enabled' => $user->hasTwoFactor(),
             'created_at' => $user->created_at?->toIso8601ZuluString('millisecond'),
         ]);

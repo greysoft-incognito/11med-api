@@ -4,12 +4,13 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\Concerns\HasPublicId;
 use App\Models\Scopes\NotDeletingUserScope;
 use App\Notifications\SendCode;
 use App\Traits\ModelCanExtend;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -116,6 +117,7 @@ class User extends Authenticatable implements WalletOperations
             'phone_verified_at' => 'datetime',
             'suspended_at' => 'datetime',
             'deactivated_at' => 'datetime',
+            'staff_since' => 'datetime',
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
@@ -235,23 +237,93 @@ class User extends Authenticatable implements WalletOperations
     }
 
     /**
-     * The user's one account role. A team account also holds staff roles, which are not one.
+     * @return HasMany<UserKind, $this>
      */
-    public function role(): ?Role
+    public function accountKinds(): HasMany
     {
-        $names = $this->relationLoaded('roles')
-            ? $this->roles->pluck('name')
-            : $this->getRoleNames();
+        return $this->hasMany(UserKind::class);
+    }
 
-        foreach ($names as $name) {
-            $role = Role::tryFrom($name);
+    /**
+     * The kinds of account the person holds, in the enum's order. Staff access is separate
+     * (`StaffAccess`), from Spatie roles and permissions.
+     *
+     * @return list<AccountKind>
+     */
+    public function kinds(): array
+    {
+        $held = $this->accountKinds
+            ->pluck('kind')
+            ->all();
 
-            if ($role !== null) {
-                return $role;
-            }
-        }
+        return array_values(array_filter(AccountKind::cases(), fn(AccountKind $kind) => in_array($kind, $held, true)));
+    }
 
-        return null;
+    /**
+     * The kinds held among these, in their order.
+     *
+     * @param  list<AccountKind>  $among
+     * @return list<AccountKind>
+     */
+    public function kindsOf(array $among): array
+    {
+        return array_values(array_filter($among, fn(AccountKind $kind) => $this->holds($kind)));
+    }
+
+    public function holds(AccountKind ...$kinds): bool
+    {
+        return array_intersect(AccountKind::values($kinds), AccountKind::values($this->kinds())) !== [];
+    }
+
+    /**
+     * A team member who may use the admin desk: marked staff and not deactivated. What they may do
+     * there is their staff roles and permissions (`StaffAccess`).
+     */
+    public function isStaff(): bool
+    {
+        return $this->staff_since !== null && $this->deactivated_at === null;
+    }
+
+    public function grantKind(AccountKind $kind): void
+    {
+        UserKind::query()->insertOrIgnore([
+            'user_id' => $this->id,
+            'kind' => $kind->value,
+            'created_at' => now(),
+        ]);
+
+        $this->unsetRelation('accountKinds');
+    }
+
+    public function revokeKind(AccountKind $kind): void
+    {
+        $this->accountKinds()
+            ->where('kind', $kind->value)
+            ->delete();
+
+        $this->unsetRelation('accountKinds');
+    }
+
+    /**
+     * Accounts holding any of the kinds.
+     *
+     * @param  Builder<User>  $query
+     * @param  AccountKind|list<AccountKind>  $kinds
+     */
+    public function scopeOfKind(Builder $query, AccountKind|array $kinds): void
+    {
+        $query->whereHas('accountKinds', fn(Builder $held) => $held->whereIn('kind', AccountKind::values(is_array($kinds) ? $kinds : [$kinds])));
+    }
+
+    /**
+     * Accounts holding none of the kinds.
+     *
+     * @param  Builder<User>  $query
+     * @param  AccountKind|list<AccountKind>  $kinds
+     */
+    public function scopeNotOfKind(Builder $query, AccountKind|array $kinds): void
+    {
+        $query->whereDoesntHave('accountKinds', fn(Builder $held) => $held->whereIn('kind', AccountKind::values(is_array($kinds) ? $kinds : [$kinds])));
     }
 
     /**

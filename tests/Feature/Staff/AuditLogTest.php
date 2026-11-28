@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Staff;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Models\AuditEvent;
 use App\Models\LabTest;
 use App\Models\User;
@@ -20,7 +20,7 @@ class AuditLogTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create(['full_name' => 'Ada Super']);
     }
 
@@ -70,7 +70,7 @@ class AuditLogTest extends TestCase
 
     public function test_the_log_filters_by_actor_action_subject_and_lagos_day(): void
     {
-        $other = User::factory()->portal(Role::Admin)->create();
+        $other = User::factory()->admin()->create();
         $log = app(AuditLog::class);
 
         $this->travelTo('2026-11-29T23:30:00Z');
@@ -115,14 +115,14 @@ class AuditLogTest extends TestCase
 
         $this->actingAs($reader)->getJson('api/v1/portal/admin/audit')->assertOk();
         $this->actingAs($nobody)->getJson('api/v1/portal/admin/audit')->assertForbidden();
-        $this->actingAs(User::factory()->portal(Role::Laboratory)->create())
+        $this->actingAs(User::factory()->portal(AccountKind::Laboratory)->create())
             ->getJson('api/v1/portal/admin/audit')
             ->assertForbidden();
     }
 
     public function test_recording_a_subscription_is_audited(): void
     {
-        $admin = User::factory()->portal(Role::Admin)->create();
+        $admin = User::factory()->admin()->create();
         $patient = User::factory()->app()->create(['phone' => '08031112222', 'phone_verified_at' => now()]);
 
         $this->actingAs($admin)

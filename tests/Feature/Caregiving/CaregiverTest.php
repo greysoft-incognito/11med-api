@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Caregiving;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Events\Caregiving\CaregiverAccepted;
 use App\Models\Caregiver;
 use App\Models\User;
@@ -183,7 +183,7 @@ class CaregiverTest extends TestCase
     public function test_caregiving_is_for_patient_accounts(): void
     {
         $doctor = User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create();
 
         $this->actingAs($doctor)
@@ -205,7 +205,7 @@ class CaregiverTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\ConsentRecord;
 use App\Models\User;
 use App\Notifications\Identity\PhoneCode;
@@ -47,7 +47,7 @@ class AppAuthTest extends TestCase
 
         $user = User::firstWhere('phone', '08031234567');
 
-        $this->assertSame(Role::Patient, $user->role());
+        $this->assertSame([AccountKind::Patient], $user->kinds());
         $this->assertNull($user->phone_verified_at);
         $this->assertSame('1.1', ConsentRecord::firstWhere('user_id', $user->id)->policy_version);
 
@@ -113,7 +113,7 @@ class AppAuthTest extends TestCase
             ->assertJsonPath('data.user.phone_number', '08031234567')
             ->assertJsonPath('data.user.email', null)
             ->assertJsonPath('data.user.email_verified', false)
-            ->assertJsonPath('data.user.role', 'patient')
+            ->assertJsonPath('data.user.kinds', ['patient'])
             ->assertJsonPath('data.user.has_medical_profile', false)
             ->assertJsonPath('data.user.is_premium', false)
             ->assertJsonStructure(['data' => ['access_token', 'refresh_token', 'user' => ['id']]]);
@@ -193,12 +193,12 @@ class AppAuthTest extends TestCase
     public function test_login_opens_a_session(): void
     {
         User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create(['phone' => '08031234567']);
 
         $this->postJson('api/v1/auth/login', ['phone_number' => '+2348031234567', 'password' => 'Password1', 'device_id' => self::INSTALL])
             ->assertOk()
-            ->assertJsonPath('data.user.role', 'doctor');
+            ->assertJsonPath('data.user.kinds', ['doctor']);
     }
 
     public function test_failed_logins_count_down_then_lock(): void
@@ -260,7 +260,7 @@ class AppAuthTest extends TestCase
     public function test_a_portal_account_cannot_sign_in_to_the_app(): void
     {
         User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create(['phone' => '08031234567']);
 
         $this->postJson('api/v1/auth/login', ['phone_number' => '08031234567', 'password' => 'Password1', 'device_id' => 'x'])
@@ -303,7 +303,7 @@ class AppAuthTest extends TestCase
             ->assertJsonPath('error.code', 'UNAUTHENTICATED');
 
         $admin = User::factory()
-            ->portal()
+            ->admin()
             ->create();
 
         $this->actingAs($admin)

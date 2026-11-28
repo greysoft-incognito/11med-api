@@ -2,7 +2,7 @@
 
 namespace App\Services\Subscriptions;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
@@ -58,7 +58,7 @@ class Subscriptions
     public function record(User $admin, string $phone, string $premiumUntil, string $reference): Subscription
     {
         $patient = User::query()
-            ->role(Role::Patient->value)
+            ->ofKind(AccountKind::Patient)
             ->where('phone', PhoneNumber::normalise($phone))
             ->whereNotNull('phone_verified_at')
             ->first();

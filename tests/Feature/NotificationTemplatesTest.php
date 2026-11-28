@@ -14,10 +14,9 @@ class NotificationTemplatesTest extends TestCase
 
     public function test_can_list_notification_templates(): void
     {
-        $admin = User::factory()->unverified()->create();
+        $admin = User::factory()->unverified()->staff()->create();
 
         $this->artisan('app:sync-roles');
-        $admin->syncRoles(config('permission-defs.roles', []));
         $admin->syncPermissions(config('permission-defs.permissions', []));
 
         $response = $this->actingAs($admin)->get('api/admin/configurations/notifications/templates');
@@ -28,10 +27,9 @@ class NotificationTemplatesTest extends TestCase
 
     public function test_can_get_notification_template(): void
     {
-        $admin = User::factory()->unverified()->create();
+        $admin = User::factory()->unverified()->staff()->create();
 
         $this->artisan('app:sync-roles');
-        $admin->syncRoles(config('permission-defs.roles', []));
         $admin->syncPermissions(config('permission-defs.permissions', []));
 
         $key = array_keys(config('messages'))[0];
@@ -41,10 +39,9 @@ class NotificationTemplatesTest extends TestCase
 
     public function test_can_parse_notification_template(): void
     {
-        $admin = User::factory()->unverified()->create();
+        $admin = User::factory()->unverified()->staff()->create();
 
         $this->artisan('app:sync-roles');
-        $admin->syncRoles(config('permission-defs.roles', []));
         $admin->syncPermissions(config('permission-defs.permissions', []));
 
         $key = array_keys(config('messages'))[3];

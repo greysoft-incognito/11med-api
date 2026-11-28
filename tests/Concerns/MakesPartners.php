@@ -5,7 +5,6 @@ namespace Tests\Concerns;
 use App\Enums\MediaPurpose;
 use App\Enums\PartnerKind;
 use App\Enums\PartnerStatus;
-use App\Enums\Role;
 use App\Models\Media;
 use App\Models\Organisation;
 use App\Models\User;
@@ -69,13 +68,6 @@ trait MakesPartners
     protected function suspend(Organisation $organisation): void
     {
         $organisation->forceFill(['status' => PartnerStatus::Suspended])->save();
-    }
-
-    protected function admin(): User
-    {
-        return User::factory()
-            ->portal(Role::Admin)
-            ->create();
     }
 
     protected function picture(User $owner, MediaPurpose $purpose): string

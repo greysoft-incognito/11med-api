@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Exceptions\ApiException;
 use App\Models\Subscription;
 use App\Models\User;
@@ -79,7 +79,7 @@ class EntitlementsTest extends TestCase
     private function patient(bool $premium = false): User
     {
         $user = User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
 
         if ($premium) {

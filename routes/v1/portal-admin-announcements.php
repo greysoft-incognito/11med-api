@@ -1,12 +1,12 @@
 <?php
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Http\Controllers\Announcements\AdminAnnouncementController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // Announcements to app users, doctors, pharmacies or laboratories, now or at a time.
-Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::staff()])
     ->prefix('portal/admin/announcements')
     ->name('portal.admin.announcements.')
     ->group(function () {

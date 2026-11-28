@@ -1,13 +1,14 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Pharmacy\CartController;
 use App\Http\Controllers\Pharmacy\OrderController;
 use App\Http\Controllers\Pharmacy\StoreController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The app's store (app spec §8): listed pharmacies, their medicines, the cart and orders.
-Route::middleware(['auth:sanctum', 'role:' . Role::Patient->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::for([AccountKind::Patient])])
     ->prefix('pharmacy')
     ->name('pharmacy.')
     ->group(function () {

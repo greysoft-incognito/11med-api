@@ -2,23 +2,34 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Tests\TestCase;
 
 class AccountModelTest extends TestCase
 {
-    public function test_every_role_exists_and_only_admin_holds_the_kit_permissions(): void
+    public function test_an_account_holds_any_kinds_and_only_a_super_admin_holds_the_kit_permissions(): void
     {
-        foreach (Role::cases() as $role) {
-            $user = User::factory()
-                ->app($role)
-                ->create();
+        $user = User::factory()
+            ->app(AccountKind::Patient)
+            ->holding(AccountKind::Doctor)
+            ->holding(AccountKind::Pharmacy)
+            ->create();
 
-            $this->assertSame($role, $user->role());
-            $this->assertSame($role === Role::Admin, $user->can('manage-users'));
-        }
+        $this->assertSame([AccountKind::Patient, AccountKind::Doctor, AccountKind::Pharmacy], $user->kinds());
+        $this->assertTrue($user->holds(AccountKind::Laboratory, AccountKind::Doctor));
+        $this->assertFalse($user->holds(AccountKind::Laboratory));
+        $this->assertFalse($user->isStaff());
+        $this->assertFalse($user->can('manage-users'));
+
+        $admin = User::factory()
+            ->admin()
+            ->create();
+
+        $this->assertSame([], $admin->kinds());
+        $this->assertTrue($admin->isStaff());
+        $this->assertTrue($admin->can('manage-users'));
     }
 
     public function test_a_user_gets_a_public_uuid(): void

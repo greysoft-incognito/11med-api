@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\DataExport;
 use App\Models\Reading;
 use App\Models\User;
@@ -155,7 +155,7 @@ class DataExportTest extends TestCase
         $this->postJson('api/v1/auth/data-export')->assertUnauthorized();
 
         $desk = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create();
 
         $this->actingAs($desk, 'sanctum')

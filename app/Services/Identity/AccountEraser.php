@@ -2,6 +2,7 @@
 
 namespace App\Services\Identity;
 
+use App\Enums\AccountKind;
 use App\Events\Identity\AccountErasing;
 use App\Exceptions\ApiException;
 use App\Models\AccountErasure;
@@ -13,7 +14,8 @@ use Illuminate\Support\Facades\Hash;
 
 /**
  * Erasure under NDPR (app handover §3.1): the person's rows are removed for real, not soft
- * deleted; what the law keeps survives without them; the phone number is free again.
+ * deleted; what the law keeps survives without them; the phone number is free again. An account
+ * that still holds portal access, staff or a partner's, is closed from there first.
  */
 class AccountEraser
 {
@@ -23,9 +25,13 @@ class AccountEraser
             throw ApiException::unprocessable('PASSWORD_INCORRECT', 'password');
         }
 
+        if ($user->isStaff() || $user->holds(...AccountKind::portal())) {
+            throw ApiException::unprocessable('PORTAL_ACCESS_HELD');
+        }
+
         DB::transaction(function () use ($user, $reason) {
             AccountErasure::create([
-                'role' => $user->role()?->value,
+                'kinds' => implode(',', AccountKind::values($user->kinds())),
                 'reason' => $reason,
                 'erased_at' => now(),
             ]);
@@ -35,6 +41,7 @@ class AccountEraser
             $user->tokens()->delete();
             $user->notifications()->delete();
             $user->syncRoles([]);
+            $user->accountKinds()->delete();
 
             OtpCode::query()
                 ->whereIn('target', ['phone:' . $user->phone, 'email:' . $user->id])

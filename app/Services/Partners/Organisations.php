@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Partners (concept §5.1, portal handover §6): a pharmacy or laboratory applies with its licence,
- * the team approves it, which creates its contact's account, and may suspend and reinstate it.
+ * the team approves it, which gives its contact an account, and may suspend and reinstate it.
  * The only writer of `organisations`.
  */
 class Organisations
@@ -229,20 +229,39 @@ class Organisations
         $organisation->fill(['status' => PartnerStatus::Approved, 'notes' => null, 'reviewed_at' => now()]);
         $organisation->save();
 
-        $account = new User([
-            'full_name' => $organisation->contact_name,
-            'email' => $organisation->contact_email,
-        ]);
-        $account->organisation_id = $organisation->id;
-        $account->email_verified_at = now();
-        $account->save();
-        $account->assignRole($organisation->kind->role()->value);
+        $account = $this->admit($organisation, $organisation->contact_name, $organisation->contact_email, 'contact_email');
 
         $organisation->forceFill(['owner_id' => $account->id])->save();
 
         PartnerApproved::dispatch($organisation);
+    }
 
-        $this->accounts->welcome($account);
+    /**
+     * Make a person a member of the organisation: a new account with its first-password link, or
+     * their existing verified account, told it was given access. An account already in an
+     * organisation is 409 `EMAIL_TAKEN`.
+     */
+    public function admit(Organisation $organisation, string $name, string $email, string $field): User
+    {
+        [$account, $linked] = $this->accounts->openOrLink($email, $name, $field);
+
+        if ($account->organisation_id !== null) {
+            throw ApiException::conflict('EMAIL_TAKEN', $field);
+        }
+
+        $account->organisation_id = $organisation->id;
+        $account->email_verified_at ??= now();
+        $account->save();
+        $account->grantKind($organisation->kind->accountKind());
+        $account->setRelation('organisation', $organisation);
+
+        if ($linked) {
+            $this->accounts->announceAccess($account, __('identity.places.organisation', ['name' => $organisation->name]));
+        } else {
+            $this->accounts->welcome($account);
+        }
+
+        return $account;
     }
 
     private function suspend(Organisation $organisation, string $notes): void
@@ -284,10 +303,16 @@ class Organisations
     /**
      * The contact's address becomes a sign-in, so it may not already be one.
      */
+    /**
+     * The contact's email may be a verified account outside any organisation, or none.
+     */
     private function ensureEmailFree(string $email): void
     {
         $taken = User::query()
             ->whereRaw('lower(email) = ?', [mb_strtolower($email)])
+            ->where(fn($query) => $query
+                ->whereNull('email_verified_at')
+                ->orWhereNotNull('organisation_id'))
             ->exists();
 
         if ($taken) {

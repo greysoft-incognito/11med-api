@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\User;
 use App\Notifications\Identity\PhoneCode;
 use Illuminate\Support\Facades\Notification;
@@ -49,7 +49,7 @@ class PhoneChangeTest extends TestCase
             'full_name' => 'New Holder',
             'phone_number' => '08031234567',
             'password' => 'Password1',
-            'role' => Role::Patient->value,
+            'role' => AccountKind::Patient->value,
             'device_id' => 'x',
         ])->assertCreated();
     }
@@ -122,7 +122,7 @@ class PhoneChangeTest extends TestCase
         $this->postJson('api/v1/auth/phone', ['phone_number' => '08051112222', 'password' => 'Password1'])->assertUnauthorized();
 
         $desk = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create();
 
         $this->actingAs($desk, 'sanctum')

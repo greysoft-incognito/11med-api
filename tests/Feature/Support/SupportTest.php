@@ -155,7 +155,7 @@ class SupportTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.assignee.id', $this->agent->uuid)
             ->assertJsonPath('data.requester.id', $this->patient->uuid)
-            ->assertJsonPath('data.requester.role', 'patient');
+            ->assertJsonPath('data.requester.kinds', ['patient']);
 
         $this->actingAs($this->agent)
             ->postJson("api/v1/portal/admin/support/tickets/{$id}/messages", ['message' => 'We have refunded the second charge.'])

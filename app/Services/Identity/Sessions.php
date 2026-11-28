@@ -2,6 +2,7 @@
 
 namespace App\Services\Identity;
 
+use App\Enums\AuthClient;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
 use App\Models\User;
@@ -29,4 +30,9 @@ interface Sessions
      * End every session of the user, except the family named.
      */
     public function revokeAll(User $user, ?string $exceptFamily = null): void;
+
+    /**
+     * End every session of the user on one client, leaving the other's.
+     */
+    public function revokeClient(User $user, AuthClient $client): void;
 }

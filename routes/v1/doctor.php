@@ -1,11 +1,12 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Doctors\DoctorProfileController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The doctor's own record (app spec §4).
-Route::middleware(['auth:sanctum', 'role:' . Role::Doctor->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::for([AccountKind::Doctor])])
     ->prefix('doctor')
     ->name('doctor.')
     ->group(function () {

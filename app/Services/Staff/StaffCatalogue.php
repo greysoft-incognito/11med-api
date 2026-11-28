@@ -3,7 +3,6 @@
 namespace App\Services\Staff;
 
 use App\Enums\AdminPermission as P;
-use App\Enums\Role;
 use App\Models\StaffRole;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -113,7 +112,7 @@ class StaffCatalogue
     private function promoteExistingAdmins(StaffRole $superAdmin): void
     {
         User::query()
-            ->role(Role::Admin->value)
+            ->whereNotNull('staff_since')
             ->chunkById(200, function ($admins) use ($superAdmin) {
                 foreach ($admins as $admin) {
                     $admin->assignRole($superAdmin);

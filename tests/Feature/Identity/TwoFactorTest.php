@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\User;
 use Illuminate\Testing\TestResponse;
 use PragmaRX\Google2FA\Google2FA;
@@ -225,7 +225,7 @@ class TwoFactorTest extends TestCase
     public function test_a_portal_account_signs_in_with_the_second_step(): void
     {
         $desk = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create(['email' => 'desk@pharmacy.ng']);
 
         [$secret] = $this->enable($desk, 'api/v1/portal/account');
@@ -247,7 +247,7 @@ class TwoFactorTest extends TestCase
         config(['elevenmed.two_factor.admin_required' => true]);
 
         $admin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create();
 
         $this->actingAs($admin, 'sanctum')
@@ -290,7 +290,7 @@ class TwoFactorTest extends TestCase
         config(['elevenmed.two_factor.admin_required' => false]);
 
         $admin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create();
 
         $this->actingAs($admin, 'sanctum')
@@ -303,7 +303,7 @@ class TwoFactorTest extends TestCase
         $this->getJson('api/v1/auth/two-factor')->assertUnauthorized();
 
         $desk = User::factory()
-            ->portal(Role::Laboratory)
+            ->portal(AccountKind::Laboratory)
             ->create();
 
         $this->actingAs($desk, 'sanctum')

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Profile;
 
+use App\Enums\AccountKind;
 use App\Enums\MediaPurpose;
-use App\Enums\Role;
 use App\Models\Media;
 use App\Models\MedicalProfile;
 use App\Models\QrToken;
@@ -228,7 +228,7 @@ class ProfileTest extends TestCase
     public function test_only_patients_have_a_medical_profile(): void
     {
         $doctor = User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create();
 
         $this->actingAs($doctor)
@@ -243,7 +243,7 @@ class ProfileTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 

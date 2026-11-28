@@ -26,20 +26,20 @@ enum MediaPurpose: string
     public const DOCUMENT_TYPES = ['application/pdf'];
 
     /**
-     * The roles that may upload for this purpose; empty when no account is needed.
+     * The account kinds that may upload for this purpose; empty when no account is needed.
      *
-     * @return list<Role>
+     * @return list<AccountKind>
      */
-    public function roles(): array
+    public function kinds(): array
     {
         return match ($this) {
-            self::ProfilePhoto => [Role::Patient],
-            self::DoctorPhoto, self::DoctorDocument => [Role::Doctor],
-            self::MessageAttachment => [Role::Patient, Role::Doctor],
-            self::DrugImage, self::PharmacyLogo, self::PharmacyCover => [Role::Pharmacy],
-            self::LaboratoryLogo, self::LaboratoryCover, self::LabResults => [Role::Laboratory],
+            self::ProfilePhoto => [AccountKind::Patient],
+            self::DoctorPhoto, self::DoctorDocument => [AccountKind::Doctor],
+            self::MessageAttachment => [AccountKind::Patient, AccountKind::Doctor],
+            self::DrugImage, self::PharmacyLogo, self::PharmacyCover => [AccountKind::Pharmacy],
+            self::LaboratoryLogo, self::LaboratoryCover, self::LabResults => [AccountKind::Laboratory],
             self::PartnerLicence => [],
-            self::SupportAttachment => [Role::Patient, Role::Doctor, Role::Pharmacy, Role::Laboratory],
+            self::SupportAttachment => [AccountKind::Patient, AccountKind::Doctor, AccountKind::Pharmacy, AccountKind::Laboratory],
         };
     }
 
@@ -48,7 +48,7 @@ enum MediaPurpose: string
      */
     public function isPublicUpload(): bool
     {
-        return $this->roles() === [];
+        return $this->kinds() === [];
     }
 
     /**

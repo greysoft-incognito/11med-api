@@ -46,7 +46,7 @@ class DemoPartners
         $account->organisation_id = $organisation->id;
         $account->email_verified_at = now()->subDays(40);
         $account->save();
-        $account->assignRole($kind->role()->value);
+        $account->grantKind($kind->accountKind());
 
         PartnerApproved::dispatch($organisation);
 

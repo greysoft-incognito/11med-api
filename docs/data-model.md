@@ -145,9 +145,17 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 
 | Table | Notes |
 | --- | --- |
-| `roles` (Spatie) | Gains `uuid`, `is_staff`, `key` (the seeded defaults: `super-admin`, `verification`, `finance`, `support`, `catalogue`), `label` (unique among staff roles, case-insensitive) and `description`. Account roles keep `is_staff` false. A staff role is deleted for real, with its assignments |
-| `users` | Gains `deactivated_at`: a deactivated team account holds no permission and cannot sign in |
+| `roles` (Spatie) | Staff roles only (account kinds left in the change below). Gains `uuid`, `key` (the seeded defaults: `super-admin`, `verification`, `finance`, `support`, `catalogue`), `label` (unique, case-insensitive) and `description`; `name` is the key, or the public id for a role the team made. A staff role is deleted for real, with its assignments |
+| `users` | Gains `deactivated_at`: a deactivated team member holds no permission and loses the desk, and an account with nothing else cannot sign in to the portals |
 | `audit_events` | Not soft deleted, never updated or deleted. `actor_id` (nulled if the account goes), `actor_name` as written, `action` (`<area>.<verb>`), `subject_type` (the model's snake name), `subject_id` (its public id), `meta` JSONB, `created_at`. Never holds medical data |
+
+### Account kinds
+
+| Table | Notes |
+| --- | --- |
+| `account_kinds` | Not soft deleted (cascades with the user). The kinds an account holds, any number: `user_id`, `kind` (`patient`, `doctor`, `pharmacy`, `laboratory`, indexed), `created_at`, unique `(user_id, kind)`. Moved out of Spatie's `model_has_roles` by `2026_12_04_100000`, which also removed the account roles and the `is_staff` column from `roles` |
+| `users` (extended) | `staff_since` (indexed): the person has staff access, and what they may do is their staff roles and permissions. Replaces the old `admin` role |
+| `account_erasures` (changed) | `role` becomes `kinds`, the erased account's kinds comma separated |
 
 ### Admin operations (M17)
 

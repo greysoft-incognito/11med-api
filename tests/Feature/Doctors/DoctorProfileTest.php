@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Doctors;
 
+use App\Enums\AccountKind;
 use App\Enums\DocumentKind;
 use App\Enums\MediaPurpose;
-use App\Enums\Role;
 use App\Models\DoctorDocument;
 use App\Models\DoctorProfile;
 use App\Models\Media;
@@ -17,7 +17,7 @@ class DoctorProfileTest extends TestCase
 
     public function test_a_doctor_reads_a_blank_record_on_first_open(): void
     {
-        $doctor = $this->user(Role::Doctor);
+        $doctor = $this->user(AccountKind::Doctor);
 
         $this->actingAs($doctor)
             ->getJson('api/v1/doctor/profile')
@@ -46,8 +46,8 @@ class DoctorProfileTest extends TestCase
 
     public function test_other_roles_are_refused(): void
     {
-        foreach ([Role::Patient, Role::Admin, Role::Pharmacy] as $role) {
-            $this->actingAs($this->user($role))
+        foreach ([$this->user(AccountKind::Patient), $this->admin(), $this->user(AccountKind::Pharmacy)] as $account) {
+            $this->actingAs($account)
                 ->getJson('api/v1/doctor/profile')
                 ->assertForbidden();
         }
@@ -59,7 +59,7 @@ class DoctorProfileTest extends TestCase
 
     public function test_the_practice_details_save_and_the_account_is_masked(): void
     {
-        $doctor = $this->user(Role::Doctor);
+        $doctor = $this->user(AccountKind::Doctor);
         $photo = $this->upload($doctor, MediaPurpose::DoctorPhoto);
 
         $response = $this->actingAs($doctor)
@@ -89,7 +89,7 @@ class DoctorProfileTest extends TestCase
 
     public function test_the_practice_details_are_validated(): void
     {
-        $doctor = $this->user(Role::Doctor);
+        $doctor = $this->user(AccountKind::Doctor);
         $cases = [
             'specialty' => ['specialty' => 'surgery'],
             'languages.0' => ['languages' => ['french']],
@@ -113,8 +113,8 @@ class DoctorProfileTest extends TestCase
 
     public function test_a_photo_must_be_the_doctors_own_upload_for_it(): void
     {
-        $doctor = $this->user(Role::Doctor);
-        $other = $this->user(Role::Doctor);
+        $doctor = $this->user(AccountKind::Doctor);
+        $other = $this->user(AccountKind::Doctor);
         $document = $this->upload($doctor, MediaPurpose::DoctorDocument);
 
         foreach ([$this->upload($other, MediaPurpose::DoctorPhoto), $document] as $url) {
@@ -128,7 +128,7 @@ class DoctorProfileTest extends TestCase
 
     public function test_a_document_is_uploaded_and_replaced(): void
     {
-        $doctor = $this->user(Role::Doctor);
+        $doctor = $this->user(AccountKind::Doctor);
 
         $this->sendDocument($doctor, DocumentKind::GovernmentId);
         $this->sendDocument($doctor, DocumentKind::GovernmentId);
@@ -144,8 +144,8 @@ class DoctorProfileTest extends TestCase
 
     public function test_a_document_must_be_the_doctors_own_upload(): void
     {
-        $doctor = $this->user(Role::Doctor);
-        $stranger = $this->upload($this->user(Role::Doctor), MediaPurpose::DoctorDocument);
+        $doctor = $this->user(AccountKind::Doctor);
+        $stranger = $this->upload($this->user(AccountKind::Doctor), MediaPurpose::DoctorDocument);
         $photo = $this->upload($doctor, MediaPurpose::DoctorPhoto);
 
         foreach ([$stranger, $photo, 'file:///var/mobile/scan.jpg'] as $uri) {
@@ -169,7 +169,7 @@ class DoctorProfileTest extends TestCase
 
     public function test_an_incomplete_submission_names_what_is_missing(): void
     {
-        $doctor = $this->user(Role::Doctor);
+        $doctor = $this->user(AccountKind::Doctor);
 
         $this->actingAs($doctor)
             ->patchJson('api/v1/doctor/profile', ['mdcn_number' => 'MD1', 'sub_specialty' => 'Electrophysiology'])
@@ -234,7 +234,7 @@ class DoctorProfileTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonPath('error.code', 'DOCTOR_APPROVED');
 
-        $this->actingAs($this->user(Role::Admin))
+        $this->actingAs($this->admin())
             ->postJson("api/v1/portal/admin/doctors/{$doctor->uuid}/review", ['decision' => 'suspended', 'notes' => 'Complaint under investigation.'])
             ->assertOk();
 
@@ -247,7 +247,7 @@ class DoctorProfileTest extends TestCase
     public function test_a_rejected_application_resubmits_after_fixing_the_document(): void
     {
         $doctor = $this->submittedDoctor();
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
 
         $this->actingAs($admin)
             ->postJson("api/v1/portal/admin/doctors/{$doctor->uuid}/documents/review", ['kind' => 'mdcn_certificate', 'decision' => 'rejected', 'reason' => 'The scan is cut off at the registration number.'])

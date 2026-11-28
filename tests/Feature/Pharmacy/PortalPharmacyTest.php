@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Pharmacy;
 
+use App\Enums\AccountKind;
 use App\Enums\MediaPurpose;
 use App\Enums\PartnerKind;
-use App\Enums\Role;
 use App\Models\Media;
 use App\Models\Organisation;
 use App\Models\User;
@@ -218,7 +218,7 @@ class PortalPharmacyTest extends TestCase
             ->assertForbidden();
 
         $orphan = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create();
 
         $this->actingAs($orphan)

@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Identity;
 
+use App\Enums\AccountKind;
 use App\Enums\AuthClient;
 use App\Enums\HttpStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Identity\AddKindRequest;
 use App\Http\Requests\Identity\DeleteAccountRequest;
 use App\Http\Requests\Identity\LoginRequest;
 use App\Http\Requests\Identity\LogoutRequest;
@@ -13,6 +15,7 @@ use App\Http\Requests\Identity\RefreshRequest;
 use App\Http\Requests\Identity\RegisterRequest;
 use App\Http\Requests\Identity\VerifyOtpRequest;
 use App\Http\Resources\EmptyResource;
+use App\Http\Resources\Identity\AccountResource;
 use App\Http\Resources\Identity\AppSessionResource;
 use App\Http\Resources\Identity\OtpSentResource;
 use App\Http\Resources\Identity\PendingAccountResource;
@@ -100,6 +103,17 @@ class AppAuthController extends Controller
         $session = new AppSession($request->user(), $pair);
 
         return new AppSessionResource($session);
+    }
+
+    /**
+     * Open the other app side on the signed-in account: a patient becomes a doctor too, or a
+     * doctor a patient. Opening one already held changes nothing.
+     */
+    public function addKind(AddKindRequest $request): AccountResource
+    {
+        $user = $this->accounts->addKind($request->user(), AccountKind::from($request->string('kind')->toString()));
+
+        return new AccountResource($user);
     }
 
     /**

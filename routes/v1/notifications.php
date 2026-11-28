@@ -1,11 +1,12 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Notifications\NotificationController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // A user's own notification history and delivery choices (app spec §9); another account's id is 404.
-Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::app()))])
+Route::middleware(['auth:sanctum', RequireAccountKind::for(AccountKind::app())])
     ->prefix('notifications/{userId}')
     ->whereUuid('userId')
     ->name('notifications.')

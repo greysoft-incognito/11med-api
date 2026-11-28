@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Notifications;
 
+use App\Enums\AuthClient;
 use App\Http\Controllers\Controller;
 use App\Http\Paging\ListQuery;
 use App\Http\Requests\Notifications\UpdatePreferencesRequest;
@@ -21,7 +22,7 @@ class NotificationController extends Controller
 
     public function index(Request $request, string $userId): NotificationCollection
     {
-        $list = $this->history->list($request->user(), $userId, ListQuery::from($request));
+        $list = $this->history->list($request->user(), $userId, AuthClient::App, ListQuery::from($request));
 
         return new NotificationCollection($list);
     }
@@ -35,21 +36,21 @@ class NotificationController extends Controller
 
     public function readAll(Request $request, string $userId): EmptyResource
     {
-        $this->history->markAllRead($request->user(), $userId);
+        $this->history->markAllRead($request->user(), $userId, AuthClient::App);
 
         return new EmptyResource;
     }
 
     public function preferences(Request $request, string $userId): NotificationPreferencesResource
     {
-        $preferences = $this->preferences->of($request->user(), $userId);
+        $preferences = $this->preferences->of($request->user(), $userId, AuthClient::App);
 
         return new NotificationPreferencesResource($preferences);
     }
 
     public function updatePreferences(UpdatePreferencesRequest $request, string $userId): NotificationPreferencesResource
     {
-        $preferences = $this->preferences->save($request->user(), $userId, $request->validated('preferences'));
+        $preferences = $this->preferences->save($request->user(), $userId, AuthClient::App, $request->validated('preferences'));
 
         return new NotificationPreferencesResource($preferences);
     }

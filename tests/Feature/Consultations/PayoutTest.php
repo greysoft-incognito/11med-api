@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Consultations;
 
-use App\Enums\Role;
 use App\Models\Consultation;
 use App\Models\ConsultationMessage;
 use App\Models\Payout;
@@ -63,7 +62,7 @@ class PayoutTest extends TestCase
     public function test_the_desk_settles_a_payout_once(): void
     {
         $doctor = $this->availableDoctor();
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
 
         $this->finished($doctor);
         $this->artisan('consultations:payouts');
@@ -109,7 +108,7 @@ class PayoutTest extends TestCase
     public function test_a_failed_payout_returns_its_sessions_to_the_next_one(): void
     {
         $doctor = $this->availableDoctor();
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
 
         $this->finished($doctor);
         $this->artisan('consultations:payouts');

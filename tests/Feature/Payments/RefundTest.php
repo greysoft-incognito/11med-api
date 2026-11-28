@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Payments;
 
+use App\Enums\AccountKind;
 use App\Enums\PaymentPurpose;
-use App\Enums\Role;
 use App\Events\Payments\PaymentAbandoned;
 use App\Events\Payments\PaymentRefunded;
 use App\Models\Payment;
@@ -63,7 +63,7 @@ class RefundTest extends TestCase
     public function test_a_refund_paystack_refuses_leaves_the_share_paid_and_tells_the_team(): void
     {
         $admin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create();
 
         [$first, , $reference] = $this->paidCheckout();
@@ -173,7 +173,7 @@ class RefundTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 }

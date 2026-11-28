@@ -1,8 +1,9 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Identity\PolicyConsentController;
 use App\Http\Controllers\Identity\PortalAuthController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('portal/auth')->name('portal.auth.')->group(function () {
@@ -17,11 +18,11 @@ Route::prefix('portal/auth')->name('portal.auth.')->group(function () {
         Route::post('set-password', [PortalAuthController::class, 'setPassword'])->name('set-password');
     });
 
-    Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::portal()))])
+    Route::middleware(['auth:sanctum', RequireAccountKind::for(AccountKind::portal(), staff: true)])
         ->get('session', [PortalAuthController::class, 'session'])
         ->name('session');
 
-    Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values([Role::Pharmacy, Role::Laboratory]))])
+    Route::middleware(['auth:sanctum', RequireAccountKind::for(AccountKind::portal())])
         ->post('consent', [PolicyConsentController::class, 'portal'])
         ->name('consent');
 });

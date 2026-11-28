@@ -1,11 +1,11 @@
 <?php
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Http\Controllers\Partners\AdminPartnerController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::staff()])
     ->prefix('portal/admin/partners')
     ->name('portal.admin.partners.')
     ->group(function () {

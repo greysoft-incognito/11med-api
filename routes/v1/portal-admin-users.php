@@ -1,12 +1,12 @@
 <?php
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Http\Controllers\Accounts\AdminUserController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // Patient and doctor accounts: the directory and what the team may do to an account.
-Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::staff()])
     ->prefix('portal/admin/users')
     ->name('portal.admin.users.')
     ->group(function () {

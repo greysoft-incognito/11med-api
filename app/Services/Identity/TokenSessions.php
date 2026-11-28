@@ -2,6 +2,7 @@
 
 namespace App\Services\Identity;
 
+use App\Enums\AuthClient;
 use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
@@ -49,5 +50,10 @@ class TokenSessions implements Sessions
     public function revokeAll(User $user, ?string $exceptFamily = null): void
     {
         $this->tokens->revokeAll($user, $exceptFamily);
+    }
+
+    public function revokeClient(User $user, AuthClient $client): void
+    {
+        $this->tokens->revokeClient($user, $client);
     }
 }

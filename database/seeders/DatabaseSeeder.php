@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Console\Commands\SyncRoles;
-use App\Enums\Role;
 use App\Models\User;
 use App\Services\Staff\StaffCatalogue;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -32,7 +31,7 @@ class DatabaseSeeder extends Seeder
                 'email' => 'admin@example.com',
             ]);
 
-            $admin->assignRole(Role::Admin->value);
+            $admin->forceFill(['staff_since' => now()])->save();
             $admin->assignRole(app(StaffCatalogue::class)->superAdmin());
         }
     }

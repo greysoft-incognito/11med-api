@@ -1,11 +1,12 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Notifications\PortalNotificationController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // A portal account's own notification centre (portal handover §8): history, the bell's count, and preferences.
-Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::portal()))])
+Route::middleware(['auth:sanctum', RequireAccountKind::for(AccountKind::portal(), staff: true)])
     ->prefix('portal/notifications')
     ->name('portal.notifications.')
     ->group(function () {

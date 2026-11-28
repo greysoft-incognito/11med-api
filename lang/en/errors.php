@@ -18,6 +18,7 @@ return [
     'AUTH_INVALID_CREDENTIALS' => 'That phone number or password is not correct.',
     'AUTH_ACCOUNT_LOCKED' => 'Too many attempts. Your account is temporarily locked.',
     'PASSWORD_INCORRECT' => 'That is not your current password.',
+    'PORTAL_ACCESS_HELD' => 'This account still has access to a portal on 11med. Ask that portal\'s administrator to remove it first.',
     'PASSWORD_UNCHANGED' => 'Choose a password you have not used here before.',
     'EMAIL_TAKEN' => 'That email is already on another account.',
     'NO_EMAIL' => 'There is no email address to confirm.',

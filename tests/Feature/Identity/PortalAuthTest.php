@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\PasswordLink;
 use App\Models\User;
 use App\Notifications\Identity\PortalPasswordLink;
@@ -20,7 +20,7 @@ class PortalAuthTest extends TestCase
         Notification::fake();
 
         $this->account = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create(['email' => 'desk@pharmacy.ng', 'full_name' => 'Ada Desk']);
     }
 
@@ -53,7 +53,7 @@ class PortalAuthTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('data.account.email', 'desk@pharmacy.ng')
             ->assertJsonPath('data.account.name', 'Ada Desk')
-            ->assertJsonPath('data.account.role', 'pharmacy')
+            ->assertJsonPath('data.account.kinds', ['pharmacy'])
             ->assertJsonPath('data.account.organisation_id', null)
             ->assertJsonPath('data.account.organisation_name', null)
             ->assertJsonStructure(['data' => ['access_token', 'refresh_token', 'account' => ['id', 'created_at']]]);
@@ -206,7 +206,7 @@ class PortalAuthTest extends TestCase
 
         $admin = User::firstWhere('email', 'ops@11med.ng');
 
-        $this->assertSame(Role::Admin, $admin->role());
+        $this->assertTrue($admin->isStaff());
         $this->assertNull($admin->password);
         $this->assertTrue(PasswordLink::firstWhere('user_id', $admin->id)->expires_at->isAfter(now()->addDays(6)));
 

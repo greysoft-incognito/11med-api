@@ -2,6 +2,35 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-04: Account kinds apart from roles
+
+- Account kinds (`patient`, `doctor`, `pharmacy`, `laboratory`) live in `account_kinds`, any
+  number per account, read through `User::kinds()`, `holds()`, `grantKind()` and the `ofKind`
+  scope. Spatie holds staff roles and permissions only; `App\Enums\Role` is gone, replaced by
+  `AccountKind`, and admin is not a kind: `users.staff_since` marks staff access and
+  `User::isStaff()` reads it with `deactivated_at`. The migration moves the existing data both ways.
+- Every route group names its kinds with the `kind` middleware (`RequireAccountKind`), which also
+  checks the token's client (Sanctum ability `app` or `portal`), so an app token never reaches the
+  portals or the desk and a portal token never reaches the app. `kind:staff` guards
+  `portal/admin/*` and the kit's `/api/admin/*`.
+- App sign-in takes any account holding patient or doctor; portal sign-in a partner member or
+  anyone with staff access. The app session's `user.kinds` lists its app kinds, the portal
+  session's `kinds` its partner kinds beside `permissions` (FE-173). `POST auth/kinds` opens the
+  other app side on a signed-in account (FE-174).
+- Staff and partner invites link an existing account when its email is verified and tell it with
+  `PortalAccessGranted` instead of a password link; an unverified one is 409 `EMAIL_TAKEN`, as is
+  one already staff or already in an organisation. Removing a partner member who holds anything
+  else keeps the account and ends only its portal sessions.
+- Two-step verification is required of anyone with staff access while `ADMIN_2FA_REQUIRED` is on,
+  for the desk only. Deactivation ends portal sessions and keeps app ones.
+- Erasure from the app is 422 `PORTAL_ACCESS_HELD` while the account has staff access or a partner
+  membership. `account_erasures.role` became `kinds`.
+- Notification categories, history, unread counts and the terms to accept are per client: the app
+  lists the categories of its kinds, a portal those of its partner kind and staff access
+  (`NotificationCategory::for(User, AuthClient)`), and a push goes out only for an app category.
+- The user directory filters by `kind` instead of `role` and lists `kinds`; a support ticket's
+  requester carries `kinds`; announcements reach every holder of the audience's kinds.
+
 ## 2026-12-03: M18.5 Terms and privacy documents
 
 - The terms and privacy policies live in the API, as toneflix/photos keeps its policies, instead of

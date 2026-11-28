@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Partners;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\User;
 use App\Notifications\Identity\PortalPasswordLink;
 use Illuminate\Support\Facades\Notification;
@@ -91,7 +91,7 @@ class PartnerWelcomeTest extends TestCase
             ->postJson("api/v1/portal/admin/partners/{$partner->uuid}/welcome")
             ->assertForbidden();
 
-        $this->actingAs(User::factory()->app(Role::Patient)->create())
+        $this->actingAs(User::factory()->app(AccountKind::Patient)->create())
             ->postJson("api/v1/portal/admin/partners/{$partner->uuid}/welcome")
             ->assertForbidden();
     }

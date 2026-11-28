@@ -2,25 +2,28 @@
 
 namespace App\Services\Notifications;
 
+use App\Enums\AuthClient;
 use App\Enums\NotificationCategory;
 use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Models\AppNotification;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 /**
  * A user's notification history (app handover §8.2): the only writer of `app_notifications`.
+ * Each client reads the categories the account is told about there.
  */
 class NotificationHistory
 {
-    public function list(User $caller, string $userId, ListQuery $list): NotificationList
+    public function list(User $caller, string $userId, AuthClient $client, ListQuery $list): NotificationList
     {
         $this->ensureSelf($caller, $userId);
 
-        $mine = AppNotification::query()->where('user_id', $caller->id);
-        $unread = $this->unreadCount($caller);
+        $mine = $this->seenOn($caller, $client);
+        $unread = $this->unreadCount($caller, $client);
 
         $page = $list->paginate(
             $mine
@@ -31,10 +34,10 @@ class NotificationHistory
         return new NotificationList($page, $unread);
     }
 
-    public function unreadCount(User $user): int
+    public function unreadCount(User $user, AuthClient $client): int
     {
-        return AppNotification::query()
-            ->where('user_id', $user->id)
+        return $this
+            ->seenOn($user, $client)
             ->whereNull('read_at')
             ->count();
     }
@@ -56,12 +59,12 @@ class NotificationHistory
         }
     }
 
-    public function markAllRead(User $caller, string $userId): void
+    public function markAllRead(User $caller, string $userId, AuthClient $client): void
     {
         $this->ensureSelf($caller, $userId);
 
-        AppNotification::query()
-            ->where('user_id', $caller->id)
+        $this
+            ->seenOn($caller, $client)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
     }
@@ -106,6 +109,18 @@ class NotificationHistory
             ->sole();
 
         return [$notification, $written === 1];
+    }
+
+    /**
+     * The user's rows in the categories one client shows.
+     *
+     * @return Builder<AppNotification>
+     */
+    private function seenOn(User $user, AuthClient $client): Builder
+    {
+        return AppNotification::query()
+            ->where('user_id', $user->id)
+            ->whereIn('category', NotificationCategory::valuesFor($user, $client));
     }
 
     private function ensureSelf(User $caller, string $userId): void

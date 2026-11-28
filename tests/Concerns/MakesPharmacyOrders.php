@@ -2,7 +2,7 @@
 
 namespace Tests\Concerns;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\Drug;
 use App\Models\MedicalProfile;
 use App\Models\Organisation;
@@ -54,7 +54,7 @@ trait MakesPharmacyOrders
     protected function patient(?string $state = null): User
     {
         $patient = User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
 
         if ($state !== null) {

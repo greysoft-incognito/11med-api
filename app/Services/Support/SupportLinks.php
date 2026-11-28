@@ -2,7 +2,7 @@
 
 namespace App\Services\Support;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Enums\SupportLinkKind;
 use App\Exceptions\ApiException;
 use App\Models\User;
@@ -32,20 +32,27 @@ class SupportLinks
 
     public function ensureVisible(User $requester, SupportLinkKind $kind, string $id): void
     {
-        $role = $requester->role();
+        $checks = [
+            [SupportLinkKind::Order, AccountKind::Patient, fn() => $this->patientOrders->find($requester, $id)],
+            [SupportLinkKind::Order, AccountKind::Pharmacy, fn() => $this->pharmacyOrders->find($this->pharmacies->of($requester), $id)],
+            [SupportLinkKind::LabBooking, AccountKind::Patient, fn() => $this->patientBookings->find($requester, $id)],
+            [SupportLinkKind::LabBooking, AccountKind::Laboratory, fn() => $this->laboratoryBookings->find($this->laboratories->of($requester), $id)],
+            [SupportLinkKind::Consultation, AccountKind::Patient, fn() => $this->consultations->ofPatient($requester, $id)],
+            [SupportLinkKind::Consultation, AccountKind::Doctor, fn() => $this->consultations->ofDoctor($requester, $id)],
+        ];
 
-        try {
-            $found = match (true) {
-                $kind === SupportLinkKind::Order && $role === Role::Patient => (bool) $this->patientOrders->find($requester, $id),
-                $kind === SupportLinkKind::Order && $role === Role::Pharmacy => (bool) $this->pharmacyOrders->find($this->pharmacies->of($requester), $id),
-                $kind === SupportLinkKind::LabBooking && $role === Role::Patient => (bool) $this->patientBookings->find($requester, $id),
-                $kind === SupportLinkKind::LabBooking && $role === Role::Laboratory => (bool) $this->laboratoryBookings->find($this->laboratories->of($requester), $id),
-                $kind === SupportLinkKind::Consultation && $role === Role::Patient => (bool) $this->consultations->ofPatient($requester, $id),
-                $kind === SupportLinkKind::Consultation && $role === Role::Doctor => (bool) $this->consultations->ofDoctor($requester, $id),
-                default => false,
-            };
-        } catch (ApiException) {
-            $found = false;
+        $found = false;
+
+        foreach ($checks as [$linkKind, $accountKind, $find]) {
+            if ($found || $linkKind !== $kind || ! $requester->holds($accountKind)) {
+                continue;
+            }
+
+            try {
+                $found = (bool) $find();
+            } catch (ApiException) {
+                $found = false;
+            }
         }
 
         if (! $found) {

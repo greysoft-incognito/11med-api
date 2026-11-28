@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Desk;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Services\Partners\Organisations;
 use App\Services\Subscriptions\Subscriptions;
 use Tests\Concerns\MakesPartners;
@@ -78,7 +78,7 @@ class AdminSummaryTest extends TestCase
     {
         $this->getJson('api/v1/portal/admin/summary')->assertUnauthorized();
 
-        foreach ([Role::Patient, Role::Doctor, Role::Pharmacy, Role::Laboratory] as $role) {
+        foreach ([AccountKind::Patient, AccountKind::Doctor, AccountKind::Pharmacy, AccountKind::Laboratory] as $role) {
             $this->actingAs($this->user($role))
                 ->getJson('api/v1/portal/admin/summary')
                 ->assertForbidden();

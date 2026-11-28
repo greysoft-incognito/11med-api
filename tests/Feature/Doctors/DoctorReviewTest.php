@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Doctors;
 
+use App\Enums\AccountKind;
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Events\Doctors\DoctorDocumentReviewed;
 use App\Events\Doctors\DoctorReviewed;
 use App\Models\User;
@@ -18,7 +18,7 @@ class DoctorReviewTest extends TestCase
 
     public function test_the_team_lists_submitted_applications_oldest_first(): void
     {
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
         $first = $this->submittedDoctor();
         $this->travel(1)->hours();
         $second = $this->submittedDoctor();
@@ -51,7 +51,7 @@ class DoctorReviewTest extends TestCase
 
     public function test_the_list_searches_name_mdcn_number_and_phone(): void
     {
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
         $doctor = $this->submittedDoctor();
         $this->submittedDoctor();
         $doctor->doctorProfile()->update(['mdcn_number' => 'MDCN/77777']);
@@ -72,7 +72,7 @@ class DoctorReviewTest extends TestCase
 
     public function test_the_detail_carries_signed_document_links(): void
     {
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
         $doctor = $this->submittedDoctor();
 
         $url = $this->actingAs($admin)
@@ -87,7 +87,7 @@ class DoctorReviewTest extends TestCase
         $this->get($url)->assertOk();
 
         $this->actingAs($admin)
-            ->getJson('api/v1/portal/admin/doctors/' . $this->user(Role::Patient)->uuid)
+            ->getJson('api/v1/portal/admin/doctors/' . $this->user(AccountKind::Patient)->uuid)
             ->assertNotFound()
             ->assertJsonPath('error.code', 'DOCTOR_NOT_FOUND');
     }
@@ -96,7 +96,7 @@ class DoctorReviewTest extends TestCase
     {
         $doctor = $this->submittedDoctor();
 
-        foreach ([Role::Doctor, Role::Patient, Role::Pharmacy, Role::Laboratory] as $role) {
+        foreach ([AccountKind::Doctor, AccountKind::Patient, AccountKind::Pharmacy, AccountKind::Laboratory] as $role) {
             $user = $this->user($role);
 
             $this->actingAs($user)->getJson('api/v1/portal/admin/doctors')->assertForbidden();
@@ -114,7 +114,7 @@ class DoctorReviewTest extends TestCase
     {
         Event::fake([DoctorDocumentReviewed::class]);
 
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
         $doctor = $this->submittedDoctor();
         $route = "api/v1/portal/admin/doctors/{$doctor->uuid}/documents/review";
 
@@ -145,7 +145,7 @@ class DoctorReviewTest extends TestCase
 
     public function test_approval_needs_every_required_document_accepted(): void
     {
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
         $doctor = $this->submittedDoctor();
 
         $this->actingAs($admin)
@@ -163,7 +163,7 @@ class DoctorReviewTest extends TestCase
     {
         Event::fake([DoctorReviewed::class]);
 
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
         $doctor = $this->approvedDoctor(['is_available_now' => true]);
         $route = "api/v1/portal/admin/doctors/{$doctor->uuid}/review";
         $notes = 'Complaint received; on hold pending review.';
@@ -230,7 +230,7 @@ class DoctorReviewTest extends TestCase
         $this->app->instance(Notifier::class, $sent);
 
         $doctor = $this->approvedDoctor();
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
 
         $this->actingAs($admin)
             ->postJson("api/v1/portal/admin/doctors/{$doctor->uuid}/documents/review", ['kind' => 'government_id', 'decision' => 'rejected', 'reason' => 'The NIN slip has expired; upload a current one.'])

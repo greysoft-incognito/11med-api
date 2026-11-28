@@ -2,11 +2,12 @@
 
 namespace App\Services\Identity;
 
+use App\Enums\AccountKind;
 use App\Enums\AuthClient;
-use App\Enums\Role;
 use App\Exceptions\ApiException;
 use App\Models\PasswordLink;
 use App\Models\User;
+use App\Notifications\Identity\PortalAccessGranted;
 use App\Notifications\Identity\PortalPasswordLink;
 use App\Services\Identity\TwoFactor\TwoFactorChallenges;
 use Illuminate\Support\Facades\DB;
@@ -15,8 +16,9 @@ use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
 
 /**
- * Portal accounts (pharmacy, laboratory, the team): email and password, no phone, no OTP.
- * Passwords are set from emailed links, for a reset or a new account.
+ * Portal sign-in (pharmacy, laboratory, the team): email and password, no OTP. The account may also
+ * hold app kinds; the portal session reaches only portal routes. Passwords are set from emailed
+ * links, for a reset or a new account.
  */
 class PortalAccounts
 {
@@ -111,17 +113,62 @@ class PortalAccounts
         return $this->open($account);
     }
 
+    /**
+     * An account that may sign in to the portals: a pharmacy or laboratory member, or a team
+     * member, deactivated or not.
+     */
     public function findByEmail(string $email): ?User
     {
         return User::query()
             ->whereRaw('lower(email) = ?', [mb_strtolower($email)])
-            ->whereHas('roles', fn($q) => $q->whereIn('name', Role::values(Role::portal())))
+            ->where(fn($query) => $query
+                ->ofKind(AccountKind::portal())
+                ->orWhereNotNull('staff_since'))
             ->first();
+    }
+
+    /**
+     * The account a portal invitation goes to: a new one, or the person's existing account when
+     * its email is verified, so nobody inherits access by typing another person's address. The
+     * second value says whether it already existed.
+     *
+     * @return array{0: User, 1: bool}
+     */
+    public function openOrLink(string $email, string $name, string $field): array
+    {
+        $existing = User::query()
+            ->whereRaw('lower(email) = ?', [mb_strtolower($email)])
+            ->first();
+
+        if ($existing === null) {
+            $account = User::create([
+                'full_name' => $name,
+                'email' => mb_strtolower($email),
+            ]);
+
+            return [$account, false];
+        }
+
+        if ($existing->email_verified_at === null) {
+            throw ApiException::conflict('EMAIL_TAKEN', $field);
+        }
+
+        return [$existing, true];
+    }
+
+    /**
+     * Tells an existing account it was given access to a portal; it signs in as it already does.
+     */
+    public function announceAccess(User $account, string $place): void
+    {
+        $url = rtrim(config('elevenmed.portals_url'), '/') . '/sign-in';
+
+        $account->notify(new PortalAccessGranted($place, $url));
     }
 
     private function open(User $account): PortalSession
     {
-        if ($account->deactivated_at !== null) {
+        if (! $account->holds(...AccountKind::portal()) && ! $account->isStaff()) {
             throw ApiException::forbidden('ACCOUNT_DEACTIVATED');
         }
         $this->twoFactor->requireFor($account, AuthClient::Portal);

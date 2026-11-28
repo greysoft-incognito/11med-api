@@ -179,6 +179,13 @@ shows: if every admin loses their phone, an operator on the server can clear one
 two-step verification with `php artisan tinker` and
 `User::where('email', 'you@example.com')->first()->forceFill(['two_factor_secret' => null, 'two_factor_recovery_codes' => null, 'two_factor_confirmed_at' => null])->save();`.
 
+Account kinds (December 2026): the deploy's migration `2026_12_04_100000` moves every account's
+kind out of Spatie's roles into `account_kinds` and marks the old admin accounts with
+`users.staff_since`; nothing else is needed. Roll it back with
+`php artisan migrate:rollback --step=2` before deploying an older release. After it runs,
+`app:sync-roles` manages staff roles and permissions only, and `--roles=patient` and the like no
+longer mean anything.
+
 Team access (M15): the deploy's `app:sync-roles` also syncs the admin permissions and creates the
 five default staff roles the first time it runs, making every team account that already exists a
 super admin. After that, the super admin invites the team and manages roles from the admin portal;

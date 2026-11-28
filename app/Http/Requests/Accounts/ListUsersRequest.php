@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Accounts;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Requests\ApiRequest;
 use App\Services\Accounts\UserDirectory;
 use Illuminate\Validation\Rule;
@@ -15,7 +15,7 @@ class ListUsersRequest extends ApiRequest
     public function rules(): array
     {
         return [
-            'role' => ['nullable', Rule::in(Role::values(Role::app()))],
+            'kind' => ['nullable', Rule::in(AccountKind::values(AccountKind::app()))],
             'status' => ['nullable', Rule::in([UserDirectory::ACTIVE, UserDirectory::SUSPENDED])],
             'q' => ['nullable', 'string', 'max:120'],
         ];

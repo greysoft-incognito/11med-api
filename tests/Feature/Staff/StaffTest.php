@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Staff;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
 use App\Enums\AuthClient;
-use App\Enums\Role;
 use App\Models\AuditEvent;
 use App\Models\StaffRole;
 use App\Models\User;
@@ -26,7 +26,7 @@ class StaffTest extends TestCase
         Notification::fake();
 
         $this->superAdmin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create(['full_name' => 'Ada Super']);
     }
 
@@ -54,7 +54,8 @@ class StaffTest extends TestCase
         $this->assertContains('audit.view', $response->json('data.effective_permissions'));
 
         $member = User::query()->where('email', 'kemi@11med.ng')->firstOrFail();
-        $this->assertSame(Role::Admin, $member->role());
+        $this->assertTrue($member->isStaff());
+        $this->assertSame([], $member->kinds());
         Notification::assertSentTo($member, PortalPasswordLink::class);
         $this->assertSame('staff.invited', AuditEvent::query()->value('action'));
     }
@@ -81,7 +82,7 @@ class StaffTest extends TestCase
         $kemi = User::factory()->staff()->create(['full_name' => 'Kemi Bello', 'email' => 'kemi@11med.ng']);
         $kemi->assignRole($finance);
         User::factory()->staff()->create(['full_name' => 'Tunde Ade', 'deactivated_at' => now()]);
-        User::factory()->portal(Role::Pharmacy)->create();
+        User::factory()->portal(AccountKind::Pharmacy)->create();
 
         $this->actingAs($this->superAdmin)
             ->getJson('api/v1/portal/admin/staff?limit=2')
@@ -157,7 +158,7 @@ class StaffTest extends TestCase
             ->assertUnprocessable()
             ->assertJsonPath('error.code', 'LAST_SUPER_ADMIN');
 
-        $second = User::factory()->portal(Role::Admin)->create();
+        $second = User::factory()->admin()->create();
 
         $this->actingAs($second)
             ->putJson("api/v1/portal/admin/staff/{$this->superAdmin->uuid}/access", ['roles' => [], 'permissions' => []])
@@ -167,7 +168,7 @@ class StaffTest extends TestCase
     public function test_a_deactivated_super_admin_does_not_count(): void
     {
         User::query()->where('email', 'admin@example.com')->update(['deactivated_at' => now()]);
-        $second = User::factory()->portal(Role::Admin)->create();
+        $second = User::factory()->admin()->create();
 
         $this->actingAs($second)
             ->postJson("api/v1/portal/admin/staff/{$this->superAdmin->uuid}/deactivate")
@@ -241,7 +242,7 @@ class StaffTest extends TestCase
             ->assertCreated()
             ->assertJsonPath('data.account.permissions', ['summary.view', 'catalogue.view', 'catalogue.edit', 'audit.view']);
 
-        $pharmacy = User::factory()->portal(Role::Pharmacy)->create();
+        $pharmacy = User::factory()->portal(AccountKind::Pharmacy)->create();
 
         $this->actingAs($pharmacy)
             ->getJson('api/v1/portal/auth/session')
@@ -270,7 +271,7 @@ class StaffTest extends TestCase
     {
         $reader = User::factory()->staff([AdminPermission::StaffView])->create();
         $nobody = User::factory()->staff()->create();
-        $pharmacy = User::factory()->portal(Role::Pharmacy)->create();
+        $pharmacy = User::factory()->portal(AccountKind::Pharmacy)->create();
 
         $this->actingAs($reader)->getJson('api/v1/portal/admin/staff')->assertOk();
         $this->actingAs($reader)->getJson("api/v1/portal/admin/staff/{$nobody->uuid}")->assertOk();

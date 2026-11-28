@@ -23,6 +23,16 @@ return [
             'expiry' => 'The link works once, for seven days.',
         ],
     ],
+    'places' => [
+        'admin' => 'the 11med admin portal',
+        'organisation' => ":name's portal on 11med",
+    ],
+    'portal_access' => [
+        'subject' => 'You have new access on 11med',
+        'line' => 'You can now use :place with your existing 11med account.',
+        'action' => 'Sign in',
+        'note' => 'Sign in with this email address and the password you already use. If you did not expect this, tell the person who gave you access.',
+    ],
     'new_sign_in' => [
         'title' => 'New sign-in to your account',
         'body' => 'Your 11med account was signed in on :device on :time.',

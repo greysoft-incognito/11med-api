@@ -2,6 +2,7 @@
 
 namespace App\Services\Notifications;
 
+use App\Enums\AuthClient;
 use App\Enums\NotificationCategory;
 use App\Exceptions\ApiException;
 use App\Models\NotificationPreference;
@@ -12,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Per-category delivery choices (app handover §8.3). Every category is on until the user saves
  * otherwise, SMS excepted, and a category added after the user saved still appears, defaulted.
- * Each role sees only the categories it is told about (`NotificationCategory::for`).
+ * Each client lists only the categories the account is told about there (`NotificationCategory::for`).
  */
 class NotificationPreferences
 {
@@ -21,18 +22,18 @@ class NotificationPreferences
      *
      * @return Collection<int, NotificationPreference>
      */
-    public function of(User $caller, string $userId): Collection
+    public function of(User $caller, string $userId, AuthClient $client): Collection
     {
         $this->ensureSelf($caller, $userId);
 
-        return $this->all($caller);
+        return $this->all($caller, $client);
     }
 
     /**
      * @param  list<array{category: string, push: bool, sms: bool, in_app: bool}>  $preferences
      * @return Collection<int, NotificationPreference>
      */
-    public function save(User $caller, string $userId, array $preferences): Collection
+    public function save(User $caller, string $userId, AuthClient $client, array $preferences): Collection
     {
         $this->ensureSelf($caller, $userId);
 
@@ -49,7 +50,7 @@ class NotificationPreferences
             }
         });
 
-        return $this->all($caller);
+        return $this->all($caller, $client);
     }
 
     public function for(User $user, NotificationCategory $category): NotificationPreference
@@ -65,14 +66,14 @@ class NotificationPreferences
     /**
      * @return Collection<int, NotificationPreference>
      */
-    private function all(User $user): Collection
+    private function all(User $user, AuthClient $client): Collection
     {
         $saved = NotificationPreference::query()
             ->where('user_id', $user->id)
             ->get()
             ->keyBy(fn(NotificationPreference $preference) => $preference->category->value);
 
-        return collect(NotificationCategory::for($user->role()))
+        return collect(NotificationCategory::for($user, $client))
             ->map(fn(NotificationCategory $category) => $saved->get($category->value) ?? $this->default($user, $category));
     }
 

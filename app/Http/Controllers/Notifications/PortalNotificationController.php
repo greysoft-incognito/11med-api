@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Notifications;
 
+use App\Enums\AuthClient;
 use App\Http\Controllers\Controller;
 use App\Http\Paging\ListQuery;
 use App\Http\Requests\Notifications\UpdatePreferencesRequest;
@@ -27,14 +28,14 @@ class PortalNotificationController extends Controller
     public function index(Request $request): NotificationCollection
     {
         $user = $request->user();
-        $list = $this->history->list($user, $user->uuid, ListQuery::from($request));
+        $list = $this->history->list($user, $user->uuid, AuthClient::Portal, ListQuery::from($request));
 
         return new NotificationCollection($list);
     }
 
     public function unreadCount(Request $request): UnreadCountResource
     {
-        $count = $this->history->unreadCount($request->user());
+        $count = $this->history->unreadCount($request->user(), AuthClient::Portal);
 
         return new UnreadCountResource($count);
     }
@@ -52,7 +53,7 @@ class PortalNotificationController extends Controller
     {
         $user = $request->user();
 
-        $this->history->markAllRead($user, $user->uuid);
+        $this->history->markAllRead($user, $user->uuid, AuthClient::Portal);
 
         return new EmptyResource;
     }
@@ -60,7 +61,7 @@ class PortalNotificationController extends Controller
     public function preferences(Request $request): NotificationPreferencesResource
     {
         $user = $request->user();
-        $preferences = $this->preferences->of($user, $user->uuid);
+        $preferences = $this->preferences->of($user, $user->uuid, AuthClient::Portal);
 
         return new NotificationPreferencesResource($preferences);
     }
@@ -68,7 +69,7 @@ class PortalNotificationController extends Controller
     public function updatePreferences(UpdatePreferencesRequest $request): NotificationPreferencesResource
     {
         $user = $request->user();
-        $preferences = $this->preferences->save($user, $user->uuid, $request->validated('preferences'));
+        $preferences = $this->preferences->save($user, $user->uuid, AuthClient::Portal, $request->validated('preferences'));
 
         return new NotificationPreferencesResource($preferences);
     }

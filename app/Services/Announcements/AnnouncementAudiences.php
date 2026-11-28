@@ -3,13 +3,12 @@
 namespace App\Services\Announcements;
 
 use App\Enums\AnnouncementAudience;
-use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * The accounts an announcement reaches, as one query: the audience's roles, live and not suspended,
- * never a team account that also holds one of them.
+ * The accounts an announcement reaches, as one query: those holding the audience's kinds, live and
+ * not suspended.
  */
 class AnnouncementAudiences
 {
@@ -19,8 +18,7 @@ class AnnouncementAudiences
     public function query(AnnouncementAudience $audience): Builder
     {
         return User::query()
-            ->role(Role::values($audience->roles()))
-            ->withoutRole(Role::Admin->value)
+            ->ofKind($audience->kinds())
             ->whereNull('suspended_at');
     }
 

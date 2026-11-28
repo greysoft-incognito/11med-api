@@ -1,11 +1,12 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Support\SupportController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // Contact support (M18): app accounts and partner portal accounts, each seeing only their own tickets.
-Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values([Role::Patient, Role::Doctor, Role::Pharmacy, Role::Laboratory]))])
+Route::middleware(['auth:sanctum', RequireAccountKind::for([AccountKind::Patient, AccountKind::Doctor, AccountKind::Pharmacy, AccountKind::Laboratory])])
     ->prefix('support/tickets')
     ->name('support.tickets.')
     ->group(function () {

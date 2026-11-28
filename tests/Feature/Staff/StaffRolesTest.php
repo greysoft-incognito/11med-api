@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Staff;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Models\AuditEvent;
 use App\Models\StaffRole;
 use App\Models\User;
@@ -19,7 +19,7 @@ class StaffRolesTest extends TestCase
         parent::setUp();
 
         $this->superAdmin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create();
     }
 
@@ -164,7 +164,7 @@ class StaffRolesTest extends TestCase
     public function test_roles_need_their_permissions_and_the_admin_role(): void
     {
         $reader = User::factory()->staff([AdminPermission::RolesView])->create();
-        $pharmacy = User::factory()->portal(Role::Pharmacy)->create();
+        $pharmacy = User::factory()->portal(AccountKind::Pharmacy)->create();
         $nobody = User::factory()->staff()->create();
 
         $this->actingAs($reader)->getJson('api/v1/portal/admin/roles')->assertOk();

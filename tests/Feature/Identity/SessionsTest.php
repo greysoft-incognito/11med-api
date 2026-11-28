@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\SignIn;
 use App\Models\User;
 use Tests\TestCase;
@@ -56,7 +56,7 @@ class SessionsTest extends TestCase
     public function test_a_browser_is_named_from_its_user_agent(): void
     {
         $admin = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create(['email' => 'desk@pharmacy.ng']);
 
         $session = $this->withHeaders(['User-Agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36'])
@@ -161,7 +161,7 @@ class SessionsTest extends TestCase
         $this->getJson('api/v1/auth/sessions')->assertUnauthorized();
 
         $desk = User::factory()
-            ->portal(Role::Laboratory)
+            ->portal(AccountKind::Laboratory)
             ->create();
 
         $this->actingAs($desk, 'sanctum')

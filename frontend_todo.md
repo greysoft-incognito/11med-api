@@ -242,3 +242,13 @@ milestone that introduced it. The clients tick them; never delete.
   `<terms>.<privacy>` (`1.1`, then `2.1` after one edit to the terms), not a date; a consent
   recorded at registration without one names that version too. Done in both clients on
   `fix/terms-gate` (app #12, web #11). (M18.5)
+- [ ] **FE-173 · Kinds instead of a role.** An account holds any number of kinds. The app's
+  `zAccount.role` becomes `kinds` (`patient`, `doctor`, one or both); the portal's
+  `zPortalAccount.role` becomes `kinds` (`pharmacy` or `laboratory`, or none for staff only),
+  beside `permissions`, and any permission opens the admin portal. The admin user directory's
+  `role` becomes `kinds` and its filter `kind`; a support ticket's `requester.role` becomes
+  `requester.kinds`. An app token is 403 on portal routes and a portal token on app routes.
+  Erasure is 422 `PORTAL_ACCESS_HELD` while the account has portal access. Both clients.
+- [ ] **FE-174 · Opening the other app side.** `POST auth/kinds { kind }` (`patient` or `doctor`)
+  adds the kind to the signed-in account and answers the account. The app offers it in Settings
+  and switches between the sides it holds. 11med.

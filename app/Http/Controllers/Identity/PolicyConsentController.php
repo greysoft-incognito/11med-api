@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Identity;
 
+use App\Enums\AuthClient;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Identity\AcceptPolicyRequest;
 use App\Http\Resources\Identity\AccountResource;
@@ -19,14 +20,14 @@ class PolicyConsentController extends Controller
 
     public function app(AcceptPolicyRequest $request): AccountResource
     {
-        $user = $this->consent->accept($request->user(), $request->string('policy_version')->toString());
+        $user = $this->consent->accept($request->user(), AuthClient::App, $request->string('policy_version')->toString());
 
         return new AccountResource($user);
     }
 
     public function portal(AcceptPolicyRequest $request): PortalAccountResource
     {
-        $account = $this->consent->accept($request->user(), $request->string('policy_version')->toString());
+        $account = $this->consent->accept($request->user(), AuthClient::Portal, $request->string('policy_version')->toString());
 
         return new PortalAccountResource($account);
     }

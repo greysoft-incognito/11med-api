@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Notifications;
 
+use App\Enums\AccountKind;
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Jobs\Notifications\DeliverPush;
 use App\Models\User;
 use App\Services\Notifications\Notifier;
@@ -14,8 +14,8 @@ class PortalNotificationRoutesTest extends TestCase
 {
     public function test_a_portal_account_pages_its_history_with_the_unread_count(): void
     {
-        $admin = $this->account(Role::Admin);
-        $other = $this->account(Role::Admin);
+        $admin = User::factory()->admin()->create();
+        $other = User::factory()->admin()->create();
 
         foreach (['First', 'Second', 'Third'] as $title) {
             $this->notify($admin, $title);
@@ -47,7 +47,7 @@ class PortalNotificationRoutesTest extends TestCase
 
     public function test_reading_one_and_reading_all(): void
     {
-        $pharmacy = $this->account(Role::Pharmacy);
+        $pharmacy = $this->account(AccountKind::Pharmacy);
         $one = $this->notify($pharmacy, 'One');
         $this->notify($pharmacy, 'Two');
 
@@ -70,10 +70,10 @@ class PortalNotificationRoutesTest extends TestCase
 
     public function test_another_accounts_notification_is_not_found(): void
     {
-        $owner = $this->account(Role::Laboratory);
+        $owner = $this->account(AccountKind::Laboratory);
         $id = $this->notify($owner, 'Mine');
 
-        $this->actingAs($this->account(Role::Laboratory))
+        $this->actingAs($this->account(AccountKind::Laboratory))
             ->patchJson("api/v1/portal/notifications/{$id}/read")
             ->assertNotFound();
     }
@@ -87,7 +87,9 @@ class PortalNotificationRoutesTest extends TestCase
         ];
 
         foreach ($expected as $role => $categories) {
-            $response = $this->actingAs($this->account(Role::from($role)))
+            $account = $role === 'admin' ? $this->admin() : $this->account(AccountKind::from($role));
+
+            $response = $this->actingAs($account)
                 ->getJson('api/v1/portal/notifications/preferences')
                 ->assertOk();
 
@@ -97,7 +99,7 @@ class PortalNotificationRoutesTest extends TestCase
 
     public function test_preferences_save_and_refuse_another_roles_category(): void
     {
-        $lab = $this->account(Role::Laboratory);
+        $lab = $this->account(AccountKind::Laboratory);
 
         $this->actingAs($lab)
             ->patchJson('api/v1/portal/notifications/preferences', ['preferences' => [
@@ -121,7 +123,7 @@ class PortalNotificationRoutesTest extends TestCase
     {
         Queue::fake();
 
-        $pharmacy = $this->account(Role::Pharmacy);
+        $pharmacy = $this->account(AccountKind::Pharmacy);
 
         $this->assertNotNull(app(Notifier::class)->send($pharmacy, NotificationCategory::PharmacyOrder, 'New order', 'Start it.'));
 
@@ -131,7 +133,7 @@ class PortalNotificationRoutesTest extends TestCase
     public function test_app_accounts_and_guests_are_refused(): void
     {
         $patient = User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
 
         $this->actingAs($patient)
@@ -147,7 +149,7 @@ class PortalNotificationRoutesTest extends TestCase
     public function test_a_doctor_is_offered_only_the_doctors_categories(): void
     {
         $doctor = User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create();
 
         $response = $this->actingAs($doctor)
@@ -157,7 +159,7 @@ class PortalNotificationRoutesTest extends TestCase
         $this->assertSame(['consultation', 'account', 'announcement'], array_column($response->json('data.preferences'), 'category'));
     }
 
-    private function account(Role $role): User
+    private function account(AccountKind $role): User
     {
         return User::factory()
             ->portal($role)

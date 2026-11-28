@@ -1,12 +1,12 @@
 <?php
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Http\Controllers\Doctors\DoctorApplicationController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // Doctor verification on the team's desk (portal handover §6 "Doctors").
-Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::staff()])
     ->prefix('portal/admin/doctors')
     ->name('portal.admin.doctors.')
     ->group(function () {

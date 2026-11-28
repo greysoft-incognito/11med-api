@@ -1,14 +1,14 @@
 <?php
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Http\Controllers\Operations\AdminConsultationController;
 use App\Http\Controllers\Operations\AdminLabBookingController;
 use App\Http\Controllers\Operations\AdminOrderController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // Oversight of orders, lab bookings and consultations: find one, and cancel it with a refund.
-Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::staff()])
     ->prefix('portal/admin')
     ->name('portal.admin.')
     ->group(function () {
