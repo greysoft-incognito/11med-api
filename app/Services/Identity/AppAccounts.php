@@ -9,6 +9,7 @@ use App\Exceptions\ApiException;
 use App\Models\ConsentRecord;
 use App\Models\User;
 use App\Notifications\Identity\PhoneCode;
+use App\Services\Identity\TwoFactor\TwoFactorChallenges;
 use App\Support\PhoneNumber;
 use App\Support\Sms;
 use Illuminate\Support\Facades\DB;
@@ -24,6 +25,7 @@ class AppAccounts
         private readonly OneTimeCodes $codes,
         private readonly LoginGuard $guard,
         private readonly SessionTokens $tokens,
+        private readonly TwoFactorChallenges $twoFactor,
     ) {}
 
     /**
@@ -120,9 +122,15 @@ class AppAccounts
         return $this->open($user, $installId);
     }
 
+    /**
+     * Sign the account in, or ask for its second step when two-step verification is on.
+     */
     public function open(User $user, ?string $installId): AppSession
     {
         $installId = $installId !== null && Str::isUuid($installId) ? $installId : null;
+
+        $this->twoFactor->requireFor($user, AuthClient::App, $installId);
+
         $pair = $this->tokens->issue($user, AuthClient::App, $installId);
 
         return new AppSession($user, $pair);
@@ -156,7 +164,7 @@ class AppAccounts
     /**
      * Refuse a number a verified account holds; remove one an unverified sign-up left behind.
      */
-    private function releaseUnverified(string $phone): void
+    public function releaseUnverified(string $phone): void
     {
         $holder = User::where('phone', $phone)->first();
 
