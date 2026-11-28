@@ -130,4 +130,5 @@ return [
     'ALREADY_SUSPENDED' => 'This account is already suspended.',
     'NOT_SUSPENDED' => 'This account is not suspended.',
     'PHONE_VERIFIED' => 'That phone number is already confirmed.',
+    'SETTING_NOT_FOUND' => 'There is no such setting.',
 ];

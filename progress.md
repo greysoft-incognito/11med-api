@@ -2,6 +2,21 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-01: M17.3 Platform settings
+
+- `GET portal/admin/settings` (`settings.view`) lists every runtime setting, whole: key, group,
+  label, type (`integer`, `number`, `boolean`), current value, the config file's default, bounds,
+  and whether the team set it. `PUT portal/admin/settings/{key}` (`settings.edit`) sets one within
+  its bounds, or `null` to go back to the default; 404 `SETTING_NOT_FOUND`; audited
+  `setting.changed` with the value before and after.
+- `App\Enums\PlatformSetting` names each setting's config path: the free tier (medications,
+  history and readings days, caregivers free and premium), the consultation commission, the code
+  limits (lifetime, resends, window, attempts), the sign-in lock (failures, minutes) and
+  `two_factor.admin_required` (listed once M14 configures it). `PlatformSettings` stores them as
+  dbconfig rows in the `platform` group and lays them over the config at boot and before every
+  queued job, so every existing reader (`Entitlements`, `OneTimeCodes`, `LoginGuard`, `Earnings`,
+  `Payouts`) follows without change.
+
 ## 2026-12-01: M17.2 Oversight of orders, lab bookings and consultations
 
 - `GET portal/admin/orders`, `lab-bookings` and `consultations` (`orders.view`, `bookings.view`,

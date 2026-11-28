@@ -140,9 +140,16 @@ Kept in the database (`laravel-dbconfig`), changed with Artisan, no deploy neede
 | --- | --- | --- |
 | `prefered_sms_channel` | `KUDISMS` (the kit's default is Twilio) | `php artisan dbconfig:set prefered_sms_channel KUDISMS` |
 
-The free tier's limits (3 medications, 1 caregiver, 7 days of history and readings) are code
-config in `config/elevenmed.php` (`free_tier`, `caregivers`), changed by a deploy, not here. Premium
-needs no service or credential: the team records it in the admin portal (M5).
+The free tier's limits (3 medications, 1 caregiver, 7 days of history and readings), the
+consultation commission, the phone-code and sign-in limits, and whether team accounts must use
+two-step verification are defaults in `config/elevenmed.php` (and their env variables). Since M17
+the team changes them in the admin portal's **Settings** page (permission `settings.edit`), with no
+deploy: each change is a `platform.<key>` row in the dbconfig `configurations` table, laid over the
+config on every request, command and queued job (`PlatformSettingsServiceProvider`), and audited.
+Resetting a setting removes its row and the config file's value stands again. Nothing to set up;
+`php artisan config:cache` does not freeze them. The app's own copy of the medication cap
+(`FREE_TIER_MAX_MEDICATIONS`) only words the limit screen; the server's value is the one enforced.
+Premium needs no service or credential: the team records it in the admin portal (M5).
 
 ## 5. Commands, once per server
 
