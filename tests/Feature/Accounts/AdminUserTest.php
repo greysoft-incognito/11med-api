@@ -38,7 +38,7 @@ class AdminUserTest extends TestCase
         $this->audit = new RecordingAuditLog;
         $this->app->instance(AuditLog::class, $this->audit);
 
-        $this->admin = $this->admin();
+        $this->admin = $this->teamMember();
     }
 
     public function test_the_directory_lists_app_accounts_newest_first_and_searches(): void
@@ -266,7 +266,7 @@ class AdminUserTest extends TestCase
 
     public function test_viewing_does_not_allow_managing(): void
     {
-        $viewer = $this->admin(AdminPermission::UsersView);
+        $viewer = $this->teamMember(AdminPermission::UsersView);
         $patient = $this->patient();
 
         $this->actingAs($viewer)
@@ -277,7 +277,7 @@ class AdminUserTest extends TestCase
             ->postJson("api/v1/portal/admin/users/{$patient->uuid}/suspend", ['reason' => 'Repeated chargebacks on orders.'])
             ->assertForbidden();
 
-        $this->actingAs($this->admin(AdminPermission::OrdersView))
+        $this->actingAs($this->teamMember(AdminPermission::OrdersView))
             ->getJson('api/v1/portal/admin/users')
             ->assertForbidden();
     }

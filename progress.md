@@ -2,6 +2,21 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-01: M17.2 Oversight of orders, lab bookings and consultations
+
+- `GET portal/admin/orders`, `lab-bookings` and `consultations` (`orders.view`, `bookings.view`,
+  `consultations.view`): every record, newest first, paged, `status` (or `open`) and `q` over
+  reference, patient name and phone, and pharmacy, laboratory or doctor name. Each has a detail
+  route. A lab booking leaves out its results link and the doctor's notes; a consultation its
+  complaint, conversation and prescription.
+- `POST .../{id}/cancel` with a reason (`orders.cancel`, `bookings.cancel`, `consultations.cancel`)
+  goes through each module's own rule and refund: `OrderBook::close()` (now shared with the
+  pharmacy's cancellation; refused once with the rider or on the counter), `BookingLifecycle::cancel()`
+  with the new `LabCancelledBy::Team` (only while booked), and `ConsultationLifecycle::cancelForTeam()`
+  (any time before it starts, no cut-off hour). Every route refunds through `Payments::refund()`,
+  tells the patient (and a doctor whose paid booking it was), and is audited. An order and a booking
+  record `cancellation.by: team`, a value both clients' contracts gain (FE-170).
+
 ## 2026-12-01: M17.1 The user directory
 
 - `GET portal/admin/users` (`users.view`): patient and doctor accounts, newest first, paged, `q` over

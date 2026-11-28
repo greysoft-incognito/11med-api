@@ -12,7 +12,7 @@ use Spatie\Permission\Models\Permission;
  */
 trait MakesAdmins
 {
-    protected function admin(AdminPermission ...$permissions): User
+    protected function teamMember(AdminPermission ...$permissions): User
     {
         $permissions = $permissions === [] ? AdminPermission::cases() : $permissions;
         $names = AdminPermission::values($permissions);

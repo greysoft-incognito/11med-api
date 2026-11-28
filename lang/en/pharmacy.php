@@ -27,5 +27,9 @@ return [
             'title' => 'The pharmacy cancelled your order',
             'body' => 'Order :reference. :reason',
         ],
+        'team_cancelled' => [
+            'title' => 'The 11med team cancelled your order',
+            'body' => 'Order :reference. :reason Any payment is refunded.',
+        ],
     ],
 ];

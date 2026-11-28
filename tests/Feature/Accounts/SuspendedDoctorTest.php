@@ -32,7 +32,7 @@ class SuspendedDoctorTest extends TestCase
             ->getJson('api/v1/doctors')
             ->assertJsonPath('data.total', 1);
 
-        $this->actingAs($this->admin())
+        $this->actingAs($this->teamMember())
             ->postJson("api/v1/portal/admin/users/{$doctor->uuid}/suspend", ['reason' => 'Licence under MDCN review.'])
             ->assertOk();
 
