@@ -2,8 +2,8 @@
 
 namespace Database\Seeders\Demo;
 
+use App\Enums\AccountKind;
 use App\Enums\ConsentContext;
-use App\Enums\Role;
 use App\Models\ConsentRecord;
 use App\Models\User;
 use App\Services\Identity\PolicyConsent;
@@ -16,7 +16,7 @@ class DemoAccounts
 {
     public const PASSWORD = 'Password1';
 
-    public static function create(string $fullName, string $phone, ?string $email, Role $role): User
+    public static function create(string $fullName, string $phone, ?string $email, AccountKind $kind): User
     {
         $user = User::create([
             'full_name' => $fullName,
@@ -26,12 +26,12 @@ class DemoAccounts
         ]);
 
         $user->forceFill(['phone_verified_at' => now()->subDays(60), 'email_verified_at' => $email === null ? null : now()->subDays(60)])->save();
-        $user->assignRole($role->value);
+        $user->grantKind($kind);
 
         ConsentRecord::create([
             'user_id' => $user->id,
             'context' => ConsentContext::Register,
-            'policy_version' => app(PolicyConsent::class)->recordable($role),
+            'policy_version' => app(PolicyConsent::class)->recordable($kind),
             'accepted_at' => now()->subDays(60),
             'recorded_at' => now()->subDays(60),
         ]);

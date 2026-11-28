@@ -1,13 +1,14 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Pharmacy\PortalDrugController;
 use App\Http\Controllers\Pharmacy\PortalOrderController;
 use App\Http\Controllers\Pharmacy\PortalPharmacyController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The pharmacy portal (portal handover §4): every route scoped to the account's own pharmacy.
-Route::middleware(['auth:sanctum', 'role:' . Role::Pharmacy->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::for([AccountKind::Pharmacy])])
     ->prefix('portal/pharmacy')
     ->name('portal.pharmacy.')
     ->group(function () {

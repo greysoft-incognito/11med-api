@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Subscriptions;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\Subscription;
 use App\Models\SubscriptionPayment;
 use App\Models\User;
@@ -13,7 +13,7 @@ class SubscriptionTest extends TestCase
 {
     public function test_a_patient_without_a_record_reads_none(): void
     {
-        $patient = $this->account(Role::Patient);
+        $patient = $this->account(AccountKind::Patient);
 
         $this->actingAs($patient)
             ->getJson("api/v1/subscriptions/{$patient->uuid}")
@@ -30,7 +30,7 @@ class SubscriptionTest extends TestCase
     {
         $this->travelTo('2026-11-17T12:00:00Z');
 
-        $patient = $this->account(Role::Patient);
+        $patient = $this->account(AccountKind::Patient);
         $this->premium($patient, '2026-12-31');
 
         $this->actingAs($patient)
@@ -57,7 +57,7 @@ class SubscriptionTest extends TestCase
 
     public function test_the_session_carries_is_premium_from_the_record(): void
     {
-        $patient = $this->account(Role::Patient);
+        $patient = $this->account(AccountKind::Patient);
         $this->premium($patient, now()->addMonth()->toDateString());
 
         $this->postJson('api/v1/auth/login', ['phone_number' => $patient->phone, 'password' => 'Password1', 'device_id' => '0b8f3a52-3c55-4c9e-9a3e-2f3c1d4e5f60'])
@@ -67,8 +67,8 @@ class SubscriptionTest extends TestCase
 
     public function test_a_doctor_reads_their_own_and_nobody_reads_another(): void
     {
-        $doctor = $this->account(Role::Doctor);
-        $patient = $this->account(Role::Patient);
+        $doctor = $this->account(AccountKind::Doctor);
+        $patient = $this->account(AccountKind::Patient);
 
         $this->actingAs($doctor)
             ->getJson("api/v1/subscriptions/{$doctor->uuid}")
@@ -83,9 +83,9 @@ class SubscriptionTest extends TestCase
 
     public function test_portal_accounts_and_guests_are_refused(): void
     {
-        $patient = $this->account(Role::Patient);
+        $patient = $this->account(AccountKind::Patient);
         $admin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create();
 
         $this->getJson("api/v1/subscriptions/{$patient->uuid}")->assertUnauthorized();
@@ -97,7 +97,7 @@ class SubscriptionTest extends TestCase
 
     public function test_erasing_the_patient_removes_the_record_and_keeps_the_reference_used(): void
     {
-        $patient = $this->account(Role::Patient);
+        $patient = $this->account(AccountKind::Patient);
         $this->premium($patient, now()->addMonth()->toDateString());
 
         app(AccountEraser::class)->erase($patient, 'Password1', null);
@@ -106,7 +106,7 @@ class SubscriptionTest extends TestCase
         $this->assertNull(SubscriptionPayment::firstWhere('reference', 'PSK-0001')->user_id);
     }
 
-    private function account(Role $role): User
+    private function account(AccountKind $role): User
     {
         return User::factory()
             ->app($role)

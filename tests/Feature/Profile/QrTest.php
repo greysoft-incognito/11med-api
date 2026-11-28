@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Profile;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\QrAccess;
 use App\Models\User;
 use Tests\TestCase;
@@ -133,7 +133,7 @@ class QrTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 }

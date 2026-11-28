@@ -2,13 +2,14 @@
 
 namespace Tests\Feature\Partners;
 
+use App\Enums\AccountKind;
 use App\Enums\PartnerKind;
-use App\Enums\Role;
 use App\Events\Partners\PartnerApproved;
 use App\Events\Partners\PartnerReinstated;
 use App\Events\Partners\PartnerSuspended;
 use App\Models\Organisation;
 use App\Models\User;
+use App\Notifications\Identity\PortalAccessGranted;
 use App\Notifications\Identity\PortalPasswordLink;
 use App\Notifications\Partners\PartnerStatusChanged;
 use Illuminate\Support\Facades\Event;
@@ -64,8 +65,8 @@ class PartnerTest extends TestCase
             ->assertJsonPath('error.field', 'licence_url');
 
         $taken = User::factory()
-            ->portal(Role::Admin)
-            ->create();
+            ->app()
+            ->create(['email' => 'unverified@medplus.ng', 'email_verified_at' => null]);
 
         $this->postJson('api/v1/partners/apply', $this->application(['contact_email' => strtoupper($taken->email)]))
             ->assertConflict()
@@ -133,7 +134,7 @@ class PartnerTest extends TestCase
             ->firstOrFail();
 
         $this->assertNull($account->password);
-        $this->assertSame(Role::Pharmacy, $account->role());
+        $this->assertSame([AccountKind::Pharmacy], $account->kinds());
         $this->assertSame($partner['id'], $account->organisation->uuid);
 
         Event::assertDispatched(PartnerApproved::class);
@@ -150,7 +151,7 @@ class PartnerTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.account.organisation_id', $partner['id'])
             ->assertJsonPath('data.account.organisation_name', 'Medplus Ikeja')
-            ->assertJsonPath('data.account.role', 'pharmacy');
+            ->assertJsonPath('data.account.kinds', ['pharmacy']);
     }
 
     public function test_decisions_must_fit_the_status(): void
@@ -186,13 +187,31 @@ class PartnerTest extends TestCase
             ->assertJsonPath('error.code', 'PARTNER_NOT_FOUND');
     }
 
-    public function test_approval_is_refused_when_the_contacts_email_became_an_account_meanwhile(): void
+    public function test_approval_links_a_verified_account_and_tells_it(): void
+    {
+        $patient = User::factory()
+            ->app()
+            ->create(['email' => 'desk@medplus.ng', 'email_verified_at' => now()]);
+
+        $partner = $this->postJson('api/v1/partners/apply', $this->application(['contact_email' => 'desk@medplus.ng']))->json('data.id');
+
+        $this->actingAs($this->admin())
+            ->postJson("api/v1/portal/admin/partners/{$partner}/review", ['decision' => 'approved'])
+            ->assertOk();
+
+        $patient->refresh();
+        $this->assertSame([AccountKind::Patient, AccountKind::Pharmacy], $patient->kinds());
+        $this->assertSame($patient->id, Organisation::query()->where('uuid', $partner)->value('owner_id'));
+        Notification::assertSentTo($patient, PortalAccessGranted::class);
+    }
+
+    public function test_approval_is_refused_when_the_contacts_email_became_an_unverified_account_meanwhile(): void
     {
         $partner = $this->postJson('api/v1/partners/apply', $this->application(['contact_email' => 'desk@medplus.ng']))->json('data.id');
 
         User::factory()
-            ->portal(Role::Admin)
-            ->create(['email' => 'desk@medplus.ng']);
+            ->app()
+            ->create(['email' => 'desk@medplus.ng', 'email_verified_at' => null]);
 
         $this->actingAs($this->admin())
             ->postJson("api/v1/portal/admin/partners/{$partner}/review", ['decision' => 'approved'])
@@ -237,7 +256,7 @@ class PartnerTest extends TestCase
             ->getJson('api/v1/portal/admin/partners')
             ->assertForbidden();
 
-        $this->actingAs(User::factory()->app(Role::Patient)->create())
+        $this->actingAs(User::factory()->app(AccountKind::Patient)->create())
             ->postJson('api/v1/portal/admin/partners/0190a0a0-0000-7000-8000-000000000000/review', ['decision' => 'approved'])
             ->assertForbidden();
     }

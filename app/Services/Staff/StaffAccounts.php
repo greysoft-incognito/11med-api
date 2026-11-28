@@ -3,7 +3,7 @@
 namespace App\Services\Staff;
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
+use App\Enums\AuthClient;
 use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
@@ -15,6 +15,7 @@ use App\Services\Identity\Sessions;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 /**
  * The team's accounts: invited by email, given roles and direct permissions, deactivated and
@@ -79,7 +80,8 @@ class StaffAccounts
     }
 
     /**
-     * Opens a team account and emails its first-password link.
+     * Makes the person a team member: a new account emailed its first-password link, or their
+     * existing account (verified email, not already on the team) told it has access.
      *
      * @param  list<string>  $roles  staff role ids
      * @param  list<string>  $permissions
@@ -91,28 +93,29 @@ class StaffAccounts
         $this->access->assertHolds($actor, $this->permissionsIn($staffRoles), 'roles');
         $this->access->assertHolds($actor, $permissions);
 
-        $member = DB::transaction(function () use ($actor, $email, $name, $staffRoles, $permissions) {
-            if (User::query()->whereRaw('lower(email) = ?', [mb_strtolower($email)])->exists()) {
+        [$member, $linked] = DB::transaction(function () use ($actor, $email, $name, $staffRoles, $permissions) {
+            [$member, $linked] = $this->accounts->openOrLink($email, $name, 'email');
+
+            if ($member->staff_since !== null) {
                 throw ApiException::conflict('EMAIL_TAKEN', 'email');
             }
 
-            $member = User::create([
-                'full_name' => $name,
-                'email' => $email,
-            ]);
-            $member->assignRole(Role::Admin->value);
+            $member->forceFill(['staff_since' => now()])->save();
             $member->assignRole($staffRoles);
             $member->givePermissionTo($permissions);
 
             $this->audit->record($actor, 'staff.invited', $member, [
                 'roles' => $staffRoles->pluck('label')->all(),
                 'permissions' => $permissions,
+                'existing_account' => $linked,
             ]);
 
-            return $member;
+            return [$member, $linked];
         });
 
-        $this->accounts->welcome($member);
+        $linked
+            ? $this->accounts->announceAccess($member, __('identity.places.admin'))
+            : $this->accounts->welcome($member);
 
         return $this->find($member->uuid);
     }
@@ -128,7 +131,7 @@ class StaffAccounts
         $member = $this->find($id);
         $staffRoles = $this->roles($roles);
 
-        $beforeRoles = $member->roles->where('is_staff', true);
+        $beforeRoles = $member->roles;
         $addedRoles = $staffRoles->whereNotIn('id', $beforeRoles->pluck('id'));
         $removedRoles = $beforeRoles->whereNotIn('id', $staffRoles->pluck('id'));
         $beforePermissions = $member->permissions->pluck('name')->all();
@@ -145,7 +148,7 @@ class StaffAccounts
                 $this->assertAnotherSuperAdmin($member);
             }
 
-            $member->syncRoles([Role::Admin->value, ...$staffRoles->all()]);
+            $member->syncRoles($staffRoles);
             $member->syncPermissions($permissions);
 
             $this->audit->record($actor, 'staff.access_changed', $member, [
@@ -181,7 +184,7 @@ class StaffAccounts
             $this->audit->record($actor, 'staff.deactivated', $member);
         });
 
-        $this->sessions->revokeAll($member);
+        $this->sessions->revokeClient($member, AuthClient::Portal);
 
         return $this->find($id);
     }
@@ -214,7 +217,7 @@ class StaffAccounts
             'full_name' => $name,
             'email' => $email,
         ]);
-        $member->assignRole(Role::Admin->value);
+        $member->forceFill(['staff_since' => now()])->save();
         $member->assignRole($this->catalogue->superAdmin());
 
         return $this->accounts->welcome($member);
@@ -225,7 +228,7 @@ class StaffAccounts
      */
     private function team(): Builder
     {
-        return User::query()->role(Role::Admin->value);
+        return User::query()->whereNotNull('staff_since');
     }
 
     /**
@@ -249,7 +252,7 @@ class StaffAccounts
     /**
      * The catalogue permissions the roles carry, leaving out the kit's platform ones.
      *
-     * @param  iterable<\Spatie\Permission\Models\Role>  $roles
+     * @param  iterable<Role>  $roles
      * @return list<string>
      */
     private function permissionsIn(iterable $roles): array

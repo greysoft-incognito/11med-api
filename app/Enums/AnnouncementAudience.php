@@ -14,16 +14,18 @@ enum AnnouncementAudience: string
     case Laboratories = 'laboratories';
 
     /**
-     * @return list<Role>
+     * The account kinds it reaches.
+     *
+     * @return list<AccountKind>
      */
-    public function roles(): array
+    public function kinds(): array
     {
         return match ($this) {
-            self::AppUsers => Role::app(),
-            self::Patients => [Role::Patient],
-            self::Doctors => [Role::Doctor],
-            self::Pharmacies => [Role::Pharmacy],
-            self::Laboratories => [Role::Laboratory],
+            self::AppUsers => AccountKind::app(),
+            self::Patients => [AccountKind::Patient],
+            self::Doctors => [AccountKind::Doctor],
+            self::Pharmacies => [AccountKind::Pharmacy],
+            self::Laboratories => [AccountKind::Laboratory],
         };
     }
 }

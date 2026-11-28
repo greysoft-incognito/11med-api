@@ -1,14 +1,15 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Consultations\ConsultationChatController;
 use App\Http\Controllers\Consultations\DoctorConsultationController;
 use App\Http\Controllers\Consultations\LabRequestController;
 use App\Http\Controllers\Consultations\PrescriptionController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The doctor's consultations and earnings (app spec §7.2, §7.6, §7.7).
-Route::middleware(['auth:sanctum', 'role:' . Role::Doctor->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::for([AccountKind::Doctor])])
     ->prefix('doctor')
     ->name('doctor.')
     ->group(function () {

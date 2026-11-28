@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Notifications;
 
+use App\Enums\AccountKind;
 use App\Enums\NotificationCategory;
 use App\Enums\PartnerKind;
-use App\Enums\Role;
 use App\Models\AppNotification;
 use App\Models\LabBooking;
 use App\Models\Order;
@@ -88,7 +88,7 @@ class PartnerAlertsTest extends TestCase
     {
         [$pharmacy, $desk] = $this->approvedPartner();
         $colleague = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create(['organisation_id' => $pharmacy->id]);
 
         app(Notifier::class)->toOrganisation($pharmacy, NotificationCategory::PharmacyOrder, 'New order', 'Start it.', ['dedupe_key' => 'once']);

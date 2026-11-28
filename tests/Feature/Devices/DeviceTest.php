@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Devices;
 
-use App\Enums\Role;
 use App\Models\Device;
 use App\Models\User;
 use Tests\TestCase;
@@ -112,7 +111,7 @@ class DeviceTest extends TestCase
         $this->putJson('api/v1/devices/' . self::INSTALL, self::BODY)->assertUnauthorized();
 
         $admin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create();
 
         $this->actingAs($admin)

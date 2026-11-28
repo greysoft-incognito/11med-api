@@ -2,9 +2,9 @@
 
 namespace App\Services\Identity;
 
+use App\Enums\AccountKind;
 use App\Enums\AuthClient;
 use App\Enums\ConsentContext;
-use App\Enums\Role;
 use App\Exceptions\ApiException;
 use App\Models\ConsentRecord;
 use App\Models\User;
@@ -50,12 +50,12 @@ class AppAccounts
             ]);
 
             $user->forceFill(['email_verified_at' => $data['email_verified_at'] ?? null])->save();
-            $user->assignRole($data['role']);
+            $user->grantKind(AccountKind::from($data['role']));
 
             ConsentRecord::create([
                 'user_id' => $user->id,
                 'context' => $context,
-                'policy_version' => $data['consent']['policy_version'] ?? $this->policy->recordable(Role::from($data['role'])),
+                'policy_version' => $data['consent']['policy_version'] ?? $this->policy->recordable(AccountKind::from($data['role'])),
                 'accepted_at' => $data['consent']['accepted_at'] ?? now(),
                 'recorded_at' => now(),
             ]);
@@ -138,13 +138,23 @@ class AppAccounts
     }
 
     /**
-     * The live app account holding a phone number.
+     * Give the account another app kind. Both read the same terms, so the consent it gave holds.
+     */
+    public function addKind(User $user, AccountKind $kind): User
+    {
+        $user->grantKind($kind);
+
+        return $user;
+    }
+
+    /**
+     * The live account holding a phone number that may sign in to the app: a patient or a doctor.
      */
     public function findByPhone(string $phone): ?User
     {
         return User::query()
             ->where('phone', $phone)
-            ->whereHas('roles', fn($q) => $q->whereIn('name', Role::values(Role::app())))
+            ->ofKind(AccountKind::app())
             ->first();
     }
 

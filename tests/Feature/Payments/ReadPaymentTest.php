@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Payments;
 
+use App\Enums\AccountKind;
 use App\Enums\PaymentChannel;
 use App\Enums\PaymentPurpose;
-use App\Enums\Role;
 use App\Events\Payments\PaymentSucceeded;
 use App\Models\User;
 use App\Services\Payments\Payments;
@@ -44,7 +44,7 @@ class ReadPaymentTest extends TestCase
             ->assertJsonPath('error.code', 'PAYMENT_NOT_FOUND');
 
         $doctor = User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create();
 
         $this->actingAs($doctor)
@@ -163,7 +163,7 @@ class ReadPaymentTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 }

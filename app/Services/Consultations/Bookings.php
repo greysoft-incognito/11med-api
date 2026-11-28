@@ -2,10 +2,10 @@
 
 namespace App\Services\Consultations;
 
+use App\Enums\AccountKind;
 use App\Enums\ConsentContext;
 use App\Enums\ConsultationStatus;
 use App\Enums\PaymentChannel;
-use App\Enums\Role;
 use App\Enums\SessionType;
 use App\Exceptions\ApiException;
 use App\Models\ConsentRecord;
@@ -221,7 +221,7 @@ class Bookings
         $consent = new ConsentRecord([
             'user_id' => $patient->id,
             'context' => ConsentContext::ProfileSharing,
-            'policy_version' => $this->policy->recordable(Role::Patient),
+            'policy_version' => $this->policy->recordable(AccountKind::Patient),
             'accepted_at' => $now,
             'recorded_at' => $now,
         ]);

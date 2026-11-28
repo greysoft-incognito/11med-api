@@ -2,9 +2,9 @@
 
 namespace Tests\Concerns;
 
+use App\Enums\AccountKind;
 use App\Enums\ConsultationStatus;
 use App\Enums\PartnerKind;
-use App\Enums\Role;
 use App\Enums\SessionType;
 use App\Enums\Specialty;
 use App\Models\Consultation;
@@ -89,7 +89,7 @@ trait MakesLaboratories
     protected function labPatient(?string $state = null): User
     {
         $patient = User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
 
         if ($state !== null) {

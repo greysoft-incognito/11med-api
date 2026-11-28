@@ -39,7 +39,8 @@ The approved proposal, with the domain model and the milestone order, is the Cla
 | PHP | 8.4 on the servers and in CI (8.3 is the floor) |
 | Database | PostgreSQL only, 14 or later (14 on the test server and in CI). `php artisan test` runs on `elevenmed_test` |
 | Auth | Sanctum personal access tokens (15 minutes) plus our own rotating refresh tokens |
-| Roles | `spatie/laravel-permission`: `patient`, `doctor`, `pharmacy`, `laboratory`, `admin` |
+| Account kinds | `account_kinds`: `patient`, `doctor`, `pharmacy`, `laboratory`, any number per account, checked by the `kind:` route middleware with the token's client |
+| Staff access | `users.staff_since`, then `spatie/laravel-permission` staff roles and permissions; never an account kind |
 | Responses | `toneflix/laravel-resource-modifier`; every controller method returns an API resource |
 | Settings | `toneflix/laravel-dbconfig` for values an operator may change at runtime |
 | Files | Object storage through Laravel's filesystem; local disk in development |
@@ -286,3 +287,4 @@ Add to this list; do not remove entries.
 | 2026-11-28 | Deactivating a team account sets `users.deactivated_at` and ends its sessions; sign-in answers 403 `ACCOUNT_DEACTIVATED` | A deactivated account must not hold a live token |
 | 2026-12-03 | The terms and privacy policies are `documents` rows (Markdown), seeded once from `resources/documents` and edited by the team; the clients read them at the public `GET documents/{slug}`. Every edit is a new version kept in `document_versions`, and the policy version an account accepts is its pair's versions joined (`terms.privacy`), so `PolicyConsent` reads it from the documents and `CONSENT_POLICY_VERSION` is gone | Owner's calls: the terms live where we control them, as in toneflix/photos; every update creates a new version |
 | 2026-11-28 | The audit log is `audit_events`, written only through `AuditLog::record()` inside the admin write's transaction, never changed; actor name kept as written | M15.4; one writer for M15, M17 and M18 |
+| 2026-12-04 | Account kinds are `account_kinds` rows, any number per account, never Spatie roles; admin is not a kind but staff access (`users.staff_since`) with staff roles and permissions. Routes name kinds with `kind:` (`RequireAccountKind`), which also requires the token's client to be that kind's (`app` or `portal`; `kind:staff` is portal). App sign-in takes a patient or doctor, portal sign-in a partner member or staff; invites link a verified existing account; erasure waits until portal access is removed. Supersedes the 2026-11-28 RBAC row's "Spatie roles marked `is_staff` beside the `admin` account role" | Owner's call: account kinds are not Spatie roles, and anyone signs in to every side they belong to |

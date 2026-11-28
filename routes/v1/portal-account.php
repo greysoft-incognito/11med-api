@@ -1,13 +1,14 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Identity\PortalAccountController;
 use App\Http\Controllers\Identity\SessionController;
 use App\Http\Controllers\Identity\TwoFactorController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // A portal account's own page: name, email, password, signed-in devices, two-step verification (M14).
-Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::portal()))])
+Route::middleware(['auth:sanctum', RequireAccountKind::for(AccountKind::portal(), staff: true)])
     ->prefix('portal/account')
     ->name('portal.account.')
     ->group(function () {

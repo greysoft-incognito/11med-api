@@ -1,11 +1,12 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Caregiving\CaregiverController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // Caregiving is a capability of a patient account, not a role (app spec §6.5).
-Route::middleware(['auth:sanctum', 'role:' . Role::Patient->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::for([AccountKind::Patient])])
     ->prefix('medications')
     ->name('caregivers.')
     ->group(function () {

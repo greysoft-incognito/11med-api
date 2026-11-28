@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Subscriptions;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\Subscription;
 use App\Models\SubscriptionPayment;
 use App\Models\User;
@@ -19,7 +19,7 @@ class AdminSubscriptionTest extends TestCase
         $this->travelTo('2026-11-17T12:00:00Z');
 
         $this->admin = User::factory()
-            ->portal(Role::Admin)
+            ->admin()
             ->create();
     }
 
@@ -78,10 +78,10 @@ class AdminSubscriptionTest extends TestCase
     public function test_only_a_verified_patient_number_is_found(): void
     {
         User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create(['phone' => '08031114444']);
         User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create(['phone' => '08031115555', 'phone_verified_at' => null]);
 
         foreach (['08031110000', '08031114444', '08031115555'] as $phone) {
@@ -163,7 +163,7 @@ class AdminSubscriptionTest extends TestCase
     public function test_other_roles_are_refused(): void
     {
         $pharmacy = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create();
         $patient = $this->patient('08031112222');
 
@@ -181,7 +181,7 @@ class AdminSubscriptionTest extends TestCase
     private function patient(string $phone, ?string $name = null): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create(array_filter(['phone' => $phone, 'full_name' => $name]));
     }
 

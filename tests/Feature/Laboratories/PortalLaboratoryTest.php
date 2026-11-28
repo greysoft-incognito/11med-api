@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Laboratories;
 
+use App\Enums\AccountKind;
 use App\Enums\LabBookingStatus;
 use App\Enums\MediaPurpose;
 use App\Enums\PartnerKind;
-use App\Enums\Role;
 use App\Models\LabBooking;
 use App\Models\Laboratory;
 use App\Models\User;
@@ -112,7 +112,7 @@ class PortalLaboratoryTest extends TestCase
     {
         $this->getJson('api/v1/portal/laboratory/summary')->assertUnauthorized();
 
-        $orphan = User::factory()->portal(Role::Laboratory)->create();
+        $orphan = User::factory()->portal(AccountKind::Laboratory)->create();
         [, $pharmacy] = $this->approvedPartner(PartnerKind::Pharmacy);
 
         $this->actingAs($orphan)

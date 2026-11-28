@@ -1,11 +1,12 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Doctors\DoctorDirectoryController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The doctor directory and bookable slots (app spec §7.2, handover §13).
-Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::app()))])
+Route::middleware(['auth:sanctum', RequireAccountKind::for(AccountKind::app())])
     ->prefix('doctors')
     ->name('doctors.')
     ->group(function () {

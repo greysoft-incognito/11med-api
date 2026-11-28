@@ -2,7 +2,7 @@
 
 namespace App\Services\Accounts;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
@@ -28,7 +28,7 @@ class UserDirectory
     /**
      * Newest first; `q` over name, phone and email.
      */
-    public function list(?Role $role, ?string $status, ?string $search, ListQuery $list): Page
+    public function list(?AccountKind $kind, ?string $status, ?string $search, ListQuery $list): Page
     {
         $search = trim((string) $search);
         $pattern = LikePattern::contains($search);
@@ -36,7 +36,7 @@ class UserDirectory
 
         $query = $this
             ->accounts()
-            ->when($role !== null, fn(Builder $q) => $q->role($role->value))
+            ->when($kind !== null, fn(Builder $q) => $q->ofKind($kind))
             ->when($status === self::ACTIVE, fn(Builder $q) => $q->whereNull('suspended_at'))
             ->when($status === self::SUSPENDED, fn(Builder $q) => $q->whereNotNull('suspended_at'))
             ->when($search !== '', fn(Builder $q) => $q->where(fn(Builder $q) => $q
@@ -81,8 +81,7 @@ class UserDirectory
     public function locate(string $id): User
     {
         $user = User::query()
-            ->role(Role::values(Role::app()))
-            ->withoutRole(Role::values(Role::portal()))
+            ->ofKind(AccountKind::app())
             ->where('uuid', $id)
             ->lockForUpdate()
             ->first();
@@ -91,14 +90,13 @@ class UserDirectory
     }
 
     /**
-     * App accounts with what the list shows: role, premium record, doctor status and the last
+     * App accounts with what the list shows: kinds, premium record, doctor status and the last
      * time a session was refreshed.
      */
     private function accounts(): Builder
     {
         return User::query()
-            ->role(Role::values(Role::app()))
-            ->withoutRole(Role::values(Role::portal()))
+            ->ofKind(AccountKind::app())
             ->select('users.*')
             ->addSelect([
                 'last_active_at' => RefreshToken::query()
@@ -107,6 +105,6 @@ class UserDirectory
                     ->orderByDesc('created_at')
                     ->limit(1),
             ])
-            ->with(['roles', 'subscription', 'doctorProfile:id,user_id,verification_status']);
+            ->with(['accountKinds', 'subscription', 'doctorProfile:id,user_id,verification_status']);
     }
 }

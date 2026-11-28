@@ -3,7 +3,6 @@
 namespace Tests\Feature\Doctors;
 
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Models\AppNotification;
 use Tests\TestCase;
 
@@ -13,7 +12,7 @@ class DoctorSubmissionAlertTest extends TestCase
 
     public function test_a_submission_tells_the_team_once_while_it_waits(): void
     {
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
         $doctor = $this->submittedDoctor();
 
         $this->actingAs($doctor)

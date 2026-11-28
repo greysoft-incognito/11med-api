@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\User;
 use App\Notifications\Identity\EmailCode;
 use App\Notifications\Identity\PhoneCode;
@@ -224,7 +224,7 @@ class AppPasswordAndEmailTest extends TestCase
         $this->patchJson('api/v1/auth/email')->assertUnauthorized();
 
         $pharmacy = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create();
 
         $this->actingAs($pharmacy)

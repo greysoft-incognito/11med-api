@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -17,7 +17,7 @@ class KitRoutesTest extends TestCase
 
     public function test_only_the_team_reaches_the_kits_admin_routes(): void
     {
-        foreach ([Role::Patient, Role::Doctor, Role::Pharmacy, Role::Laboratory] as $role) {
+        foreach ([AccountKind::Patient, AccountKind::Doctor, AccountKind::Pharmacy, AccountKind::Laboratory] as $role) {
             $user = User::factory()
                 ->app($role)
                 ->create();
@@ -28,7 +28,7 @@ class KitRoutesTest extends TestCase
         }
 
         $admin = User::factory()
-            ->portal()
+            ->admin()
             ->create();
 
         $this->actingAs($admin)

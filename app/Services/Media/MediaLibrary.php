@@ -181,7 +181,7 @@ class MediaLibrary
             throw new AuthenticationException;
         }
 
-        if (! in_array($user->role(), $purpose->roles(), true)) {
+        if (! $user->holds(...$purpose->kinds())) {
             throw ApiException::forbidden();
         }
 

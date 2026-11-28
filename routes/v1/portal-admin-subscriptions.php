@@ -1,12 +1,12 @@
 <?php
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Http\Controllers\Subscriptions\AdminSubscriptionController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // Premium bought outside the app, recorded by the team (portal handover §6 "Subscriptions").
-Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::staff()])
     ->prefix('portal/admin/subscriptions')
     ->name('portal.admin.subscriptions.')
     ->group(function () {

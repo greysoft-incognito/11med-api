@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\AppNotification;
 use App\Models\User;
 use App\Notifications\Identity\NewSignInEmail;
@@ -70,7 +70,7 @@ class NewSignInAlertTest extends TestCase
     public function test_a_portal_account_is_told_of_a_new_browser(): void
     {
         $desk = User::factory()
-            ->portal(Role::Laboratory)
+            ->portal(AccountKind::Laboratory)
             ->create(['email' => 'desk@lab.ng', 'email_verified_at' => now()]);
 
         foreach (['Firefox/130.0', 'Firefox/130.0', 'Chrome/130.0'] as $agent) {

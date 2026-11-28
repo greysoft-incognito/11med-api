@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Laboratories;
 
+use App\Enums\AccountKind;
 use App\Enums\PartnerKind;
-use App\Enums\Role;
 use App\Models\User;
 use Tests\Concerns\MakesLaboratories;
 use Tests\TestCase;
@@ -79,7 +79,7 @@ class DirectoryTest extends TestCase
             ->assertJsonPath('data.2.from_kobo', 150000)
             ->assertJsonPath('data.2.offered_by', 1);
 
-        $doctor = User::factory()->app(Role::Doctor)->create();
+        $doctor = User::factory()->app(AccountKind::Doctor)->create();
 
         $this->actingAs($doctor)
             ->getJson('api/v1/labs/tests?category=chemistry')

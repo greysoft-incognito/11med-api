@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Operations;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Models\Order;
 use App\Models\Organisation;
 use App\Models\User;
@@ -139,7 +139,7 @@ class AdminOrderTest extends TestCase
             ->getJson('api/v1/portal/admin/orders')
             ->assertForbidden();
 
-        foreach ([User::factory()->app(Role::Patient)->create(), User::factory()->portal(Role::Pharmacy)->create()] as $user) {
+        foreach ([User::factory()->app(AccountKind::Patient)->create(), User::factory()->portal(AccountKind::Pharmacy)->create()] as $user) {
             $this->actingAs($user)
                 ->getJson('api/v1/portal/admin/orders')
                 ->assertForbidden();

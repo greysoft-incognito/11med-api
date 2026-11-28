@@ -2,10 +2,10 @@
 
 namespace Database\Seeders\Demo;
 
+use App\Enums\AccountKind;
 use App\Enums\DocumentKind;
 use App\Enums\DocumentStatus;
 use App\Enums\MediaPurpose;
-use App\Enums\Role;
 use App\Enums\VerificationStatus;
 use App\Models\DoctorDocument;
 use App\Models\DoctorProfile;
@@ -47,7 +47,7 @@ class DemoDoctors
      */
     public function create(string $phone, array $doctor): User
     {
-        $user = DemoAccounts::create($doctor['full_name'], $phone, $doctor['email'] ?? null, Role::Doctor);
+        $user = DemoAccounts::create($doctor['full_name'], $phone, $doctor['email'] ?? null, AccountKind::Doctor);
         $reviewedAt = now()->subDays(28);
         [$chat, $audio, $video] = $doctor['fees'];
         [$mean, $count] = $doctor['rating'] ?? [0, 0];

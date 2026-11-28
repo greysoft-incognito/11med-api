@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Payments;
 
+use App\Enums\AccountKind;
 use App\Enums\PaymentPurpose;
-use App\Enums\Role;
 use App\Events\Payments\PaymentAbandoned;
 use App\Models\Payment;
 use App\Models\User;
@@ -195,7 +195,7 @@ class InitialisePaymentTest extends TestCase
             ->assertJsonPath('error.field', 'target_id');
 
         $doctor = User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create();
 
         $this->actingAs($doctor)
@@ -214,7 +214,7 @@ class InitialisePaymentTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 }

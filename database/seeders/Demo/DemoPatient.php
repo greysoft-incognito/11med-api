@@ -2,9 +2,9 @@
 
 namespace Database\Seeders\Demo;
 
+use App\Enums\AccountKind;
 use App\Enums\DoseState;
 use App\Enums\MediaPurpose;
-use App\Enums\Role;
 use App\Enums\SkipReason;
 use App\Models\DoseLog;
 use App\Models\MedicalProfile;
@@ -26,7 +26,7 @@ class DemoPatient
 
     public function create(): User
     {
-        $user = DemoAccounts::create('Amara Okafor', self::PHONE, 'amara@example.com', Role::Patient);
+        $user = DemoAccounts::create('Amara Okafor', self::PHONE, 'amara@example.com', AccountKind::Patient);
 
         $this->profile($user);
         $this->medications($user);

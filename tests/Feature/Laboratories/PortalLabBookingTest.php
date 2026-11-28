@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Laboratories;
 
+use App\Enums\AccountKind;
 use App\Enums\MediaPurpose;
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Models\LabBooking;
 use App\Models\Laboratory;
 use App\Models\User;
@@ -53,7 +53,7 @@ class PortalLabBookingTest extends TestCase
     {
         [$laboratory, $account] = $this->laboratory(['FBC' => 300000]);
         $patient = $this->labPatient();
-        $doctor = User::factory()->app(Role::Doctor)->create(['full_name' => 'Dr Bello Musa']);
+        $doctor = User::factory()->app(AccountKind::Doctor)->create(['full_name' => 'Dr Bello Musa']);
         $request = app(LabRequests::class)->create($doctor, $patient, $this->consultationBetween($doctor, $patient), 'MDCN/1', [['test_code' => 'FBC']], 'Fast overnight');
 
         $unpaid = $this->book($laboratory, $patient, paid: false);

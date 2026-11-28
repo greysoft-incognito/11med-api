@@ -3,22 +3,21 @@
 namespace App\Services\Staff;
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Exceptions\ApiException;
 use App\Models\StaffRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
- * What a team account may do: the union of its direct permissions and its staff roles' permissions.
- * Deactivated accounts hold nothing.
+ * What a team member may do: the union of their direct permissions and their staff roles'
+ * permissions. Anyone else, and a deactivated member, holds nothing.
  */
 class StaffAccess implements PermissionHolders
 {
     public function holders(AdminPermission $permission): Builder
     {
         return User::query()
-            ->role(Role::Admin->value)
+            ->whereNotNull('staff_since')
             ->whereNull('deactivated_at')
             ->permission($permission->value);
     }
@@ -30,7 +29,7 @@ class StaffAccess implements PermissionHolders
      */
     public function permissionsOf(User $user): array
     {
-        if ($user->role() !== Role::Admin || $user->deactivated_at !== null) {
+        if (! $user->isStaff()) {
             return [];
         }
 
@@ -54,6 +53,7 @@ class StaffAccess implements PermissionHolders
     {
         return User::query()
             ->role(StaffRole::superAdminName())
+            ->whereNotNull('staff_since')
             ->whereNull('deactivated_at')
             ->whereKeyNot($except->id)
             ->count();

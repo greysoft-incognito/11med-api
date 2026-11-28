@@ -1,6 +1,5 @@
 <?php
 
-use App\Enums\Role;
 use App\Models\User;
 
 // The kit's platform permissions. Only the super admin holds them, through the gate.
@@ -40,16 +39,16 @@ return [
     | This is the role that would be considered as the super admin role: the
     | staff role every permission check passes for (App\Models\StaffRole).
     */
-    'super-admin-role' => 'staff:super-admin',
+    'super-admin-role' => 'super-admin',
     /*
     |--------------------------------------------------------------------------
     | Role List
     |--------------------------------------------------------------------------
     |
-    | These are roles that will be made available  to the user.
-    | Feel free to add or remove as per your requirements.
+    | Spatie roles are staff roles only, created by App\Services\Staff\StaffCatalogue;
+    | account kinds are the account_kinds table, never roles.
     */
-    'roles' => Role::values(),
+    'roles' => [],
     /*
     |--------------------------------------------------------------------------
     | Elevated Role List
@@ -59,7 +58,7 @@ return [
     | Listed roles should already be defined in [roles] above.
     */
     'elevated-roles' => [
-        'admin',
+        'super-admin',
     ],
     /*
     |--------------------------------------------------------------------------
@@ -79,13 +78,7 @@ return [
     | If there are permisions you do not want to attach to a particlular role
     | you can add them here using the role name as key.
     */
-    'exclusions' => [
-        'patient' => $permissions,
-        'doctor' => $permissions,
-        'pharmacy' => $permissions,
-        'laboratory' => $permissions,
-        'admin' => $permissions,
-    ],
+    'exclusions' => [],
     /*
     |--------------------------------------------------------------------------
     | Admin Roles
@@ -94,6 +87,6 @@ return [
     | Users with any of the following roles are considered admins in general contexts.
     */
     'admin_roles' => [
-        'admin',
+        'super-admin',
     ],
 ];

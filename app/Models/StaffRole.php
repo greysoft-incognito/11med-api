@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
 /**
- * A named set of admin permissions given to team accounts. Stored in Spatie's `roles` table with
- * `is_staff` set; its Spatie name is `staff:<key>` for a seeded default and `staff:<uuid>` otherwise,
- * so renaming one changes only its label.
+ * A named set of admin permissions given to team members. Spatie's `roles` table holds staff roles
+ * and nothing else (account kinds are `account_kinds`); a role's Spatie name is its key for a seeded
+ * default and its public id otherwise, so renaming one changes only its label.
  *
  * @property int $id
  * @property string $uuid
@@ -29,16 +28,6 @@ class StaffRole extends Role
      */
     public const GUARD = 'web';
 
-    protected $casts = [
-        'is_staff' => 'boolean',
-    ];
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope('staff', fn(Builder $query) => $query->where('is_staff', true));
-
-    }
-
     /**
      * Creates a staff role from its key (a seeded default) or a fresh public id.
      *
@@ -52,9 +41,8 @@ class StaffRole extends Role
         return static::create([
             ...$attributes,
             'uuid' => $uuid,
-            'is_staff' => true,
             'guard_name' => self::GUARD,
-            'name' => 'staff:' . ($key ?? $uuid),
+            'name' => $key ?? $uuid,
         ]);
     }
 
@@ -84,6 +72,6 @@ class StaffRole extends Role
 
     public static function superAdminName(): string
     {
-        return 'staff:' . self::SUPER_ADMIN;
+        return self::SUPER_ADMIN;
     }
 }

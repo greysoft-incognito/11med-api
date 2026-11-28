@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Laboratories;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Exceptions\ApiException;
 use App\Models\User;
 use App\Services\Laboratories\LabRequests;
@@ -21,7 +21,7 @@ class LabRequestsTest extends TestCase
         $this->fakeLabSeams();
         $this->labTest('FBC', ['name' => 'Full blood count']);
         $requests = app(LabRequests::class);
-        $doctor = User::factory()->app(Role::Doctor)->create();
+        $doctor = User::factory()->app(AccountKind::Doctor)->create();
         $patient = $this->labPatient();
         $consultation = $this->consultationBetween($doctor, $patient);
 

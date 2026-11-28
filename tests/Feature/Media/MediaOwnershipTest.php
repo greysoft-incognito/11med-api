@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Media;
 
+use App\Enums\AccountKind;
 use App\Enums\MediaPurpose;
-use App\Enums\Role;
 use App\Exceptions\ApiException;
 use App\Models\Media;
 use App\Models\User;
@@ -143,7 +143,7 @@ class MediaOwnershipTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 

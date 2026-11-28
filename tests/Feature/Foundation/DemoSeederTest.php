@@ -45,7 +45,7 @@ class DemoSeederTest extends TestCase
 
         $this->postJson('api/v1/auth/login', ['phone_number' => '08030000003', 'password' => 'Password1', 'device_id' => 'demo-test'])
             ->assertOk()
-            ->assertJsonPath('data.user.role', 'doctor');
+            ->assertJsonPath('data.user.kinds', ['doctor']);
 
         $this->assertSame(19, Drug::query()->count());
         $this->assertSame(84, LaboratoryTest::query()->count());

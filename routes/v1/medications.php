@@ -1,9 +1,10 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Medications\ComplianceController;
 use App\Http\Controllers\Medications\DoseController;
 use App\Http\Controllers\Medications\MedicationController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The compliance report's PDF, behind a signed link that lapses in minutes (app handover §9).
@@ -13,7 +14,7 @@ Route::get('medications/reports/{report}/file', [ComplianceController::class, 'f
     ->name('medications.report-file');
 
 // Schedules and doses (app spec §6). A caregiver reads a patient's schedule through the `{userId}` routes.
-Route::middleware(['auth:sanctum', 'role:' . Role::Patient->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::for([AccountKind::Patient])])
     ->prefix('medications')
     ->name('medications.')
     ->group(function () {

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Notifications;
 
+use App\Enums\AccountKind;
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Models\AppNotification;
 use App\Models\User;
 use App\Services\Notifications\NotificationHistory;
@@ -130,7 +130,7 @@ class NotificationRoutesTest extends TestCase
     public function test_a_doctor_has_notifications_too(): void
     {
         $doctor = User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create();
 
         $this->actingAs($doctor)
@@ -141,7 +141,7 @@ class NotificationRoutesTest extends TestCase
     public function test_portal_accounts_and_guests_are_refused(): void
     {
         $admin = User::factory()
-            ->portal()
+            ->admin()
             ->create();
 
         $this->actingAs($admin)
@@ -161,11 +161,11 @@ class NotificationRoutesTest extends TestCase
         $response = $this->actingAs($user)
             ->getJson("api/v1/notifications/{$user->uuid}/preferences")
             ->assertOk()
-            ->assertJsonCount(count(NotificationCategory::for(Role::Patient)), 'data.preferences')
+            ->assertJsonCount(count(NotificationCategory::forKind(AccountKind::Patient)), 'data.preferences')
             ->assertJsonPath('data.preferences.0', ['category' => 'medication_reminder', 'push' => true, 'sms' => false, 'in_app' => true]);
 
         $this->assertSame(
-            array_map(fn(NotificationCategory $category) => $category->value, NotificationCategory::for(Role::Patient)),
+            array_map(fn(NotificationCategory $category) => $category->value, NotificationCategory::forKind(AccountKind::Patient)),
             array_column($response->json('data.preferences'), 'category'),
         );
     }
@@ -181,7 +181,7 @@ class NotificationRoutesTest extends TestCase
         $this->actingAs($user)
             ->patchJson("api/v1/notifications/{$user->uuid}/preferences", $body)
             ->assertOk()
-            ->assertJsonCount(count(NotificationCategory::for(Role::Patient)), 'data.preferences');
+            ->assertJsonCount(count(NotificationCategory::forKind(AccountKind::Patient)), 'data.preferences');
 
         $this->actingAs($user)
             ->patchJson("api/v1/notifications/{$user->uuid}/preferences", ['preferences' => [

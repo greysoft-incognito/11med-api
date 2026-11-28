@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Consultations;
 
+use App\Enums\AccountKind;
 use App\Enums\ConsentContext;
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Models\ConsentRecord;
 use App\Models\Consultation;
 use App\Models\DoctorProfile;
@@ -249,11 +249,11 @@ class BookingTest extends TestCase
 
     public function test_other_roles_are_refused(): void
     {
-        $this->actingAs($this->user(Role::Pharmacy))
+        $this->actingAs($this->user(AccountKind::Pharmacy))
             ->getJson('api/v1/consultations')
             ->assertForbidden();
 
-        $this->actingAs($this->user(Role::Patient))
+        $this->actingAs($this->user(AccountKind::Patient))
             ->getJson('api/v1/doctor/consultations')
             ->assertForbidden();
     }

@@ -3,6 +3,7 @@
 namespace App\Services\Notifications;
 
 use App\Enums\AdminPermission;
+use App\Enums\AuthClient;
 use App\Enums\NotificationCategory;
 use App\Jobs\Notifications\DeliverPush;
 use App\Models\Organisation;
@@ -15,8 +16,8 @@ use Illuminate\Support\Str;
 
 /**
  * Writes the history row when the user keeps in-app history for the category, then queues the
- * push when they allow it and the account is an app account. A repeated dedupe key does neither
- * again. A fan-out walks its audience in batches.
+ * push when they allow it and the app shows them the category. A repeated dedupe key does
+ * neither again. A fan-out walks its audience in batches.
  */
 class DeliveringNotifier implements Notifier
 {
@@ -44,7 +45,7 @@ class DeliveringNotifier implements Notifier
             $notificationId = $notification->uuid;
         }
 
-        if (($data['push'] ?? true) && $preference->push && $to->role()?->isApp()) {
+        if (($data['push'] ?? true) && $preference->push && in_array($category, NotificationCategory::for($to, AuthClient::App), true)) {
             $message = new PushMessage($category, $notificationId ?? (string) Str::uuid7(), $targetId, $title, $body);
 
             DeliverPush::dispatch($to->id, $message)->afterCommit();
@@ -72,7 +73,7 @@ class DeliveringNotifier implements Notifier
     private function fanOut(Builder $audience, NotificationCategory $category, string $title, string $body, array $data): void
     {
         $audience
-            ->with('roles')
+            ->with('accountKinds')
             ->chunkById(self::BATCH, function (Collection $users) use ($category, $title, $body, $data) {
                 $users->each(fn(User $user) => $this->send($user, $category, $title, $body, $data));
             });

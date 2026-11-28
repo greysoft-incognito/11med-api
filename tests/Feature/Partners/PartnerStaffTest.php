@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Partners;
 
+use App\Enums\AccountKind;
 use App\Enums\PartnerKind;
-use App\Enums\Role;
 use App\Models\Organisation;
 use App\Models\User;
 use App\Notifications\Identity\PortalPasswordLink;
@@ -56,7 +56,7 @@ class PartnerStaffTest extends TestCase
         $member = User::query()->where('uuid', $id)->firstOrFail();
 
         $this->assertSame($this->organisation->id, $member->organisation_id);
-        $this->assertSame(Role::Pharmacy, $member->role());
+        $this->assertSame([AccountKind::Pharmacy], $member->kinds());
 
         $url = null;
         Notification::assertSentTo($member, PortalPasswordLink::class, function (PortalPasswordLink $mail) use (&$url) {

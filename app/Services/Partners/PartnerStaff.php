@@ -2,13 +2,13 @@
 
 namespace App\Services\Partners;
 
+use App\Enums\AuthClient;
 use App\Enums\PartnerStatus;
 use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
 use App\Models\Organisation;
 use App\Models\User;
-use App\Services\Identity\PortalAccounts;
 use App\Services\Identity\Sessions;
 use Illuminate\Support\Facades\DB;
 
@@ -22,7 +22,6 @@ class PartnerStaff
 
     public function __construct(
         private readonly Organisations $organisations,
-        private readonly PortalAccounts $accounts,
         private readonly Sessions $sessions,
     ) {}
 
@@ -45,34 +44,15 @@ class PartnerStaff
     {
         return DB::transaction(function () use ($owner, $input) {
             $organisation = $this->ownedBy($owner);
-            $email = mb_strtolower($input['email']);
 
-            $taken = User::query()
-                ->whereRaw('lower(email) = ?', [$email])
-                ->exists();
-
-            if ($taken) {
-                throw ApiException::conflict('EMAIL_TAKEN', 'email');
-            }
-
-            $account = new User([
-                'full_name' => $input['name'],
-                'email' => $email,
-            ]);
-            $account->organisation_id = $organisation->id;
-            $account->email_verified_at = now();
-            $account->save();
-            $account->assignRole($organisation->kind->role()->value);
-            $account->setRelation('organisation', $organisation);
-
-            $this->accounts->welcome($account);
-
-            return $account;
+            return $this->organisations->admit($organisation, $input['name'], $input['email'], 'email');
         });
     }
 
     /**
-     * Remove a member: their sessions end, their unused links stop working, and their username is released.
+     * Remove a member. An account that holds nothing else is closed: its sessions end, its unused
+     * links stop working and its username is released. One that does keeps its other sides and
+     * loses only this portal and its portal sessions.
      */
     public function remove(User $owner, string $id): void
     {
@@ -82,6 +62,15 @@ class PartnerStaff
 
             if ($member->id === $organisation->owner_id) {
                 throw ApiException::unprocessable('STAFF_IS_OWNER');
+            }
+
+            $member->revokeKind($organisation->kind->accountKind());
+            $member->forceFill(['organisation_id' => null])->save();
+
+            if ($member->isStaff() || $member->kinds() !== []) {
+                $this->sessions->revokeClient($member, AuthClient::Portal);
+
+                return;
             }
 
             $this->sessions->revokeAll($member);

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Documents;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Models\Document;
 use App\Models\DocumentVersion;
 use App\Models\User;
@@ -140,7 +140,7 @@ class DocumentTest extends TestCase
         $this->actingAs($viewer)->putJson("api/v1/portal/admin/documents/{$id}", ['title' => 'Terms'])->assertForbidden();
         $this->actingAs($this->teamMember(AdminPermission::SettingsEdit))->getJson('api/v1/portal/admin/documents')->assertForbidden();
 
-        $this->actingAs(User::factory()->portal(Role::Pharmacy)->create())
+        $this->actingAs(User::factory()->portal(AccountKind::Pharmacy)->create())
             ->getJson('api/v1/portal/admin/documents')
             ->assertForbidden();
     }

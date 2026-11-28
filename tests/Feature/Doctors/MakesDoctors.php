@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Doctors;
 
+use App\Enums\AccountKind;
 use App\Enums\DocumentKind;
 use App\Enums\MediaPurpose;
-use App\Enums\Role;
 use App\Models\User;
 use App\Services\Media\MediaLibrary;
 use Illuminate\Http\UploadedFile;
@@ -25,11 +25,11 @@ trait MakesDoctors
         'bank_account_number' => '0123456789',
     ];
 
-    protected function user(Role $role): User
+    protected function user(AccountKind $kind): User
     {
         $factory = User::factory();
 
-        return ($role->isApp() ? $factory->app($role) : $factory->portal($role))->create();
+        return ($kind->isApp() ? $factory->app($kind) : $factory->portal($kind))->create();
     }
 
     protected function upload(User $owner, MediaPurpose $purpose): string
@@ -59,7 +59,7 @@ trait MakesDoctors
      */
     protected function completeDoctor(): User
     {
-        $doctor = $this->user(Role::Doctor);
+        $doctor = $this->user(AccountKind::Doctor);
 
         $this->actingAs($doctor)
             ->patchJson('api/v1/doctor/profile', self::PRACTICE)
@@ -88,7 +88,7 @@ trait MakesDoctors
     protected function approvedDoctor(array $practice = []): User
     {
         $doctor = $this->submittedDoctor();
-        $admin = $this->user(Role::Admin);
+        $admin = $this->admin();
 
         if ($practice !== []) {
             $this->actingAs($doctor)

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Settings;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Models\User;
 use App\Services\Audit\AuditLog;
 use App\Services\Settings\PlatformSettings;
@@ -56,7 +56,7 @@ class AdminSettingTest extends TestCase
     public function test_a_change_takes_effect_is_audited_and_resets_to_the_default(): void
     {
         $patient = User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
 
         $this->actingAs($this->team)
@@ -112,7 +112,7 @@ class AdminSettingTest extends TestCase
         $this->actingAs($viewer)->getJson('api/v1/portal/admin/settings')->assertOk();
         $this->actingAs($viewer)->putJson('api/v1/portal/admin/settings/otp_max_resends', ['value' => 4])->assertForbidden();
 
-        $this->actingAs(User::factory()->app(Role::Patient)->create())
+        $this->actingAs(User::factory()->app(AccountKind::Patient)->create())
             ->getJson('api/v1/portal/admin/settings')
             ->assertForbidden();
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Accounts;
 
+use App\Enums\AccountKind;
 use App\Http\Resources\ApiResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class AdminUserResource extends ApiResource
 
         return [
             'id' => $user->uuid,
-            'role' => $user->role()?->value,
+            'kinds' => AccountKind::values($user->kindsOf(AccountKind::app())),
             'full_name' => $user->full_name,
             'phone' => $user->phone,
             'email' => $user->email,

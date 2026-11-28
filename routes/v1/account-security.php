@@ -1,14 +1,15 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Identity\AppPhoneController;
 use App\Http\Controllers\Identity\DataExportController;
 use App\Http\Controllers\Identity\SessionController;
 use App\Http\Controllers\Identity\TwoFactorController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The app account's security: signed-in devices, two-step verification, the phone number, a copy of their data (M14).
-Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::app()))])
+Route::middleware(['auth:sanctum', RequireAccountKind::for(AccountKind::app())])
     ->prefix('auth')
     ->name('auth.')
     ->group(function () {

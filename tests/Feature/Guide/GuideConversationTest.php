@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Guide;
 
+use App\Enums\AccountKind;
 use App\Enums\GuideRoute;
 use App\Enums\GuideUrgency;
-use App\Enums\Role;
 use App\Models\GuideConversation;
 use App\Models\GuideMessage;
 use App\Models\User;
@@ -220,7 +220,7 @@ class GuideConversationTest extends TestCase
     public function test_the_guide_is_for_patients_and_signed_in_accounts(): void
     {
         $doctor = User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create();
 
         $this->actingAs($doctor)->getJson('api/v1/guide/conversation')->assertForbidden();
@@ -235,7 +235,7 @@ class GuideConversationTest extends TestCase
     private function patient(string $name = 'Test Patient'): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create(['full_name' => $name]);
     }
 }

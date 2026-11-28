@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Models\StaffRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -41,7 +41,7 @@ class UserFactory extends Factory
     /**
      * An app account: a verified Nigerian phone, no email, password `Password1`.
      */
-    public function app(Role $role = Role::Patient): static
+    public function app(AccountKind $kind = AccountKind::Patient): static
     {
         return $this
             ->state(fn() => [
@@ -52,13 +52,21 @@ class UserFactory extends Factory
                 'email_verified_at' => null,
                 'password' => Hash::make('Password1'),
             ])
-            ->afterCreating(function (User $user) use ($role) {
-                $user->assignRole($role->value);
+            ->holding($kind);
+    }
 
-                if ($role === Role::Admin) {
-                    $user->assignRole(StaffRole::superAdminName());
-                }
-            });
+    /**
+     * A partner portal account: an email, no phone, password `Password1`.
+     */
+    public function portal(AccountKind $kind = AccountKind::Pharmacy): static
+    {
+        return $this
+            ->state(fn() => [
+                'full_name' => fake()->name(),
+                'phone' => null,
+                'password' => Hash::make('Password1'),
+            ])
+            ->holding($kind);
     }
 
     /**
@@ -73,31 +81,27 @@ class UserFactory extends Factory
                 'full_name' => fake()->name(),
                 'phone' => null,
                 'password' => Hash::make('Password1'),
+                'staff_since' => now(),
             ])
-            ->afterCreating(function (User $user) use ($permissions) {
-                $user->assignRole(Role::Admin->value);
-                $user->givePermissionTo(AdminPermission::values($permissions));
-            });
+            ->afterCreating(fn(User $user) => $user->givePermissionTo(AdminPermission::values($permissions)));
     }
 
     /**
-     * A portal account: an email, no phone, password `Password1`.
+     * A super admin: staff access holding the super admin role.
      */
-    public function portal(Role $role = Role::Admin): static
+    public function admin(): static
     {
         return $this
-            ->state(fn() => [
-                'full_name' => fake()->name(),
-                'phone' => null,
-                'password' => Hash::make('Password1'),
-            ])
-            ->afterCreating(function (User $user) use ($role) {
-                $user->assignRole($role->value);
+            ->staff()
+            ->afterCreating(fn(User $user) => $user->assignRole(StaffRole::superAdminName()));
+    }
 
-                if ($role === Role::Admin) {
-                    $user->assignRole(StaffRole::superAdminName());
-                }
-            });
+    /**
+     * Also holds this account kind.
+     */
+    public function holding(AccountKind $kind): static
+    {
+        return $this->afterCreating(fn(User $user) => $user->grantKind($kind));
     }
 
     /**

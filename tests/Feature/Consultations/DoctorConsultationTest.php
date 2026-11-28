@@ -3,7 +3,6 @@
 namespace Tests\Feature\Consultations;
 
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Models\Consultation;
 use Carbon\CarbonImmutable;
 use Tests\TestCase;
@@ -230,7 +229,7 @@ class DoctorConsultationTest extends TestCase
 
         $this->pay($waiting);
 
-        $this->actingAs($this->user(Role::Admin))
+        $this->actingAs($this->admin())
             ->postJson("api/v1/portal/admin/doctors/{$doctor->uuid}/review", ['decision' => 'suspended', 'notes' => 'Licence under investigation by the council.'])
             ->assertOk();
 

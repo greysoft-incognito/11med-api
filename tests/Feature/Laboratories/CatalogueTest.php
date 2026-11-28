@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Laboratories;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\LabTest;
 use App\Models\User;
 use Database\Seeders\LabCatalogueSeeder;
@@ -119,7 +119,7 @@ class CatalogueTest extends TestCase
     public function test_only_the_team_maintains_it(): void
     {
         [, $laboratory] = $this->laboratory();
-        $patient = User::factory()->app(Role::Patient)->create();
+        $patient = User::factory()->app(AccountKind::Patient)->create();
 
         $this->getJson('api/v1/portal/admin/catalogue')->assertUnauthorized();
 

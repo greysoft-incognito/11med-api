@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\User;
 use App\Notifications\Identity\EmailCode;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -21,7 +21,7 @@ class PortalAccountTest extends TestCase
         config(['elevenmed.otp.fixed_code' => '123456']);
 
         $this->desk = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create(['email' => 'desk@pharmacy.ng', 'full_name' => 'Ada Desk']);
     }
 
@@ -70,7 +70,7 @@ class PortalAccountTest extends TestCase
     public function test_the_email_change_refuses_a_wrong_password_a_taken_address_and_the_same_one(): void
     {
         User::factory()
-            ->portal(Role::Laboratory)
+            ->portal(AccountKind::Laboratory)
             ->create(['email' => 'taken@lab.ng']);
 
         $this->actingAs($this->desk, 'sanctum')

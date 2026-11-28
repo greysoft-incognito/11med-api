@@ -1,12 +1,13 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Laboratories\PortalLabBookingController;
 use App\Http\Controllers\Laboratories\PortalLaboratoryController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
 // The laboratory portal (portal handover §5), scoped to the account's own laboratory.
-Route::middleware(['auth:sanctum', 'role:' . Role::Laboratory->value])
+Route::middleware(['auth:sanctum', RequireAccountKind::for([AccountKind::Laboratory])])
     ->prefix('portal/laboratory')
     ->name('portal.laboratory.')
     ->group(function () {

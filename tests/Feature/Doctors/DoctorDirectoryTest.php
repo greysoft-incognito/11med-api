@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Doctors;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Models\User;
 use App\Services\Doctors\DoctorRatings;
 use App\Services\Doctors\EngagedDoctors;
@@ -17,7 +17,7 @@ class DoctorDirectoryTest extends TestCase
 
     public function test_only_approved_doctors_are_listed_available_first_then_by_rating(): void
     {
-        $patient = $this->user(Role::Patient);
+        $patient = $this->user(AccountKind::Patient);
         $unrated = $this->approvedDoctor(['is_available_now' => true]);
         $rated = $this->approvedDoctor(['is_available_now' => true]);
         $away = $this->approvedDoctor();
@@ -54,7 +54,7 @@ class DoctorDirectoryTest extends TestCase
 
     public function test_the_directory_filters(): void
     {
-        $patient = $this->user(Role::Patient);
+        $patient = $this->user(AccountKind::Patient);
         $cardiologist = $this->approvedDoctor(['is_available_now' => true]);
         $gp = $this->approvedDoctor(['specialty' => 'general_practice', 'languages' => ['hausa']]);
 
@@ -78,7 +78,7 @@ class DoctorDirectoryTest extends TestCase
 
     public function test_a_doctor_the_patient_is_with_is_not_offered_as_available(): void
     {
-        $patient = $this->user(Role::Patient);
+        $patient = $this->user(AccountKind::Patient);
         $doctor = $this->approvedDoctor(['is_available_now' => true]);
 
         $this->app->instance(EngagedDoctors::class, new class($doctor->id) implements EngagedDoctors
@@ -103,11 +103,11 @@ class DoctorDirectoryTest extends TestCase
 
     public function test_an_unlisted_doctor_is_not_found(): void
     {
-        $patient = $this->user(Role::Patient);
+        $patient = $this->user(AccountKind::Patient);
         $pending = $this->submittedDoctor();
         $suspended = $this->approvedDoctor();
 
-        $this->actingAs($this->user(Role::Admin))
+        $this->actingAs($this->admin())
             ->postJson("api/v1/portal/admin/doctors/{$suspended->uuid}/review", ['decision' => 'suspended', 'notes' => 'Licence lapsed with the MDCN.'])
             ->assertOk();
 
@@ -123,8 +123,8 @@ class DoctorDirectoryTest extends TestCase
 
     public function test_portal_accounts_do_not_browse_the_directory(): void
     {
-        foreach ([Role::Admin, Role::Pharmacy] as $role) {
-            $this->actingAs($this->user($role))
+        foreach ([$this->admin(), $this->user(AccountKind::Pharmacy)] as $account) {
+            $this->actingAs($account)
                 ->getJson('api/v1/doctors')
                 ->assertForbidden();
         }
@@ -135,7 +135,7 @@ class DoctorDirectoryTest extends TestCase
         // Monday 2026-11-23, 07:00 in Lagos.
         $this->travelTo(CarbonImmutable::parse('2026-11-23 06:00:00', 'UTC'));
 
-        $patient = $this->user(Role::Patient);
+        $patient = $this->user(AccountKind::Patient);
         $doctor = $this->approvedDoctor([
             'session_minutes' => 45,
             'availability' => [['day' => 1, 'start' => '08:00', 'end' => '11:00']],
@@ -168,7 +168,7 @@ class DoctorDirectoryTest extends TestCase
     {
         $doctor = $this->approvedDoctor();
 
-        $this->actingAs($this->user(Role::Patient))
+        $this->actingAs($this->user(AccountKind::Patient))
             ->getJson("api/v1/doctors/{$doctor->uuid}/slots")
             ->assertOk()
             ->assertJsonPath('data.has_schedule', false)

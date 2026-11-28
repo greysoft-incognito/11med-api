@@ -5,7 +5,7 @@ namespace App\Models;
 class AccountErasure extends Model
 {
     protected $fillable = [
-        'role',
+        'kinds',
         'reason',
         'erased_at',
     ];

@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Accounts;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
 use App\Enums\AuthClient;
-use App\Enums\Role;
 use App\Enums\VerificationStatus;
 use App\Models\DoctorProfile;
 use App\Models\RefreshToken;
@@ -47,7 +47,7 @@ class AdminUserTest extends TestCase
         $this->travel(1)->minutes();
         $this->doctor(['full_name' => 'Chidi Eze', 'phone' => '08031113333']);
         User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create(['full_name' => 'Ada Pharmacy']);
 
         $this->actingAs($this->admin)
@@ -55,7 +55,7 @@ class AdminUserTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.total', 2)
             ->assertJsonPath('data.items.0.full_name', 'Chidi Eze')
-            ->assertJsonPath('data.items.0.role', 'doctor')
+            ->assertJsonPath('data.items.0.kinds', ['doctor'])
             ->assertJsonPath('data.next_cursor', fn($cursor) => is_string($cursor));
 
         foreach (['ada', '+2348031112222', '1112', 'ADA@example'] as $q) {
@@ -67,7 +67,7 @@ class AdminUserTest extends TestCase
         }
 
         $this->actingAs($this->admin)
-            ->getJson('api/v1/portal/admin/users?role=doctor')
+            ->getJson('api/v1/portal/admin/users?kind=doctor')
             ->assertJsonPath('data.total', 1)
             ->assertJsonPath('data.items.0.doctor_status', 'approved');
     }
@@ -86,7 +86,7 @@ class AdminUserTest extends TestCase
                 'timestamp' => now()->toIso8601ZuluString('millisecond'),
                 'data' => [
                     'id' => $patient->uuid,
-                    'role' => 'patient',
+                    'kinds' => ['patient'],
                     'full_name' => 'Ada Obi',
                     'phone' => '08031112222',
                     'email' => null,
@@ -227,7 +227,7 @@ class AdminUserTest extends TestCase
     {
         $patient = $this->patient();
         $pharmacy = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create();
 
         $this->actingAs($this->admin)
@@ -251,13 +251,13 @@ class AdminUserTest extends TestCase
     {
         $patient = $this->patient();
 
-        foreach ([Role::Patient, Role::Doctor] as $role) {
+        foreach ([AccountKind::Patient, AccountKind::Doctor] as $role) {
             $this->actingAs(User::factory()->app($role)->create())
                 ->getJson('api/v1/portal/admin/users')
                 ->assertForbidden();
         }
 
-        foreach ([Role::Pharmacy, Role::Laboratory] as $role) {
+        foreach ([AccountKind::Pharmacy, AccountKind::Laboratory] as $role) {
             $this->actingAs(User::factory()->portal($role)->create())
                 ->postJson("api/v1/portal/admin/users/{$patient->uuid}/sign-out")
                 ->assertForbidden();
@@ -302,14 +302,14 @@ class AdminUserTest extends TestCase
     private function patient(array $attributes = []): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create($attributes);
     }
 
     private function doctor(array $attributes = []): User
     {
         $doctor = User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create($attributes);
 
         DoctorProfile::query()->forceCreate([

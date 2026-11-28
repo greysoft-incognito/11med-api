@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Payments;
 
+use App\Enums\AccountKind;
 use App\Enums\RefundStatus;
-use App\Enums\Role;
 use App\Models\Payment;
 use App\Models\PaymentRefund;
 use App\Models\User;
@@ -99,7 +99,7 @@ class PaymentSweepTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 }

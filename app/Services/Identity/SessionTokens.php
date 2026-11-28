@@ -139,6 +139,24 @@ class SessionTokens
             ->delete();
     }
 
+    /**
+     * End every session of the user on one client.
+     */
+    public function revokeClient(User $user, AuthClient $client): void
+    {
+        RefreshToken::query()
+            ->where('user_id', $user->id)
+            ->where('client', $client)
+            ->whereNull('revoked_at')
+            ->distinct()
+            ->pluck('family')
+            ->each(fn(string $family) => $this->revokeFamily($family));
+
+        $user->tokens()
+            ->whereJsonContains('abilities', $client->value)
+            ->delete();
+    }
+
     public function familyOf(PersonalAccessToken $token): ?string
     {
         return RefreshToken::where('access_token_id', $token->id)->value('family');

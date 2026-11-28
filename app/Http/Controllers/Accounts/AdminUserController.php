@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Accounts;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Controller;
 use App\Http\Paging\ListQuery;
 use App\Http\Requests\Accounts\ListUsersRequest;
@@ -24,8 +24,8 @@ class AdminUserController extends Controller
 
     public function index(ListUsersRequest $request): AdminUserCollection
     {
-        $role = Role::tryFrom((string) $request->validated('role'));
-        $page = $this->directory->list($role, $request->validated('status'), $request->validated('q'), ListQuery::from($request));
+        $kind = AccountKind::tryFrom((string) $request->validated('kind'));
+        $page = $this->directory->list($kind, $request->validated('status'), $request->validated('q'), ListQuery::from($request));
 
         return new AdminUserCollection($page);
     }

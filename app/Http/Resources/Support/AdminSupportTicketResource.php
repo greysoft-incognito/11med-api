@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\Support;
 
+use App\Enums\AccountKind;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,7 @@ class AdminSupportTicketResource extends SupportTicketResource
             'requester' => [
                 'id' => $requester->uuid,
                 'name' => $requester->full_name,
-                'role' => $requester->role()?->value,
+                'kinds' => AccountKind::values($requester->kinds()),
                 'email' => $requester->email,
                 'phone' => $requester->phone,
                 'organisation_name' => $requester->organisation?->name,

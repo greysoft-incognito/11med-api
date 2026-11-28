@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Consultations;
 
+use App\Enums\AccountKind;
 use App\Enums\PaymentChannel;
-use App\Enums\Role;
 use App\Events\Payments\PaymentSucceeded;
 use App\Models\Consultation;
 use App\Models\User;
@@ -33,7 +33,7 @@ trait MakesConsultations
      */
     protected function patient(array $allergies = []): User
     {
-        $patient = $this->user(Role::Patient);
+        $patient = $this->user(AccountKind::Patient);
 
         $this->actingAs($patient)
             ->postJson('api/v1/profile', [

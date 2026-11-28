@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Identity;
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Events\Identity\AccountErasing;
 use App\Models\AccountErasure;
 use App\Models\ConsentRecord;
@@ -79,7 +79,7 @@ class AccountErasureTest extends TestCase
         $this->assertSame('1.1', $consent->policy_version);
 
         $erasure = AccountErasure::sole();
-        $this->assertSame('patient', $erasure->role);
+        $this->assertSame('patient', $erasure->kinds);
         $this->assertSame('Moving abroad', $erasure->reason);
 
         $this->app['auth']->forgetGuards();
@@ -145,7 +145,7 @@ class AccountErasureTest extends TestCase
         $this->deleteJson('api/v1/auth/account', ['password' => 'Password1'])->assertUnauthorized();
 
         $lab = User::factory()
-            ->portal(Role::Laboratory)
+            ->portal(AccountKind::Laboratory)
             ->create();
 
         $this->actingAs($lab)

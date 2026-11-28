@@ -1,14 +1,15 @@
 <?php
 
-use App\Enums\Role;
+use App\Enums\AccountKind;
 use App\Http\Controllers\Identity\AppAuthController;
 use App\Http\Controllers\Identity\AppEmailController;
 use App\Http\Controllers\Identity\AppPasswordController;
 use App\Http\Controllers\Identity\PolicyConsentController;
 use App\Http\Controllers\Identity\SocialAuthController;
+use App\Http\Middleware\RequireAccountKind;
 use Illuminate\Support\Facades\Route;
 
-$app = 'role:' . implode('|', Role::values(Role::app()));
+$app = RequireAccountKind::for(AccountKind::app());
 
 Route::prefix('auth')->name('auth.')->group(function () use ($app) {
     Route::middleware('throttle:auth')->group(function () {
@@ -32,5 +33,6 @@ Route::prefix('auth')->name('auth.')->group(function () use ($app) {
         Route::post('email/resend', [AppEmailController::class, 'resend'])->name('email.resend');
         Route::delete('account', [AppAuthController::class, 'destroy'])->name('account.destroy');
         Route::post('consent', [PolicyConsentController::class, 'app'])->name('consent');
+        Route::post('kinds', [AppAuthController::class, 'addKind'])->name('kinds.store');
     });
 });

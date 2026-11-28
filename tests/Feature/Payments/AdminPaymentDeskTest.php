@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Payments;
 
+use App\Enums\AccountKind;
 use App\Enums\PaymentPurpose;
-use App\Enums\Role;
 use App\Models\User;
 use App\Services\Identity\AccountEraser;
 use App\Services\Payments\Refunds;
@@ -25,7 +25,7 @@ class AdminPaymentDeskTest extends TestCase
     public function test_the_desk_lists_each_order_share_newest_first_without_consultations(): void
     {
         $patient = User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create(['full_name' => 'Ada Obi', 'phone' => '08031234567']);
 
         $first = $this->order($patient, 350000, 'ORD-1');
@@ -65,7 +65,7 @@ class AdminPaymentDeskTest extends TestCase
     public function test_the_desk_filters_by_each_share_status_and_searches(): void
     {
         $patient = User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create(['full_name' => 'Ada Obi', 'phone' => '08031234567']);
 
         $first = $this->order($patient, 350000, 'ORD-1');
@@ -133,7 +133,7 @@ class AdminPaymentDeskTest extends TestCase
     public function test_only_the_team_reads_the_desk(): void
     {
         $patient = User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
 
         $this->actingAs($patient)
@@ -141,7 +141,7 @@ class AdminPaymentDeskTest extends TestCase
             ->assertForbidden();
 
         $pharmacy = User::factory()
-            ->portal(Role::Pharmacy)
+            ->portal(AccountKind::Pharmacy)
             ->create();
 
         $this->actingAs($pharmacy)
@@ -160,14 +160,7 @@ class AdminPaymentDeskTest extends TestCase
     private function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
-            ->create();
-    }
-
-    private function admin(): User
-    {
-        return User::factory()
-            ->portal(Role::Admin)
+            ->app(AccountKind::Patient)
             ->create();
     }
 }

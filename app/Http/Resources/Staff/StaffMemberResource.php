@@ -8,7 +8,7 @@ use App\Services\Staff\StaffAccess;
 use Illuminate\Http\Request;
 
 /**
- * `zStaffMember`. `invited` until the first password is set; `permissions` are the direct ones,
+ * `zStaffMember`. `created_at` is when they joined the team; `invited` until the first password is set; `permissions` are the direct ones,
  * `effective_permissions` the union with the roles'.
  *
  * @property User $resource
@@ -18,7 +18,7 @@ class StaffMemberResource extends ApiResource
     public function toArray(Request $request): array
     {
         $member = $this->resource;
-        $roles = $member->roles->where('is_staff', true);
+        $roles = $member->roles;
         $effective = app(StaffAccess::class)->permissionsOf($member);
         $status = match (true) {
             $member->deactivated_at !== null => 'deactivated',
@@ -37,7 +37,7 @@ class StaffMemberResource extends ApiResource
                 ->all(),
             'permissions' => $member->permissions->pluck('name')->values()->all(),
             'effective_permissions' => $effective,
-            'created_at' => $this->iso($member->created_at),
+            'created_at' => $this->iso($member->staff_since ?? $member->created_at),
             'deactivated_at' => $this->iso($member->deactivated_at),
         ];
     }

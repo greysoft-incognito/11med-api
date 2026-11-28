@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Medications;
 
+use App\Enums\AccountKind;
 use App\Enums\CaregiverStatus;
-use App\Enums\Role;
 use App\Models\Caregiver;
 use App\Models\User;
 use App\Services\Subscriptions\Entitlements;
@@ -16,14 +16,14 @@ trait MedicationTesting
     protected function patient(): User
     {
         return User::factory()
-            ->app(Role::Patient)
+            ->app(AccountKind::Patient)
             ->create();
     }
 
     protected function doctor(): User
     {
         return User::factory()
-            ->app(Role::Doctor)
+            ->app(AccountKind::Doctor)
             ->create();
     }
 

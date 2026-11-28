@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Laboratories;
 
+use App\Enums\AccountKind;
 use App\Enums\LabBookingStatus;
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Models\LabBooking;
 use App\Models\User;
 use App\Services\Identity\AccountEraser;
@@ -26,7 +26,7 @@ class LabBookingTest extends TestCase
 
     private function request(User $patient, array $tests = [['test_code' => 'FBC', 'reason' => 'Tired all the time']])
     {
-        $doctor = User::factory()->app(Role::Doctor)->create(['full_name' => 'Dr Bello Musa']);
+        $doctor = User::factory()->app(AccountKind::Doctor)->create(['full_name' => 'Dr Bello Musa']);
 
         return app(LabRequests::class)->create($doctor, $patient, $this->consultationBetween($doctor, $patient), 'MDCN/12345', $tests, 'Fast overnight');
     }
@@ -240,7 +240,7 @@ class LabBookingTest extends TestCase
             ->postJson('api/v1/labs/bookings', $this->bookingBody($laboratory, ['FBC'], ['request_id' => $request->uuid]))
             ->assertNotFound();
 
-        $doctor = User::factory()->app(Role::Doctor)->create();
+        $doctor = User::factory()->app(AccountKind::Doctor)->create();
 
         $this->actingAs($doctor)->getJson('api/v1/labs/bookings')->assertForbidden();
         $this->actingAs($doctor)->postJson('api/v1/labs/bookings', [])->assertForbidden();

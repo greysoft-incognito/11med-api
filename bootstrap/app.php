@@ -4,6 +4,7 @@ use App\Exceptions\ApiExceptionRenderer;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\RequireAccountKind;
 use App\Http\Middleware\RequireAdminTwoFactor;
 use App\Services\ExceptionHandler;
 use Faker\Factory;
@@ -17,7 +18,6 @@ use Illuminate\Routing\Middleware\ThrottleRequests;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Spatie\Permission\Middleware\PermissionMiddleware;
-use Spatie\Permission\Middleware\RoleMiddleware;
 use Toneflix\FakerPicTwo\FakerPicTwoProvider;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -88,7 +88,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'auth' => Authenticate::class,
             'verified' => EnsureEmailIsVerified::class,
             'guest' => RedirectIfAuthenticated::class,
-            'role' => RoleMiddleware::class,
+            'kind' => RequireAccountKind::class,
             'permission' => PermissionMiddleware::class,
         ]);
     })

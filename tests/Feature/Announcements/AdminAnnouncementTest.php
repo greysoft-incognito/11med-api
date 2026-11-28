@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Announcements;
 
+use App\Enums\AccountKind;
 use App\Enums\AdminPermission;
 use App\Enums\NotificationCategory;
-use App\Enums\Role;
 use App\Models\Announcement;
 use App\Models\User;
 use App\Services\Audit\AuditLog;
@@ -40,10 +40,10 @@ class AdminAnnouncementTest extends TestCase
 
     public function test_the_preview_counts_live_accounts_in_the_audience(): void
     {
-        $this->users(Role::Patient, 3);
-        $this->users(Role::Doctor, 2);
-        User::factory()->app(Role::Patient)->create(['suspended_at' => now()]);
-        User::factory()->portal(Role::Pharmacy)->create();
+        $this->users(AccountKind::Patient, 3);
+        $this->users(AccountKind::Doctor, 2);
+        User::factory()->app(AccountKind::Patient)->create(['suspended_at' => now()]);
+        User::factory()->portal(AccountKind::Pharmacy)->create();
 
         foreach (['patients' => 3, 'doctors' => 2, 'app_users' => 5, 'pharmacies' => 1, 'laboratories' => 0] as $audience => $count) {
             $this->actingAs($this->team)
@@ -55,8 +55,8 @@ class AdminAnnouncementTest extends TestCase
 
     public function test_an_announcement_sent_now_reaches_every_account_once(): void
     {
-        $patients = $this->users(Role::Patient, 3);
-        $doctor = User::factory()->app(Role::Doctor)->create();
+        $patients = $this->users(AccountKind::Patient, 3);
+        $doctor = User::factory()->app(AccountKind::Doctor)->create();
 
         $id = $this->actingAs($this->team)
             ->postJson('api/v1/portal/admin/announcements', $this->body(['audience' => 'patients', 'push' => false]))
@@ -75,7 +75,7 @@ class AdminAnnouncementTest extends TestCase
 
     public function test_a_scheduled_announcement_goes_out_at_its_time_or_is_withdrawn(): void
     {
-        $this->users(Role::Doctor, 2);
+        $this->users(AccountKind::Doctor, 2);
 
         $later = $this->actingAs($this->team)
             ->postJson('api/v1/portal/admin/announcements', $this->body(['send_at' => '2026-12-01T12:00:00.000Z']))
@@ -137,7 +137,7 @@ class AdminAnnouncementTest extends TestCase
         $this->actingAs($viewer)->postJson('api/v1/portal/admin/announcements/preview', ['audience' => 'patients'])->assertOk();
         $this->actingAs($viewer)->postJson('api/v1/portal/admin/announcements', $this->body())->assertForbidden();
 
-        $this->actingAs(User::factory()->portal(Role::Laboratory)->create())
+        $this->actingAs(User::factory()->portal(AccountKind::Laboratory)->create())
             ->getJson('api/v1/portal/admin/announcements')
             ->assertForbidden();
     }
@@ -145,7 +145,7 @@ class AdminAnnouncementTest extends TestCase
     /**
      * @return list<User>
      */
-    private function users(Role $role, int $count): array
+    private function users(AccountKind $role, int $count): array
     {
         return User::factory()
             ->count($count)
