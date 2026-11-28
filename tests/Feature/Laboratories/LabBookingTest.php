@@ -143,9 +143,10 @@ class LabBookingTest extends TestCase
         $patient = $this->labPatient();
         $request = $this->request($patient);
 
-        $this->assertSame(NotificationCategory::LabRequest, $this->notifier->sent[0]['category']);
-        $this->assertSame($request->uuid, $this->notifier->sent[0]['data']['target_id']);
-        $this->assertStringNotContainsString('FBC', $this->notifier->sent[0]['body']);
+        $sent = collect($this->notifier->sent)->firstWhere('category', NotificationCategory::LabRequest);
+
+        $this->assertSame($request->uuid, $sent['data']['target_id']);
+        $this->assertStringNotContainsString('FBC', $sent['body']);
 
         $this->actingAs($patient)
             ->getJson('api/v1/labs/requests')

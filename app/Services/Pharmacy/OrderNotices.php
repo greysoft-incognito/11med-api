@@ -9,8 +9,9 @@ use App\Models\Order;
 use App\Services\Notifications\Notifier;
 
 /**
- * What the patient is told as their order moves (app handover §8.2, mock `notice()`): what
- * happened and what to do, never what was bought.
+ * What the patient is told as their order moves (app handover §8.2, mock `notice()`), and what the
+ * pharmacy's accounts are told when an order reaches them or is called off: what happened and what
+ * to do, never what was bought.
  */
 class OrderNotices
 {
@@ -52,6 +53,36 @@ class OrderNotices
         $key = $order->cancelled_by === 'team' ? 'pharmacy.push.team_cancelled' : 'pharmacy.push.cancelled';
 
         $this->send($order, __("{$key}.title"), __("{$key}.body", ['reference' => $order->reference, 'reason' => $order->cancel_reason]));
+    }
+
+    /**
+     * A paid order, or a pickup to be paid at the counter, is now the pharmacy's to start.
+     */
+    public function arrived(Order $order): void
+    {
+        $body = $order->isAtCounter() ? 'counter_body' : 'paid_body';
+
+        $this->notifier->toOrganisation(
+            $order->organisation,
+            NotificationCategory::PharmacyOrder,
+            __('notifications.pharmacy_order.arrived_title', ['reference' => $order->reference]),
+            __("notifications.pharmacy_order.{$body}"),
+            ['target_id' => $order->uuid, 'dedupe_key' => "pharmacy_order_arrived:{$order->uuid}"],
+        );
+    }
+
+    /**
+     * The patient called off an order the pharmacy could already see.
+     */
+    public function withdrawn(Order $order): void
+    {
+        $this->notifier->toOrganisation(
+            $order->organisation,
+            NotificationCategory::PharmacyOrder,
+            __('notifications.pharmacy_order.cancelled_title', ['reference' => $order->reference]),
+            __('notifications.pharmacy_order.cancelled_body'),
+            ['target_id' => $order->uuid, 'dedupe_key' => "pharmacy_order_cancelled:{$order->uuid}"],
+        );
     }
 
     private function send(Order $order, string $title, string $body): void

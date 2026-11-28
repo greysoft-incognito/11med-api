@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Consultations;
 
+use App\Enums\AdminPermission;
 use App\Enums\NotificationCategory;
+use App\Models\Organisation;
 use App\Models\User;
 use App\Services\Notifications\Notifier;
 
@@ -11,7 +13,7 @@ use App\Services\Notifications\Notifier;
  */
 class FakeNotifier implements Notifier
 {
-    /** @var list<array{to: int, category: NotificationCategory, title: string, body: string, data: array<string, mixed>}> */
+    /** @var list<array{to: ?int, audience?: string, category: NotificationCategory, title: string, body: string, data: array<string, mixed>}> */
     public array $sent = [];
 
     public function send(User $to, NotificationCategory $category, string $title, string $body, array $data = []): ?string
@@ -21,8 +23,18 @@ class FakeNotifier implements Notifier
         return null;
     }
 
+    public function toOrganisation(Organisation $organisation, NotificationCategory $category, string $title, string $body, array $data = []): void
+    {
+        $this->sent[] = ['to' => null, 'audience' => "organisation:{$organisation->id}", 'category' => $category, 'title' => $title, 'body' => $body, 'data' => $data];
+    }
+
+    public function toPermission(AdminPermission $permission, NotificationCategory $category, string $title, string $body, array $data = []): void
+    {
+        $this->sent[] = ['to' => null, 'audience' => "permission:{$permission->value}", 'category' => $category, 'title' => $title, 'body' => $body, 'data' => $data];
+    }
+
     /**
-     * @return list<array{to: int, category: NotificationCategory, title: string, body: string, data: array<string, mixed>}>
+     * @return list<array{to: ?int, audience?: string, category: NotificationCategory, title: string, body: string, data: array<string, mixed>}>
      */
     public function to(User $user): array
     {

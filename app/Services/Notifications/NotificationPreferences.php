@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 /**
  * Per-category delivery choices (app handover §8.3). Every category is on until the user saves
  * otherwise, SMS excepted, and a category added after the user saved still appears, defaulted.
+ * Each role sees only the categories it is told about (`NotificationCategory::for`).
  */
 class NotificationPreferences
 {
@@ -71,7 +72,7 @@ class NotificationPreferences
             ->get()
             ->keyBy(fn(NotificationPreference $preference) => $preference->category->value);
 
-        return collect(NotificationCategory::cases())
+        return collect(NotificationCategory::for($user->role()))
             ->map(fn(NotificationCategory $category) => $saved->get($category->value) ?? $this->default($user, $category));
     }
 

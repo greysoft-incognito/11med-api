@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\Organisation;
 use App\Models\User;
 use App\Services\Notifications\Notifier;
+use App\Services\Notifications\SilentNotifier;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Tests\Concerns\MakesPartners;
@@ -37,7 +38,7 @@ class FulfilmentTest extends TestCase
         Notification::fake();
 
         $this->payments = $this->fakePayments();
-        $this->app->instance(Notifier::class, new class($this->pushes) implements Notifier
+        $this->app->instance(Notifier::class, new class($this->pushes) extends SilentNotifier
         {
             public function __construct(private array &$pushes) {}
 

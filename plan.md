@@ -106,6 +106,13 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 15.3 Staff: list, invite, roles and direct permissions, deactivate and reactivate; `app:create-admin` opens a super admin
 - [x] 15.4 The audit log: `AuditLog::record()` from every admin write, paged and filtered
 
+## M16 Notifications everywhere `[~]`
+
+- [x] 16.1 Portal accounts' history, unread count and preferences; categories per role; pharmacy, laboratory and team events; `Notifier::toOrganisation` and `toPermission`; the doctor told of a cancellation and an unanswered request
+- [x] 16.2 The portal notification centre and bell (11med-web)
+- [~] 16.3 Doctor notifications in the app (11med)
+- [~] 16.4 Live counts and the foreground banner in the app (11med)
+
 ## M17 Admin operations `[x]`
 
 - [x] 17.1 The user directory: search, account view, suspend and reinstate, force sign-out, resend codes

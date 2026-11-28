@@ -20,14 +20,19 @@ class BookingLifecycle
         private readonly Payments $payments,
     ) {}
 
-    public function markPaid(LabBooking $booking): void
+    /**
+     * Returns whether this call marked it, false when it was paid already.
+     */
+    public function markPaid(LabBooking $booking): bool
     {
         if ($booking->paid_at !== null) {
-            return;
+            return false;
         }
 
         $booking->paid_at = now();
         $booking->save();
+
+        return true;
     }
 
     /**
