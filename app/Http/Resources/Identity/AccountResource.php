@@ -4,10 +4,11 @@ namespace App\Http\Resources\Identity;
 
 use App\Http\Resources\ApiResource;
 use App\Models\User;
+use App\Services\Identity\PolicyConsent;
 use Illuminate\Http\Request;
 
 /**
- * `zAccount` (app `src/api/contracts/auth.ts`), the user inside a session.
+ * `zAccount` (app `src/api/contracts/auth.ts`), the user inside a session. `pending_policy_version` names terms the user must accept before going on.
  *
  * @property User $resource
  */
@@ -26,6 +27,7 @@ class AccountResource extends ApiResource
             'role' => $user->role()?->value,
             'has_medical_profile' => $user->hasMedicalProfile(),
             'is_premium' => $user->isPremium(),
+            'pending_policy_version' => app(PolicyConsent::class)->pendingFor($user),
         ];
     }
 }

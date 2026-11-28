@@ -133,5 +133,6 @@ return [
     'TICKET_NOT_FOUND' => 'That support request is not here.',
     'TICKET_CLOSED' => 'This support request is closed. Start a new one if you still need help.',
     'SUPPORT_LINK_NOT_FOUND' => 'That order, booking or consultation is not one of yours.',
+    'POLICY_VERSION_OUTDATED' => 'These terms have been updated. Read the current version and accept it.',
     'ASSIGNEE_NOT_SUPPORT' => 'That team member cannot answer support requests.',
 ];

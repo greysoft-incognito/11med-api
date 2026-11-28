@@ -2,6 +2,18 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-02: M18.3 Re-consent
+
+- `PolicyConsent` reads the version in force (`CONSENT_POLICY_VERSION`). The app's `zAccount` and
+  the portals' `zPortalAccount` carry `pending_policy_version`: the version when the account has no
+  consent record for exactly it, else null. The team's accounts are never asked.
+- `POST auth/consent` (patient, doctor) and `POST portal/auth/consent` (pharmacy, laboratory) take
+  `{ policy_version }`, write a `consent_records` row with context `policy-update` and answer the
+  account. A version other than the one in force is 422 `POLICY_VERSION_OUTDATED`; accepting twice
+  writes once.
+- The clients hold the gate: the app and the portals show the terms before anything else while the
+  field is set. The server does not refuse other routes meanwhile.
+
 ## 2026-12-02: M18.2 Contact support
 
 - Patients, doctors, pharmacies and laboratories: `GET` and `POST support/tickets`,

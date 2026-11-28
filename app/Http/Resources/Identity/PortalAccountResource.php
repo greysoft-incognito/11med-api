@@ -4,6 +4,7 @@ namespace App\Http\Resources\Identity;
 
 use App\Http\Resources\ApiResource;
 use App\Models\User;
+use App\Services\Identity\PolicyConsent;
 use Illuminate\Http\Request;
 
 /**
@@ -26,6 +27,7 @@ class PortalAccountResource extends ApiResource
             'organisation_id' => $organisation?->uuid,
             'organisation_name' => $organisation?->name,
             'is_owner' => $organisation !== null && $organisation->owner_id === $account->id,
+            'pending_policy_version' => app(PolicyConsent::class)->pendingFor($account),
             'created_at' => $this->iso($account->created_at),
         ];
     }
