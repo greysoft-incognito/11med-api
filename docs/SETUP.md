@@ -47,13 +47,16 @@ by id in [human_todo.md](../human_todo.md).
   accepted in 5 minutes, or a session not joined in 10, expires and is refunded; a chat closes at
   the end of its window) and `consultations:payouts` at 02:00 every other day (doctors' payouts).
   Without the scheduler, consultations never expire and patients are never refunded for them.
+  Since M17 it runs `announcements:dispatch` every minute, which starts the team's scheduled
+  announcements; without it a scheduled announcement never goes out.
 
   ```
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
   ```
 
-- **Queue worker** (M2 onwards): every SMS, email, push (M7) and refund sent to Paystack (M9) is
-  queued, so without a worker nothing is sent.
+- **Queue worker** (M2 onwards): every SMS, email, push (M7), refund sent to Paystack (M9) and
+  announcement delivery (M17, up to 30 minutes for a large audience) is queued, so without a worker
+  nothing is sent.
   Run `php artisan queue:work` under Supervisor or systemd;
   `scripts/generate-supervisor-config.sh <user> [processes] [driver]` writes the Supervisor program.
 

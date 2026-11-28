@@ -135,5 +135,7 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | Table | Notes |
 | --- | --- |
 | `users` (extended) | `suspended_at` (indexed) and `suspension_reason`: a patient or doctor account the team suspended. No session is issued while set |
+| `announcements` | `title`, `body`, `audience` (`app_users`, `patients`, `doctors`, `pharmacies`, `laboratories`), `push`, `status` (`scheduled`, `sending`, `sent`, `cancelled`), `send_at` (indexed with `status`), `sent_at`, `cancelled_at`, `recipients`, `created_by` (nulled on erasure). Each copy is an `app_notifications` row with the dedupe key `announcement:<uuid>` |
+| `configurations` (dbconfig) | Runtime settings are rows keyed `platform.<setting>` in the `platform` group, value stored as a string; no row means the config file's value |
 
 Domain tables are added here as each milestone lands.

@@ -2,6 +2,20 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-01: M17.4 Announcements
+
+- `GET portal/admin/announcements` (paged, newest first) and `POST .../preview` (the audience's
+  count, in SQL) need `announcements.view` or `announcements.send`; `POST portal/admin/announcements`
+  and `POST .../{id}/cancel` need `announcements.send`. Audiences: `app_users`, `patients`,
+  `doctors`, `pharmacies`, `laboratories`; suspended and team accounts are left out.
+- Sent now (`send_at: null`) or scheduled up to 90 days ahead; `announcements:dispatch` runs every
+  minute and starts what is due under `FOR UPDATE SKIP LOCKED`. `SendAnnouncement` walks the
+  audience 200 at a time and calls `Notifier::send()` with the new category `announcement`
+  (identical to M16's case), a per-announcement dedupe key, and push only when asked; a scheduled
+  one is withdrawn while it waits (422 `ANNOUNCEMENT_NOT_SCHEDULED` after). Audited
+  `announcement.sent`, `.scheduled`, `.cancelled`.
+- New table `announcements`. M17 done.
+
 ## 2026-12-01: M17.3 Platform settings
 
 - `GET portal/admin/settings` (`settings.view`) lists every runtime setting, whole: key, group,

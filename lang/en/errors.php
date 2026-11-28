@@ -131,4 +131,6 @@ return [
     'NOT_SUSPENDED' => 'This account is not suspended.',
     'PHONE_VERIFIED' => 'That phone number is already confirmed.',
     'SETTING_NOT_FOUND' => 'There is no such setting.',
+    'ANNOUNCEMENT_NOT_FOUND' => 'That announcement is not here.',
+    'ANNOUNCEMENT_NOT_SCHEDULED' => 'Only an announcement still waiting for its time can be withdrawn.',
 ];
