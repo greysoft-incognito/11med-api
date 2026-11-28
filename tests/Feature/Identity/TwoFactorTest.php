@@ -271,6 +271,20 @@ class TwoFactorTest extends TestCase
             ->assertOk();
     }
 
+    public function test_the_second_step_is_asked_for_before_any_permission(): void
+    {
+        config(['elevenmed.two_factor.admin_required' => true]);
+
+        $admin = User::factory()
+            ->staff()
+            ->create();
+
+        $this->actingAs($admin, 'sanctum')
+            ->getJson('api/v1/portal/admin/doctors')
+            ->assertForbidden()
+            ->assertJsonPath('error.code', 'TWO_FACTOR_SETUP_REQUIRED');
+    }
+
     public function test_the_requirement_can_be_turned_off(): void
     {
         config(['elevenmed.two_factor.admin_required' => false]);

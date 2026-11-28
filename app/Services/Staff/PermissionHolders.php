@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * The team accounts that hold a permission, directly or through a staff role.
  */
-#[Bind(EveryAdmin::class)]
+#[Bind(StaffAccess::class)]
 interface PermissionHolders
 {
     /**

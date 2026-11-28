@@ -166,7 +166,7 @@ Run in `DEPLOY_PATH` after the first deploy (the deploy itself runs migrations, 
 php artisan key:generate                       # only if APP_KEY is empty
 php artisan dbconfig:sync                      # seeds the runtime settings
 php artisan dbconfig:set prefered_sms_channel KUDISMS
-php artisan app:create-admin you@example.com "Your Name"   # first team account; prints its link
+php artisan app:create-admin you@example.com "Your Name"   # first super admin; prints its link
 php artisan db:seed --class=DrugClassSeeder --force        # the allergy classes (M10); safe to run again
 php artisan db:seed --class=LabCatalogueSeeder --force    # the starting test catalogue (M12)
 ```
@@ -177,6 +177,11 @@ is on, is asked to set up an authenticator app (Google Authenticator, Microsoft 
 shows: if every admin loses their phone, an operator on the server can clear one account's
 two-step verification with `php artisan tinker` and
 `User::where('email', 'you@example.com')->first()->forceFill(['two_factor_secret' => null, 'two_factor_recovery_codes' => null, 'two_factor_confirmed_at' => null])->save();`.
+
+Team access (M15): the deploy's `app:sync-roles` also syncs the admin permissions and creates the
+five default staff roles the first time it runs, making every team account that already exists a
+super admin. After that, the super admin invites the team and manages roles from the admin portal;
+`app:create-admin` is only for the first account, or to recover when no super admin can sign in.
 
 Run the `DrugClassSeeder` line again after a release that changes the seed (it adds what is
 missing and never removes a class).

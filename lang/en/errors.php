@@ -136,6 +136,15 @@ return [
     'CONSULTATION_IN_PROGRESS' => 'The session has started. It can no longer be cancelled.',
     'CONSULTATION_CLOSED' => 'This consultation is already closed.',
 
+    'STAFF_NOT_FOUND' => 'No team member with that id.',
+    'ROLE_NOT_FOUND' => 'No role with that id.',
+    'ROLE_NAME_TAKEN' => 'Another role already has that name.',
+    'ROLE_PROTECTED' => 'The super admin role holds every permission and cannot be changed or deleted.',
+    'ROLE_IN_USE' => 'Team members still hold this role. Choose a role to move them to first.',
+    'PERMISSION_NOT_HELD' => 'You can only give or take away permissions you hold yourself.',
+    'LAST_SUPER_ADMIN' => 'This is the last active super admin. Make someone else super admin first.',
+    'ACCOUNT_DEACTIVATED' => 'This account has been deactivated. Ask your administrator.',
+
     'SESSION_NOT_FOUND' => 'That device is no longer signed in.',
     'TWO_FACTOR_REQUIRED' => 'Enter the code from your authenticator app to finish signing in.',
     'TWO_FACTOR_CODE_INVALID' => 'That code is not correct. Check your authenticator app and try again.',

@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\Console\Commands\SyncRoles;
+use App\Enums\Role;
 use App\Models\User;
+use App\Services\Staff\StaffCatalogue;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
@@ -29,12 +31,8 @@ class DatabaseSeeder extends Seeder
                 'email' => 'admin@example.com',
             ]);
 
-            Artisan::call(SyncRoles::class, [
-                'users' => [$admin->id],
-                '--supes' => true,
-                '--silent' => true,
-                '--no-interaction' => true,
-            ]);
+            $admin->assignRole(Role::Admin->value);
+            $admin->assignRole(app(StaffCatalogue::class)->superAdmin());
         }
     }
 }

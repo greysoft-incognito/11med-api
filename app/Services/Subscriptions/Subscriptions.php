@@ -9,6 +9,7 @@ use App\Http\Paging\Page;
 use App\Models\Subscription;
 use App\Models\SubscriptionPayment;
 use App\Models\User;
+use App\Services\Audit\AuditLog;
 use App\Support\PhoneNumber;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -20,6 +21,10 @@ use Illuminate\Support\Facades\DB;
  */
 class Subscriptions
 {
+    public function __construct(
+        private readonly AuditLog $audit,
+    ) {}
+
     /**
      * The caller's own subscription; anyone else's is 404.
      */
@@ -85,6 +90,12 @@ class Subscriptions
                     'recorded_by' => $admin->id,
                 ]);
                 $subscription->save();
+
+                $this->audit->record($admin, 'subscription.recorded', $subscription, [
+                    'patient_id' => $patient->uuid,
+                    'premium_until' => $premiumUntil,
+                    'reference' => $reference,
+                ]);
 
                 return $subscription;
             });
