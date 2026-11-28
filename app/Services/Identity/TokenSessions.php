@@ -2,13 +2,15 @@
 
 namespace App\Services\Identity;
 
+use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
-use App\Models\RefreshToken;
+use App\Models\SignIn;
 use App\Models\User;
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
- * Stand-in until the sessions table lands: lists the live refresh tokens and revokes through SessionTokens.
+ * Sessions as `sign_ins` rows, ended through SessionTokens so their tokens die with them.
  */
 class TokenSessions implements Sessions
 {
@@ -16,16 +18,32 @@ class TokenSessions implements Sessions
         private readonly SessionTokens $tokens,
     ) {}
 
-    public function list(User $user, ListQuery $query): Page
+    public function list(User $user, ListQuery $query, ?PersonalAccessToken $current = null): Page
     {
-        $live = RefreshToken::query()
+        $family = $current === null ? null : $this->tokens->familyOf($current);
+
+        $live = SignIn::query()
             ->where('user_id', $user->id)
-            ->whereNull('used_at')
-            ->whereNull('revoked_at')
-            ->where('expires_at', '>', now())
+            ->live()
+            ->orderByDesc('last_used_at')
             ->orderByDesc('id');
 
-        return $query->paginate($live);
+        $page = $query->paginate($live);
+
+        $page->items->each(fn(SignIn $signIn) => $signIn->setAttribute('current', $signIn->family === $family));
+
+        return $page;
+    }
+
+    public function end(User $user, string $sessionId): void
+    {
+        $signIn = SignIn::query()
+            ->where('user_id', $user->id)
+            ->where('uuid', $sessionId)
+            ->live()
+            ->first() ?? throw ApiException::notFound(SignIn::NOT_FOUND);
+
+        $this->tokens->revokeFamily($signIn->family);
     }
 
     public function revokeAll(User $user, ?string $exceptFamily = null): void

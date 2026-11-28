@@ -216,3 +216,14 @@ milestone that introduced it. The clients tick them; never delete.
 - [ ] **FE-005 · Routes no contract has yet.** Consent records (registration: FE-006 adds it to the body; profile sharing),
   the QR access log, and the Paystack webhook (server-only, no client change). Contracts to be added
   when their milestones land. (M2, M4, M9) The webhook is `POST payments/webhook/paystack` (M9).
+- [x] **FE-140 · The second step of a sign-in.** With two-step verification on, a correct password
+  (app `auth/login`, `auth/verify-otp`, `auth/social`; portal `portal/auth/sign-in`,
+  `portal/auth/set-password`) answers 403 `TWO_FACTOR_REQUIRED` with
+  `meta { challenge_token, expires_in }`; `auth/two-factor/verify` (app) and
+  `portal/auth/two-factor` (portal, 201) take `{ challenge_token, code }` and answer the session.
+  Done in both clients on `feat/account-security`. (M14.2)
+- [x] **FE-141 · Admins without two-step verification.** While `ADMIN_2FA_REQUIRED` is on, every
+  `portal/admin/*` route answers 403 `TWO_FACTOR_SETUP_REQUIRED`; the portal's account carries
+  `two_factor_enabled` and `two_factor_required` and sends the person to `/account`. (M14.2)
+- [x] **FE-142 · The device's name.** The app sends `X-Device-Name` and `X-Device-Platform` with each
+  request so the devices list names the phone; without them the server reads the user agent. (M14.1)
