@@ -23,6 +23,7 @@
         "laravel/tinker": "^3.0",
         "maatwebsite/excel": "^4.0",
         "matomo/device-detector": "^6.4",
+        "pragmarx/google2fa": "^8.0",
         "predis/predis": "^2.3",
         "resend/resend-laravel": "^1.7",
         "spatie/laravel-permission": "^6.16",

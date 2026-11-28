@@ -2,6 +2,30 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-28: M14 Account security
+
+- 14.1 `sign_ins` is one row per refresh family, named from `X-Device-Name` and `X-Device-Platform`
+  or the user agent (`DeviceInfo`, `matomo/device-detector`). `Sessions` (the seam M17 calls) lists
+  them, ends one (404 `SESSION_NOT_FOUND`) and revokes all but one. App `auth/sessions`, portal
+  `portal/account/sessions`. A password change keeps only the caller's family; a reset revokes all.
+- 14.2 `pragmarx/google2fa`: the secret and recovery-code hashes are encrypted casts on `users`;
+  a code is accepted once per 30-second step (`two_factor_last_step`). `AppAccounts::open()` and
+  `PortalAccounts::open()` answer 403 `TWO_FACTOR_REQUIRED` with a five-minute challenge (five
+  tries); `auth/two-factor/verify` and `portal/auth/two-factor` finish it. `RequireAdminTwoFactor`
+  on the api group answers 403 `TWO_FACTOR_SETUP_REQUIRED` on `portal/admin/*` while
+  `ADMIN_2FA_REQUIRED` is on (`config('elevenmed.two_factor.admin_required')`, read per request).
+- 14.3 `auth/phone` and `auth/phone/verify`: password, then a code to the new number on its own
+  budget (`phone-change:<user>`); an unverified holder of the number is released.
+- 14.4 `NewSignIn` after commit when a sign-in's device key is new to the account (never the first
+  sign-in): a history row through `Notifier` and an email when the email is verified. No code in it.
+- 14.5 `auth/data-export`: 202 and `BuildDataExport`; each module contributes through a tagged
+  `PersonalData` collector reading in `lazyById` batches; the zip lands on `DATA_EXPORT_DISK` for 48
+  hours behind a 15-minute signed link; 429 `DATA_EXPORT_LIMIT` within a day (failed builds do not
+  count). Bank account numbers and gateway URLs are left out.
+- 14.7 `portal/account`: name, email by a code to the new address (`email-change:<user>`), password.
+- New dependency `pragmarx/google2fa` (TOTP). Setup rows `ADMIN_2FA_REQUIRED`, `TWO_FACTOR_ISSUER`,
+  `DATA_EXPORT_DISK` in `docs/SETUP.md`. Client routes regenerated in `tests/Contract/routes.json`.
+
 ## 2026-11-26: Email through Resend
 
 - `resend/resend-laravel` adds a `resend` mailer: `MAIL_MAILER=resend` with `RESEND_API_KEY` sends
