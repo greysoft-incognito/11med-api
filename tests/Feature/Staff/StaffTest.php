@@ -100,6 +100,17 @@ class StaffTest extends TestCase
             ->assertJsonPath('data.total', 1)
             ->assertJsonPath('data.items.0.status', 'deactivated');
 
+        User::factory()->staff()->create(['full_name' => 'Ngozi Eze', 'password' => null]);
+
+        $this->actingAs($this->superAdmin)
+            ->getJson('api/v1/portal/admin/staff?status=invited')
+            ->assertJsonPath('data.total', 1)
+            ->assertJsonPath('data.items.0.name', 'Ngozi Eze');
+
+        $this->actingAs($this->superAdmin)
+            ->getJson('api/v1/portal/admin/staff?status=active')
+            ->assertJsonPath('data.total', 3);
+
         $this->actingAs($this->superAdmin)
             ->getJson('api/v1/portal/admin/staff?q=bello')
             ->assertJsonPath('data.total', 1);

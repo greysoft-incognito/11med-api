@@ -47,7 +47,12 @@ class StaffAccounts
                     ->where('full_name', 'ilike', $term)
                     ->orWhere('email', 'ilike', $term));
             })
-            ->when($status === 'active', fn(Builder $query) => $query->whereNull('deactivated_at'))
+            ->when($status === 'invited', fn(Builder $query) => $query
+                ->whereNull('deactivated_at')
+                ->whereNull('password'))
+            ->when($status === 'active', fn(Builder $query) => $query
+                ->whereNull('deactivated_at')
+                ->whereNotNull('password'))
             ->when($status === 'deactivated', fn(Builder $query) => $query->whereNotNull('deactivated_at'))
             ->when(isset($filters['role']), fn(Builder $query) => $query->whereHas(
                 'roles',

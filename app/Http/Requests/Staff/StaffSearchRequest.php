@@ -11,7 +11,7 @@ class StaffSearchRequest extends ApiRequest
     {
         return [
             'q' => ['sometimes', 'nullable', 'string', 'max:100'],
-            'status' => ['sometimes', 'nullable', Rule::in(['active', 'deactivated'])],
+            'status' => ['sometimes', 'nullable', Rule::in(['invited', 'active', 'deactivated'])],
             'role' => ['sometimes', 'nullable', 'uuid'],
         ];
     }
