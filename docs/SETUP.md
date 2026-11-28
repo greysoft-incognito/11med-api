@@ -97,6 +97,8 @@ and push) runs in the workers, so skipping the restart leaves them on the old va
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `APP_MIN_VERSION_IOS`, `APP_MIN_VERSION_ANDROID` | `1.0.0` | The oldest app version (`X.Y.Z`, the app's `version`) each platform still serves. A build below it shows an update screen and nothing else on launch and on return to the foreground. Raise it only once the newer build is live in that store | M18 |
+| `APP_STORE_URL_IOS`, `APP_STORE_URL_ANDROID` | `APP_DOWNLOAD_URL` | The App Store and Google Play pages the update screen opens | M18 |
 | `REPORT_DISK` | `local` | Disk for compliance report PDFs, served by a 15-minute signed link and deleted after a day. A private `s3` disk once the bucket exists (HT-005); never a public one | M6 |
 
 | `GUIDE_RETENTION_DAYS` | `30` | Guide conversations idle this many days are deleted by the scheduler, with their messages (HT-130) | M13 |

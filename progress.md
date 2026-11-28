@@ -2,6 +2,13 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-02: M18.4 Minimum app version
+
+- `GET app/version` (public) answers `{ ios, android }`, each `{ minimum_version, update_url }`,
+  from `elevenmed.app_versions` (`APP_MIN_VERSION_IOS`, `APP_MIN_VERSION_ANDROID`, default `1.0.0`;
+  `APP_STORE_URL_IOS`, `APP_STORE_URL_ANDROID`, falling back to `APP_DOWNLOAD_URL`). The app
+  compares its own version on launch and foreground. The server does not refuse older builds.
+
 ## 2026-12-02: M18.3 Re-consent
 
 - `PolicyConsent` reads the version in force (`CONSENT_POLICY_VERSION`). The app's `zAccount` and
