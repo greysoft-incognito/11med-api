@@ -276,8 +276,16 @@ class SupportTest extends TestCase
     public function test_the_queue_needs_the_support_permissions(): void
     {
         $id = $this->open($this->patient);
-        $viewer = $this->admin();
+
+        $viewer = User::factory()
+            ->staff()
+            ->create();
+
         $viewer->givePermissionTo($this->permissions(AdminPermission::SupportView));
+
+        $noPermission = User::factory()
+            ->staff()
+            ->create();
 
         $this->actingAs($viewer)
             ->getJson('api/v1/portal/admin/support/tickets')
@@ -287,7 +295,7 @@ class SupportTest extends TestCase
             ->postJson("api/v1/portal/admin/support/tickets/{$id}/close")
             ->assertForbidden();
 
-        $this->actingAs($this->admin())
+        $this->actingAs($noPermission)
             ->getJson('api/v1/portal/admin/support/tickets')
             ->assertForbidden();
 
