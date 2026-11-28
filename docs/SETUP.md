@@ -102,7 +102,6 @@ and push) runs in the workers, so skipping the restart leaves them on the old va
 | `APP_MIN_VERSION_IOS`, `APP_MIN_VERSION_ANDROID` | `1.0.0` | The oldest app version (`X.Y.Z`, the app's `version`) each platform still serves. A build below it shows an update screen and nothing else on launch and on return to the foreground. Raise it only once the newer build is live in that store | M18 |
 | `APP_STORE_URL_IOS`, `APP_STORE_URL_ANDROID` | `APP_DOWNLOAD_URL` | The App Store and Google Play pages the update screen opens | M18 |
 | `REPORT_DISK` | `local` | Disk for compliance report PDFs, served by a 15-minute signed link and deleted after a day. A private `s3` disk once the bucket exists (HT-005); never a public one | M6 |
-
 | `DATA_EXPORT_DISK` | `local` | Disk for "download my data" zips (M14): the person's whole record, kept 48 hours and served only by signed links. A private `s3` disk once the bucket exists (HT-005); never a public one. The queue worker builds them, writing temporary files under `storage/app/tmp` | M14 |
 | `ADMIN_2FA_REQUIRED` | `true` | The team's accounts must turn on two-step verification (an authenticator app) before any admin route answers; until then they get 403 `TWO_FACTOR_SETUP_REQUIRED` and the portal sends them to their account page. `false` makes it optional for admins too. Pharmacy, laboratory, patient and doctor accounts may always choose it | M14 |
 | `TWO_FACTOR_ISSUER` | `11med` | The name an authenticator app shows beside the code | M14 |
