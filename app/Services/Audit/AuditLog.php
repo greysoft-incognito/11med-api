@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * The record of what the team did. Every admin write calls it once, inside its transaction.
  */
-#[Bind(NullAuditLog::class)]
+#[Bind(DatabaseAuditLog::class)]
 interface AuditLog
 {
     /**
