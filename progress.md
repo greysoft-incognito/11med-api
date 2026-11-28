@@ -2,6 +2,13 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-01: M17 route list and the portal
+
+- The portal's mock now serves the 22 admin operations routes (11med-web `feat/admin-operations`);
+  `php artisan contract:routes` lists them in `tests/Contract/routes.json`, and none is pending.
+- `CONSULTATION_IN_PROGRESS` and `CONSULTATION_CLOSED` get their sentences; the other consultation
+  codes without one are ISS-170.
+
 ## 2026-12-01: M17.4 Announcements
 
 - `GET portal/admin/announcements` (paged, newest first) and `POST .../preview` (the audience's

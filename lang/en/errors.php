@@ -133,4 +133,6 @@ return [
     'SETTING_NOT_FOUND' => 'There is no such setting.',
     'ANNOUNCEMENT_NOT_FOUND' => 'That announcement is not here.',
     'ANNOUNCEMENT_NOT_SCHEDULED' => 'Only an announcement still waiting for its time can be withdrawn.',
+    'CONSULTATION_IN_PROGRESS' => 'The session has started. It can no longer be cancelled.',
+    'CONSULTATION_CLOSED' => 'This consultation is already closed.',
 ];
