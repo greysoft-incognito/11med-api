@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Enums\AdminPermission;
 use App\Enums\Role;
+use App\Models\StaffRole;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
@@ -50,7 +52,32 @@ class UserFactory extends Factory
                 'email_verified_at' => null,
                 'password' => Hash::make('Password1'),
             ])
-            ->afterCreating(fn(User $user) => $user->assignRole($role->value));
+            ->afterCreating(function (User $user) use ($role) {
+                $user->assignRole($role->value);
+
+                if ($role === Role::Admin) {
+                    $user->assignRole(StaffRole::superAdminName());
+                }
+            });
+    }
+
+    /**
+     * A team account holding only the given admin permissions, directly.
+     *
+     * @param  list<AdminPermission>  $permissions
+     */
+    public function staff(array $permissions = []): static
+    {
+        return $this
+            ->state(fn() => [
+                'full_name' => fake()->name(),
+                'phone' => null,
+                'password' => Hash::make('Password1'),
+            ])
+            ->afterCreating(function (User $user) use ($permissions) {
+                $user->assignRole(Role::Admin->value);
+                $user->givePermissionTo(AdminPermission::values($permissions));
+            });
     }
 
     /**
@@ -64,7 +91,13 @@ class UserFactory extends Factory
                 'phone' => null,
                 'password' => Hash::make('Password1'),
             ])
-            ->afterCreating(fn(User $user) => $user->assignRole($role->value));
+            ->afterCreating(function (User $user) use ($role) {
+                $user->assignRole($role->value);
+
+                if ($role === Role::Admin) {
+                    $user->assignRole(StaffRole::superAdminName());
+                }
+            });
     }
 
     /**

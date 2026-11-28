@@ -5,10 +5,13 @@ namespace App\Services\Laboratories;
 use App\Exceptions\ApiException;
 use App\Models\LaboratoryTest;
 use App\Models\LabTest;
+use App\Models\User;
+use App\Services\Audit\AuditLog;
 use App\Support\LikePattern;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The platform's test catalogue (portal handover §6 "The test catalogue"): the team adds and
@@ -16,6 +19,10 @@ use Illuminate\Database\QueryException;
  */
 class Catalogue
 {
+    public function __construct(
+        private readonly AuditLog $audit,
+    ) {}
+
     /**
      * @return Collection<int, LabTest>
      */
@@ -82,14 +89,22 @@ class Catalogue
     /**
      * @param  array<string, mixed>  $fields
      */
-    public function create(array $fields): LabTest
+    public function create(array $fields, ?User $by = null): LabTest
     {
         if (LabTest::query()->where('code', $fields['code'])->exists()) {
             throw ApiException::conflict('DUPLICATE_CODE', 'code');
         }
 
         try {
-            return LabTest::create($fields);
+            return DB::transaction(function () use ($fields, $by) {
+                $test = LabTest::create($fields);
+
+                if ($by !== null) {
+                    $this->audit->record($by, 'catalogue.test_created', $test, ['code' => $test->code, 'name' => $test->name]);
+                }
+
+                return $test;
+            });
         } catch (QueryException $e) {
             throw $e->getCode() === '23505' ? ApiException::conflict('DUPLICATE_CODE', 'code') : $e;
         }
@@ -101,7 +116,7 @@ class Catalogue
      *
      * @param  array<string, mixed>  $fields
      */
-    public function update(string $code, array $fields): LabTest
+    public function update(string $code, array $fields, ?User $by = null): LabTest
     {
         $test = $this->find($code);
 
@@ -109,7 +124,15 @@ class Catalogue
             throw ApiException::unprocessable('CODE_IMMUTABLE', 'code');
         }
 
-        $test->update($fields);
+        DB::transaction(function () use ($test, $fields, $by) {
+            $test->fill($fields);
+            $changed = array_keys($test->getDirty());
+            $test->save();
+
+            if ($by !== null) {
+                $this->audit->record($by, 'catalogue.test_updated', $test, ['code' => $test->code, 'changed' => $changed]);
+            }
+        });
 
         return $test;
     }

@@ -30,7 +30,7 @@ class PayoutDeskController extends Controller
 
     public function settle(SettlePayoutRequest $request, string $id): AdminPayoutResource
     {
-        $payout = $this->payouts->settle($id, $request->validated());
+        $payout = $this->payouts->settle($id, $request->validated(), $request->user());
 
         return new AdminPayoutResource($payout);
     }

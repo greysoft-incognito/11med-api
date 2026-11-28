@@ -10,6 +10,8 @@ use App\Http\Paging\Page;
 use App\Models\Consultation;
 use App\Models\DoctorProfile;
 use App\Models\Payout;
+use App\Models\User;
+use App\Services\Audit\AuditLog;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +23,10 @@ use Illuminate\Support\Facades\DB;
  */
 class Payouts
 {
+    public function __construct(
+        private readonly AuditLog $audit,
+    ) {}
+
     /**
      * @return int the payouts made
      */
@@ -72,9 +78,9 @@ class Payouts
     /**
      * @param  array{decision: string, reference?: string, reason?: string}  $data
      */
-    public function settle(string $id, array $data): Payout
+    public function settle(string $id, array $data, ?User $by = null): Payout
     {
-        return DB::transaction(function () use ($id, $data) {
+        return DB::transaction(function () use ($id, $data, $by) {
             $payout = Payout::query()
                 ->where('uuid', $id)
                 ->lockForUpdate()
@@ -102,6 +108,14 @@ class Payouts
             }
 
             $payout->save();
+
+            if ($by !== null) {
+                $this->audit->record($by, 'payout.settled', $payout, [
+                    'decision' => $payout->status->value,
+                    'note' => $payout->note,
+                    'net_kobo' => $payout->net_kobo,
+                ]);
+            }
 
             return $payout;
         });

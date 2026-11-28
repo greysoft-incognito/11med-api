@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Staff\StaffCatalogue;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -239,13 +240,17 @@ class SyncRoles extends Command
         $rolesArray->each(fn($role) => Role::findOrCreate($role, $this->guard));
         $permissionsArray->each(fn($role) => Permission::findOrCreate($role, $this->guard));
 
-        $roles = Role::withCount('permissions')->get();
+        $roles = Role::withCount('permissions')
+            ->whereIn('name', $rolesArray)
+            ->get();
         $permissions = Permission::get();
 
         $roles->each(function ($role) use ($permissionsArray) {
             $exclude = config("permission-defs.exclusions.{$role->name}", []);
             $role->syncPermissions($permissionsArray->filter(fn($perm) => ! in_array($perm, $exclude)));
         });
+
+        app(StaffCatalogue::class)->sync();
 
         $this->info('Roles');
         $this->table(
