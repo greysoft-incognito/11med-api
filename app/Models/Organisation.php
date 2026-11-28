@@ -55,6 +55,14 @@ class Organisation extends Model
     }
 
     /**
+     * The account that manages the partner's staff.
+     */
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    /**
      * Approved partners of a kind: the ones the app lists. A suspended one is delisted.
      */
     public function scopeListed(Builder $query, PartnerKind $kind): void

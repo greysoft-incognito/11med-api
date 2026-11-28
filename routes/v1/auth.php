@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Http\Controllers\Identity\AppAuthController;
 use App\Http\Controllers\Identity\AppEmailController;
 use App\Http\Controllers\Identity\AppPasswordController;
+use App\Http\Controllers\Identity\PolicyConsentController;
 use App\Http\Controllers\Identity\SocialAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,5 +31,6 @@ Route::prefix('auth')->name('auth.')->group(function () use ($app) {
         Route::post('email/verify', [AppEmailController::class, 'verify'])->name('email.verify');
         Route::post('email/resend', [AppEmailController::class, 'resend'])->name('email.resend');
         Route::delete('account', [AppAuthController::class, 'destroy'])->name('account.destroy');
+        Route::post('consent', [PolicyConsentController::class, 'app'])->name('consent');
     });
 });

@@ -26,6 +26,7 @@ enum NotificationCategory: string
     case PartnerApplication = 'partner_application';
     case PaymentAlert = 'payment_alert';
     case Announcement = 'announcement';
+    case Support = 'support';
 
     /**
      * The categories a role is told about, in the order its preferences list them.

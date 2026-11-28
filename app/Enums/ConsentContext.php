@@ -10,4 +10,5 @@ enum ConsentContext: string
     case Register = 'register';
     case SocialLink = 'social-link';
     case ProfileSharing = 'profile-sharing';
+    case PolicyUpdate = 'policy-update';
 }

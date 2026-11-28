@@ -105,7 +105,7 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 
 | Table | Notes |
 | --- | --- |
-| `organisations` | A pharmacy or laboratory (`kind`): its application while `pending`, then the organisation its portal accounts belong to. `name`, `state`, `city`, `address`, `licence_number` (unique among live rows, case-insensitive), `licence_media_id`, the contact (`contact_name`, `contact_phone` local form, `contact_email` lower case), `status` (`pending`, `approved`, `suspended`), `notes` (the suspension reason), `applied_at`, `reviewed_at`. Only `approved` is listed in the app. Its `uuid` is the pharmacy's or laboratory's id in every contract |
+| `organisations` | A pharmacy or laboratory (`kind`): its application while `pending`, then the organisation its portal accounts belong to. `name`, `state`, `city`, `address`, `licence_number` (unique among live rows, case-insensitive), `licence_media_id`, the contact (`contact_name`, `contact_phone` local form, `contact_email` lower case), `status` (`pending`, `approved`, `suspended`), `notes` (the suspension reason), `applied_at`, `reviewed_at`, `owner_id` (the portal account that manages its staff, set at approval, M18). Only `approved` is listed in the app. Its `uuid` is the pharmacy's or laboratory's id in every contract |
 | `users` (extended) | `organisation_id`: a pharmacy or laboratory portal account's organisation, null for the team and app accounts |
 | `pharmacies` | A pharmacy organisation's store settings, made on approval (`organisation_id` unique): `logo_media_id`, `cover_media_id`, `delivery_fee_kobo` (₦1,500 to start), `free_delivery_over_kobo`, `delivery_minutes`, `rating` and `rating_count` (no route rates an order yet) |
 | `drugs` | A pharmacy's medicines (`zDrug`): `organisation_id`, name, brand, `nafdac_number` (unique per pharmacy among live rows, case-insensitive), `category`, `dosage_form`, `dosage_strength`, `description`, `price_kobo`, `requires_prescription`, `in_stock`, `image_media_id`. Removing soft deletes, refused while an open order holds it |
@@ -148,5 +148,12 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | `roles` (Spatie) | Gains `uuid`, `is_staff`, `key` (the seeded defaults: `super-admin`, `verification`, `finance`, `support`, `catalogue`), `label` (unique among staff roles, case-insensitive) and `description`. Account roles keep `is_staff` false. A staff role is deleted for real, with its assignments |
 | `users` | Gains `deactivated_at`: a deactivated team account holds no permission and cannot sign in |
 | `audit_events` | Not soft deleted, never updated or deleted. `actor_id` (nulled if the account goes), `actor_name` as written, `action` (`<area>.<verb>`), `subject_type` (the model's snake name), `subject_id` (its public id), `meta` JSONB, `created_at`. Never holds medical data |
+
+### Partner staff and support (M18)
+
+| Table | Notes |
+| --- | --- |
+| `support_tickets` | A support conversation. `requester_id` (an app or partner portal account; cascades on erasure), `category` (`account`, `payment`, `order`, `lab_booking`, `consultation`, `technical`, `other`), `subject`, `status` (`open` waits for the team, `answered` for the requester, `closed`), optional `link_kind` (`order`, `lab_booking`, `consultation`) and `link_id` (the record's public uuid, checked against the owning module when opened), `assignee_id` (a team member who can reply), `last_activity_at` (the list order), `closed_at` |
+| `support_messages` | `ticket_id` (cascades), `author_id`, `from_team`, `body` (encrypted with `APP_KEY`; may describe symptoms, never logged), `attachment_media_id` (a `support_attachment` upload, private), `sent_at` |
 
 Domain tables are added here as each milestone lands.

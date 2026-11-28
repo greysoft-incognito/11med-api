@@ -102,6 +102,18 @@ return [
         'opens_per_hour_per_address' => 60,
     ],
 
+    // The oldest app build each platform still serves (M18); older builds are told to update from the store link.
+    'app_versions' => [
+        'ios' => [
+            'minimum' => env('APP_MIN_VERSION_IOS', '1.0.0'),
+            'update_url' => env('APP_STORE_URL_IOS', env('APP_DOWNLOAD_URL', 'https://11med.ng/app')),
+        ],
+        'android' => [
+            'minimum' => env('APP_MIN_VERSION_ANDROID', '1.0.0'),
+            'update_url' => env('APP_STORE_URL_ANDROID', env('APP_DOWNLOAD_URL', 'https://11med.ng/app')),
+        ],
+    ],
+
     // Caregivers (app spec §6.5): the store link the invitation SMS carries, and the free and premium caps.
     'app_link' => env('APP_DOWNLOAD_URL', 'https://11med.ng/app'),
     // The free tier's limits (app CLAUDE.md "Free vs premium gates"); premium lifts all three.
@@ -116,6 +128,11 @@ return [
         'premium' => 5,
         'invites_per_day' => 10,
         'accept_attempts_per_hour' => 10,
+    ],
+
+    // Support (M18): tickets and follow-ups one account may send an hour.
+    'support' => [
+        'messages_per_hour' => 30,
     ],
 
     // Partners (portal handover §6): applications per address an hour.
@@ -230,5 +247,7 @@ return [
         'POST api/v1/payments/{reference}/simulate',
         'POST api/v1/pharmacy/orders/{orderId}/advance',
         'POST api/v1/portal/admin/reset',
+        'POST api/v1/support/tickets/{id}/simulate-reply',
+        'POST api/v1/auth/consent/simulate-outdated',
     ],
 ];
