@@ -168,11 +168,6 @@ return [
     // Where the portals live; reset and welcome emails link to `<url>/set-password?token=…`.
     'portals_url' => env('PORTALS_URL', 'http://localhost:3000'),
 
-    // The policy version consent is recorded against when a client does not name one.
-    'consent' => [
-        'policy_version' => env('CONSENT_POLICY_VERSION', '2026-07-01'),
-    ],
-
     // Guide: conversations idle this long are deleted, a conversation keeps only its newest
     // messages, and a patient may send this many an hour (app handover §11).
     'guide' => [

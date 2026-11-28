@@ -43,6 +43,8 @@ return [
     'WELCOME_ALREADY_USED' => 'The contact has already set a password. They can use Forgot password on the sign-in page.',
 
     // Pharmacy
+    'DOCUMENT_NOT_FOUND' => 'That document is not published.',
+    'DOCUMENT_UNCHANGED' => 'Nothing changed, so there is no new version to publish.',
     'PHARMACY_NOT_FOUND' => 'That pharmacy is no longer listed.',
     'DRUG_NOT_FOUND' => 'That medicine is no longer listed.',
     'DUPLICATE_NAFDAC' => 'A medicine with this NAFDAC number is already on your list.',

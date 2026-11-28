@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\ConsentRecord;
 use App\Models\User;
 use App\Notifications\Identity\PhoneCode;
+use Database\Seeders\DocumentSeeder;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -35,6 +36,8 @@ class AppAuthTest extends TestCase
 
     public function test_registration_holds_the_account_for_its_phone_code(): void
     {
+        $this->seed(DocumentSeeder::class);
+
         $this->register()
             ->assertCreated()
             ->assertJsonPath('success', true)
@@ -46,7 +49,7 @@ class AppAuthTest extends TestCase
 
         $this->assertSame(Role::Patient, $user->role());
         $this->assertNull($user->phone_verified_at);
-        $this->assertSame('2026-07-01', ConsentRecord::firstWhere('user_id', $user->id)->policy_version);
+        $this->assertSame('1.1', ConsentRecord::firstWhere('user_id', $user->id)->policy_version);
 
         Notification::assertSentOnDemand(PhoneCode::class, fn($n, $channels, $notifiable) => $notifiable->routes['sms'] === '+2348031234567');
     }

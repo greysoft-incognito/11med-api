@@ -6,17 +6,44 @@ use App\Enums\ConsentContext;
 use App\Enums\Role;
 use App\Exceptions\ApiException;
 use App\Models\ConsentRecord;
+use App\Models\Document;
 use App\Models\User;
+use App\Services\Documents\Documents;
 
 /**
- * The terms and privacy policy in force (`elevenmed.consent.policy_version`): whether an account
- * has accepted that version, and the acceptance when it has not. The team's accounts are not asked.
+ * The terms and privacy policy in force for an account: the versions of the pair it reads, joined
+ * (`terms.privacy`, `2.1`), so every edit to either asks again. App accounts read `terms` and
+ * `privacy`, partner accounts the partner pair. The team's accounts are not asked.
  */
 class PolicyConsent
 {
-    public function current(): string
+    public const UNPUBLISHED = 'unpublished';
+
+    public function __construct(
+        private readonly Documents $documents,
+    ) {}
+
+    /**
+     * The version in force for a role, or null for the team or while its documents are unwritten.
+     */
+    public function current(?Role $role): ?string
     {
-        return (string) config('elevenmed.consent.policy_version');
+        $slugs = match ($role) {
+            Role::Patient, Role::Doctor => Document::APP,
+            Role::Pharmacy, Role::Laboratory => Document::PARTNER,
+            default => null,
+        };
+
+        return $slugs === null ? null : $this->documents->policyVersion($slugs);
+    }
+
+    /**
+     * The version a consent given now is recorded against: the one in force, or `unpublished`
+     * while the role's documents are unwritten.
+     */
+    public function recordable(?Role $role): string
+    {
+        return $this->current($role) ?? self::UNPUBLISHED;
     }
 
     /**
@@ -24,11 +51,11 @@ class PolicyConsent
      */
     public function pendingFor(User $user): ?string
     {
-        if ($user->role() === Role::Admin) {
+        $version = $this->current($user->role());
+
+        if ($version === null) {
             return null;
         }
-
-        $version = $this->current();
 
         $accepted = ConsentRecord::query()
             ->where('user_id', $user->id)
@@ -40,7 +67,7 @@ class PolicyConsent
 
     public function accept(User $user, string $version): User
     {
-        if ($version !== $this->current()) {
+        if ($version !== $this->current($user->role())) {
             throw ApiException::unprocessable('POLICY_VERSION_OUTDATED', 'policy_version');
         }
 

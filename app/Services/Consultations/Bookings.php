@@ -5,6 +5,7 @@ namespace App\Services\Consultations;
 use App\Enums\ConsentContext;
 use App\Enums\ConsultationStatus;
 use App\Enums\PaymentChannel;
+use App\Enums\Role;
 use App\Enums\SessionType;
 use App\Exceptions\ApiException;
 use App\Models\ConsentRecord;
@@ -13,6 +14,7 @@ use App\Models\DoctorProfile;
 use App\Models\User;
 use App\Services\Doctors\DoctorDirectory;
 use App\Services\Doctors\DoctorSlots;
+use App\Services\Identity\PolicyConsent;
 use App\Services\Payments\Payments;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -25,6 +27,7 @@ use Illuminate\Support\Facades\DB;
 class Bookings
 {
     public function __construct(
+        private readonly PolicyConsent $policy,
         private readonly DoctorDirectory $directory,
         private readonly DoctorSlots $slots,
         private readonly ConsultationClock $clock,
@@ -218,7 +221,7 @@ class Bookings
         $consent = new ConsentRecord([
             'user_id' => $patient->id,
             'context' => ConsentContext::ProfileSharing,
-            'policy_version' => config('elevenmed.consent.policy_version'),
+            'policy_version' => $this->policy->recordable(Role::Patient),
             'accepted_at' => $now,
             'recorded_at' => $now,
         ]);

@@ -2,6 +2,25 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-03: M18.5 Terms and privacy documents
+
+- The terms and privacy policies live in the API, as toneflix/photos keeps its policies, instead of
+  being bundled in each client or published at an outside URL. `documents` (slug, title, Markdown
+  body) holds four: `terms` and `privacy` for the app, `partner-terms` and `partner-privacy` for the
+  portals. `DocumentSeeder` writes them from `resources/documents/*.md` (the drafts the clients
+  bundled, pending legal review) and never overwrites one the team has edited.
+- `GET documents/{slug}` is public, no session, 404 `DOCUMENT_NOT_FOUND`. The team reads and edits
+  them at `GET portal/admin/documents`, `GET` and `PUT portal/admin/documents/{id}` (title and body
+  only; none is added or deleted), under the new permissions `documents.view` and `documents.edit`,
+  audited as `document.updated`.
+- Every edit is a new version (owner's call): `documents.version` goes up by one and the text is
+  kept in `document_versions`. A save that changes nothing is 422 `DOCUMENT_UNCHANGED`.
+- The policy version an account accepts (M18.3) is now its pair's versions joined, `terms.privacy`
+  for app accounts and `partner-terms.partner-privacy` for partners (`1.1` when seeded), read by
+  `PolicyConsent` through `Documents::policyVersion()`. Each edit therefore asks that pair's
+  readers to accept again. `CONSENT_POLICY_VERSION` is removed; a consent recorded while a pair is
+  unwritten names `unpublished`.
+
 ## 2026-12-02: M18.4 Minimum app version
 
 - `GET app/version` (public) answers `{ ios, android }`, each `{ minimum_version, update_url }`,

@@ -6,6 +6,7 @@ use App\Enums\ConsentContext;
 use App\Enums\Role;
 use App\Models\ConsentRecord;
 use App\Models\User;
+use App\Services\Identity\PolicyConsent;
 
 /**
  * App accounts as a completed sign-up leaves them: phone verified, consent recorded, signed in
@@ -30,7 +31,7 @@ class DemoAccounts
         ConsentRecord::create([
             'user_id' => $user->id,
             'context' => ConsentContext::Register,
-            'policy_version' => config('elevenmed.consent.policy_version'),
+            'policy_version' => app(PolicyConsent::class)->recordable($role),
             'accepted_at' => now()->subDays(60),
             'recorded_at' => now()->subDays(60),
         ]);
