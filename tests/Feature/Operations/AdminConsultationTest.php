@@ -60,13 +60,15 @@ class AdminConsultationTest extends TestCase
         $this->pay($id);
         $this->doctorDoes($doctor, $id, 'accept');
 
+        $audited = count($this->audit->actions());
+
         $this->actingAs($this->teamMember())
             ->postJson("api/v1/portal/admin/consultations/{$id}/cancel", ['reason' => 'The doctor reported a family emergency.'])
             ->assertOk()
             ->assertJsonPath('data.status', 'cancelled');
 
         $this->assertContains($id, $this->payments->refunded);
-        $this->assertSame(['consultation.cancelled'], $this->audit->actions());
+        $this->assertSame(['consultation.cancelled'], array_slice($this->audit->actions(), $audited));
         $toPatient = $this->notifier->to($patient);
         $toDoctor = $this->notifier->to($doctor);
 

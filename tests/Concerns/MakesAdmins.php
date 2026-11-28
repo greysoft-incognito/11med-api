@@ -3,7 +3,6 @@
 namespace Tests\Concerns;
 
 use App\Enums\AdminPermission;
-use App\Enums\Role;
 use App\Models\User;
 use Spatie\Permission\Models\Permission;
 
@@ -22,7 +21,7 @@ trait MakesAdmins
         }
 
         $admin = User::factory()
-            ->portal(Role::Admin)
+            ->staff()
             ->create();
 
         $admin->givePermissionTo($names);
