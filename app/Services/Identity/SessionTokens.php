@@ -3,6 +3,7 @@
 namespace App\Services\Identity;
 
 use App\Enums\AuthClient;
+use App\Events\Identity\NewSignIn;
 use App\Events\Identity\SessionsEnded;
 use App\Exceptions\ApiException;
 use App\Models\RefreshToken;
@@ -169,9 +170,17 @@ class SessionTokens
         }
     }
 
+    /**
+     * Record the sign-in; one from a device the account has not used before is announced.
+     */
     private function open(User $user, AuthClient $client, string $family, ?string $installId, DeviceInfo $device): SignIn
     {
-        return SignIn::create([
+        $history = SignIn::where('user_id', $user->id);
+        $isNew = $device->key !== null
+            && $history->clone()->exists()
+            && ! $history->clone()->where('device_key', $device->key)->exists();
+
+        $signIn = SignIn::create([
             'user_id' => $user->id,
             'family' => $family,
             'client' => $client,
@@ -182,6 +191,12 @@ class SessionTokens
             'signed_in_at' => now(),
             'last_used_at' => now(),
         ]);
+
+        if ($isNew) {
+            NewSignIn::dispatch($user, $signIn);
+        }
+
+        return $signIn;
     }
 
     private static function hash(string $token): string

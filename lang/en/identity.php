@@ -23,4 +23,10 @@ return [
             'expiry' => 'The link works once, for seven days.',
         ],
     ],
+    'new_sign_in' => [
+        'title' => 'New sign-in to your account',
+        'body' => 'Your 11med account was signed in on :device on :time.',
+        'advice' => 'If this was you, there is nothing to do. If it was not, change your password, which signs out every other device, and turn on two-step verification.',
+        'unknown_device' => 'a new device',
+    ],
 ];
