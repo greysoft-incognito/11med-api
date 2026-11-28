@@ -88,3 +88,11 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 
 - [x] 13.1 The guide's conversation with the emergency check first, the admin summary
 - [!] 13.2 Staging and production running, scheduler and queue workers, both clients pointed at staging
+
+## M18 Partner staff and support `[~]`
+
+- [x] 18.1 Pharmacy and laboratory staff: owner at approval, invite, remove, hand over ownership
+- [ ] 18.2 Contact support: tickets for app and portal users, the team's queue
+- [ ] 18.3 Re-consent when the policy version changes
+- [ ] 18.4 Minimum app version per platform
+

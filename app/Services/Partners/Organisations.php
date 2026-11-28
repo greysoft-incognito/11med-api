@@ -193,6 +193,16 @@ class Organisations
         return $organisation;
     }
 
+    /**
+     * Make one of the partner's own accounts its owner.
+     */
+    public function transferOwnership(Organisation $organisation, User $account): Organisation
+    {
+        $organisation->forceFill(['owner_id' => $account->id])->save();
+
+        return $organisation;
+    }
+
     private function approve(Organisation $organisation): void
     {
         if ($organisation->status !== PartnerStatus::Pending) {
@@ -212,6 +222,8 @@ class Organisations
         $account->email_verified_at = now();
         $account->save();
         $account->assignRole($organisation->kind->role()->value);
+
+        $organisation->forceFill(['owner_id' => $account->id])->save();
 
         PartnerApproved::dispatch($organisation);
 

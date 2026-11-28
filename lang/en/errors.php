@@ -124,4 +124,10 @@ return [
     'DOSE_NOT_ANSWERED' => 'That dose has not been answered.',
     'SNOOZE_LIMIT_REACHED' => 'You have used every snooze for this dose.',
     'READING_NOT_FOUND' => 'That reading is not here.',
+
+    // Partner staff and support (M18)
+    'NOT_OWNER' => 'Only the owner of this account can manage its staff.',
+    'STAFF_NOT_FOUND' => 'That person is not on your staff.',
+    'STAFF_IS_OWNER' => 'The owner cannot be removed. Make someone else the owner first.',
+    'STAFF_NOT_ACTIVE' => 'This person has not set a password yet, so they cannot be made the owner.',
 ];

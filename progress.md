@@ -2,6 +2,23 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-02: M18.1 Partner staff
+
+- `organisations.owner_id`: approval makes the contact's account the owner; the migration gives
+  existing partners the account with the contact's email, or their first. The portal session's
+  `zPortalAccount` carries `is_owner`.
+- `GET portal/staff` (paged, every member of the pharmacy or laboratory), `POST portal/staff`
+  (invite by name and email: a portal account of the partner's kind, sent the seven-day welcome
+  link), `DELETE portal/staff/{id}` (sessions revoked through the `Sessions` seam, the account soft
+  deleted and its username released, so the address can be invited again) and
+  `POST portal/staff/{id}/owner`. `PartnerStaff` is the service; `Organisations::transferOwnership()`
+  writes the owner. Refusals: 403 `NOT_OWNER` for a member who is not the owner, 404
+  `STAFF_NOT_FOUND` for another partner's account, 409 `EMAIL_TAKEN`, 422 `STAFF_IS_OWNER` (remove)
+  and `STAFF_NOT_ACTIVE` (ownership needs a member who has set a password).
+- Staff reach every existing portal route, since those already resolve the organisation from the
+  account. Partners have no payout details today, so the brief's "except payout details" gates
+  nothing yet.
+
 ## 2026-11-26: Email through Resend
 
 - `resend/resend-laravel` adds a `resend` mailer: `MAIL_MAILER=resend` with `RESEND_API_KEY` sends

@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 
 /**
- * `zPortalAccount`. A pharmacy's or laboratory's account carries its organisation; the team's carries none.
+ * `zPortalAccount`. A pharmacy's or laboratory's account carries its organisation; the team's carries none. The owner manages the partner's staff.
  *
  * @property User $resource
  */
@@ -25,6 +25,7 @@ class PortalAccountResource extends ApiResource
             'role' => $account->role()?->value,
             'organisation_id' => $organisation?->uuid,
             'organisation_name' => $organisation?->name,
+            'is_owner' => $organisation !== null && $organisation->owner_id === $account->id,
             'created_at' => $this->iso($account->created_at),
         ];
     }
