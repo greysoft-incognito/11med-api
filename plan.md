@@ -89,6 +89,16 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 13.1 The guide's conversation with the emergency check first, the admin summary
 - [!] 13.2 Staging and production running, scheduler and queue workers, both clients pointed at staging
 
+## M14 Account security `[x]`
+
+- [x] 14.1 Signed-in devices (one per refresh family), sign out one or every other; a password change or reset signs out the rest
+- [x] 14.2 Two-step verification with an authenticator app and ten recovery codes, the sign-in challenge, admins required (`ADMIN_2FA_REQUIRED`)
+- [x] 14.3 A new phone number for an app account, by password and a code to the new number
+- [x] 14.4 An alert, in the history and by email, when the account signs in on a new device
+- [x] 14.5 Download my data: a job builds a zip of JSON and a readable summary, emailed as a lapsing link, once a day
+- [x] 14.6 The app's settings (client side, 11med)
+- [x] 14.7 A portal account's name, email and password (with the portal's account page in 11med-web)
+
 ## M18 Partner staff and support `[~]`
 
 - [x] 18.1 Pharmacy and laboratory staff: owner at approval, invite, remove, hand over ownership

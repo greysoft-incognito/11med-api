@@ -5,6 +5,7 @@ namespace App\Http\Resources\Identity;
 use App\Http\Resources\ApiResource;
 use App\Models\User;
 use App\Services\Identity\PolicyConsent;
+use App\Services\Identity\TwoFactor\TwoFactorPolicy;
 use Illuminate\Http\Request;
 
 /**
@@ -29,6 +30,8 @@ class PortalAccountResource extends ApiResource
             'is_owner' => $organisation !== null && $organisation->owner_id === $account->id,
             'pending_policy_version' => app(PolicyConsent::class)->pendingFor($account),
             'created_at' => $this->iso($account->created_at),
+            'two_factor_enabled' => $account->hasTwoFactor(),
+            'two_factor_required' => app(TwoFactorPolicy::class)->required($account),
         ];
     }
 }

@@ -135,4 +135,18 @@ return [
     'SUPPORT_LINK_NOT_FOUND' => 'That order, booking or consultation is not one of yours.',
     'POLICY_VERSION_OUTDATED' => 'These terms have been updated. Read the current version and accept it.',
     'ASSIGNEE_NOT_SUPPORT' => 'That team member cannot answer support requests.',
+
+    'SESSION_NOT_FOUND' => 'That device is no longer signed in.',
+    'TWO_FACTOR_REQUIRED' => 'Enter the code from your authenticator app to finish signing in.',
+    'TWO_FACTOR_CODE_INVALID' => 'That code is not correct. Check your authenticator app and try again.',
+    'TWO_FACTOR_CHALLENGE_INVALID' => 'That sign-in has expired. Sign in again.',
+    'TWO_FACTOR_ALREADY_ENABLED' => 'Two-step verification is already on.',
+    'TWO_FACTOR_NOT_ENABLED' => 'Two-step verification is not on.',
+    'TWO_FACTOR_NOT_STARTED' => 'Start two-step verification again to get a new key.',
+    'TWO_FACTOR_SETUP_REQUIRED' => 'Turn on two-step verification on your account page to use the team desk.',
+    'PHONE_UNCHANGED' => 'That is already your number.',
+    'PHONE_CHANGE_NOT_STARTED' => 'Enter your new number first, and we will text it a code.',
+    'DATA_EXPORT_LIMIT' => 'You can ask for a copy of your data once a day.',
+    'EMAIL_UNCHANGED' => 'That is already your email address.',
+    'EMAIL_CHANGE_NOT_STARTED' => 'Enter your new address first, and we will email it a code.',
 ];

@@ -4,6 +4,19 @@ namespace App\Providers;
 
 use App\Enums\MediaPurpose;
 use App\Helpers\Provider;
+use App\Services\Consultations\ConsultationPersonalData;
+use App\Services\Devices\DevicePersonalData;
+use App\Services\Doctors\DoctorPersonalData;
+use App\Services\Guide\GuidePersonalData;
+use App\Services\Identity\Export\IdentityPersonalData;
+use App\Services\Laboratories\LaboratoryPersonalData;
+use App\Services\Medications\MedicationPersonalData;
+use App\Services\Notifications\NotificationPersonalData;
+use App\Services\Payments\PaymentPersonalData;
+use App\Services\Pharmacy\PharmacyPersonalData;
+use App\Services\Profile\ProfilePersonalData;
+use App\Services\Readings\ReadingPersonalData;
+use App\Services\Subscriptions\SubscriptionPersonalData;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
@@ -18,7 +31,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Each module's share of a person's data export (M14), in the order the export lists them.
+        $this->app->tag([
+            IdentityPersonalData::class,
+            ProfilePersonalData::class,
+            MedicationPersonalData::class,
+            ReadingPersonalData::class,
+            ConsultationPersonalData::class,
+            DoctorPersonalData::class,
+            PharmacyPersonalData::class,
+            LaboratoryPersonalData::class,
+            PaymentPersonalData::class,
+            SubscriptionPersonalData::class,
+            NotificationPersonalData::class,
+            DevicePersonalData::class,
+            GuidePersonalData::class,
+        ], 'personal-data');
     }
 
     /**
