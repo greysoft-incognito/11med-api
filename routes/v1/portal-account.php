@@ -1,15 +1,21 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Identity\PortalAccountController;
 use App\Http\Controllers\Identity\SessionController;
 use App\Http\Controllers\Identity\TwoFactorController;
 use Illuminate\Support\Facades\Route;
 
-// A portal account's own page: signed-in devices and two-step verification (M14).
+// A portal account's own page: name, email, password, signed-in devices, two-step verification (M14).
 Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::portal()))])
     ->prefix('portal/account')
     ->name('portal.account.')
     ->group(function () {
+        Route::patch('/', [PortalAccountController::class, 'update'])->name('update');
+        Route::post('email', [PortalAccountController::class, 'email'])->middleware('throttle:auth')->name('email');
+        Route::post('email/verify', [PortalAccountController::class, 'verifyEmail'])->middleware('throttle:auth')->name('email.verify');
+        Route::post('password', [PortalAccountController::class, 'password'])->middleware('throttle:auth')->name('password');
+
         Route::get('sessions', [SessionController::class, 'index'])->name('sessions.index');
         Route::delete('sessions', [SessionController::class, 'destroyOthers'])->name('sessions.destroy-others');
         Route::delete('sessions/{sessionId}', [SessionController::class, 'destroy'])->whereUuid('sessionId')->name('sessions.destroy');
