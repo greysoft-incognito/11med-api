@@ -114,15 +114,25 @@ class LaboratoryBookings
             return $booking;
         });
 
+        $this->tellCancelled($booking);
+
+        return $this->present($booking);
+    }
+
+    /**
+     * Tells the patient a booking someone else cancelled is off, and that what they paid comes back.
+     */
+    public function tellCancelled(LabBooking $booking): void
+    {
+        $key = $booking->cancelled_by === LabCancelledBy::Team ? 'labs.push.team_cancelled' : 'labs.push.cancelled';
+
         $this->notifier->send(
             $booking->patient,
             NotificationCategory::LabResult,
-            __('labs.push.cancelled_title'),
-            __('labs.push.cancelled_body', ['reference' => $booking->reference]),
+            __("{$key}_title"),
+            __("{$key}_body", ['reference' => $booking->reference]),
             ['target_id' => $booking->uuid]
         );
-
-        return $this->present($booking);
     }
 
     /**

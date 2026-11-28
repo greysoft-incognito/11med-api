@@ -149,6 +149,14 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | `users` | Gains `deactivated_at`: a deactivated team account holds no permission and cannot sign in |
 | `audit_events` | Not soft deleted, never updated or deleted. `actor_id` (nulled if the account goes), `actor_name` as written, `action` (`<area>.<verb>`), `subject_type` (the model's snake name), `subject_id` (its public id), `meta` JSONB, `created_at`. Never holds medical data |
 
+### Admin operations (M17)
+
+| Table | Notes |
+| --- | --- |
+| `users` (extended) | `suspended_at` (indexed) and `suspension_reason`: a patient or doctor account the team suspended. No session is issued while set |
+| `announcements` | `title`, `body`, `audience` (`app_users`, `patients`, `doctors`, `pharmacies`, `laboratories`), `push`, `status` (`scheduled`, `sending`, `sent`, `cancelled`), `send_at` (indexed with `status`), `sent_at`, `cancelled_at`, `recipients`, `created_by` (nulled on erasure). Each copy is an `app_notifications` row with the dedupe key `announcement:<uuid>` |
+| `configurations` (dbconfig) | Runtime settings are rows keyed `platform.<setting>` in the `platform` group, value stored as a string; no row means the config file's value |
+
 ### Partner staff and support (M18)
 
 | Table | Notes |

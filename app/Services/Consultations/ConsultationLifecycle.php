@@ -130,6 +130,38 @@ class ConsultationLifecycle
     }
 
     /**
+     * The team's cancellation of a booking that has not begun, whatever the hour: refunded in full,
+     * and both sides told.
+     */
+    public function cancelForTeam(Consultation $consultation): Consultation
+    {
+        $consultation = $this->move($consultation, function (Consultation $current) {
+            if (in_array($current->status, [ConsultationStatus::InProgress, ConsultationStatus::Completed], true)) {
+                throw ApiException::unprocessable('CONSULTATION_IN_PROGRESS');
+            }
+
+            if ($current->status->isClosed()) {
+                throw ApiException::unprocessable('CONSULTATION_CLOSED');
+            }
+
+            $current->status = ConsultationStatus::Cancelled;
+            $current->expires_at = null;
+        });
+
+        $this->refund($consultation);
+        $this->tellPatient($consultation, 'team_cancelled', __('consultations.team_cancelled.title'), __('consultations.team_cancelled.body', ['doctor' => $consultation->doctor_name]));
+
+        if ($consultation->doctor !== null && $consultation->paid_at !== null) {
+            $this->notifier->send($consultation->doctor, NotificationCategory::Consultation, __('consultations.team_cancelled.doctor_title'), __('consultations.team_cancelled.doctor_body'), [
+                'target_id' => $consultation->uuid,
+                'dedupe_key' => "consultation_team_cancelled_doctor:{$consultation->uuid}",
+            ]);
+        }
+
+        return $consultation;
+    }
+
+    /**
      * A deadline passed with nobody there: the scheduler's move. Returns null when the row moved on
      * since it was selected.
      */

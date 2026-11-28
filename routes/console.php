@@ -38,3 +38,6 @@ Schedule::command('payments:sweep')->everyFiveMinutes()->withoutOverlapping();
 // (app handover §2.3); payouts every 48 hours (§7.7).
 Schedule::command('consultations:settle')->everyMinute()->withoutOverlapping();
 Schedule::command('consultations:payouts')->cron('0 2 */2 * *')->withoutOverlapping();
+
+// Announcements the team scheduled go out at their time (M17).
+Schedule::command('announcements:dispatch')->everyMinute()->withoutOverlapping();

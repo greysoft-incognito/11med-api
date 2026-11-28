@@ -139,3 +139,12 @@ Logged as found, never deleted; a resolved issue is marked resolved.
 - **Plan:** decide with M8 whether a doctor's erasure keeps a tombstone id, or the contract makes
   `doctor_id` nullable (an FE item); the same question applies to prescriptions.
 
+
+### ISS-170: Consultation refusal codes without a sentence
+
+- **Logged:** 2026-11-28 · **Found during:** M17.2 · **Blocking:** no · **Status:** open
+- **Detail:** `NOT_PENDING`, `NOT_CONFIRMED`, `NOT_YET`, `NOT_ACTIVE` and `TOO_LATE_TO_CANCEL`
+  (consultations, M10) have no line in `lang/en/errors.php`, so their `message` is the default
+  sentence. M17 added the two its team cancellation shares (`CONSULTATION_IN_PROGRESS`,
+  `CONSULTATION_CLOSED`).
+- **Plan:** give each its sentence in a small fix PR, if Obi wants it.

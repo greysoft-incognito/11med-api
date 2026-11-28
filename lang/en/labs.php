@@ -13,5 +13,7 @@ return [
         'results_ready_body' => 'Booking :reference. Open 11med to see them.',
         'cancelled_title' => 'The laboratory cancelled your booking',
         'cancelled_body' => 'Booking :reference. Any payment is refunded. Open 11med to see why.',
+        'team_cancelled_title' => 'The 11med team cancelled your booking',
+        'team_cancelled_body' => 'Booking :reference. Any payment is refunded. Open 11med to see why.',
     ],
 ];

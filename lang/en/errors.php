@@ -125,6 +125,17 @@ return [
     'SNOOZE_LIMIT_REACHED' => 'You have used every snooze for this dose.',
     'READING_NOT_FOUND' => 'That reading is not here.',
 
+    // Admin operations (M17)
+    'ACCOUNT_SUSPENDED' => 'This account is suspended. Contact the 11med team.',
+    'ALREADY_SUSPENDED' => 'This account is already suspended.',
+    'NOT_SUSPENDED' => 'This account is not suspended.',
+    'PHONE_VERIFIED' => 'That phone number is already confirmed.',
+    'SETTING_NOT_FOUND' => 'There is no such setting.',
+    'ANNOUNCEMENT_NOT_FOUND' => 'That announcement is not here.',
+    'ANNOUNCEMENT_NOT_SCHEDULED' => 'Only an announcement still waiting for its time can be withdrawn.',
+    'CONSULTATION_IN_PROGRESS' => 'The session has started. It can no longer be cancelled.',
+    'CONSULTATION_CLOSED' => 'This consultation is already closed.',
+
     // Partner staff and support (M18)
     'NOT_OWNER' => 'Only the owner of this account can manage its staff.',
     'STAFF_IS_OWNER' => 'The owner cannot be removed. Make someone else the owner first.',

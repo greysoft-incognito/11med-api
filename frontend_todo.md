@@ -5,6 +5,9 @@ milestone that introduced it. The clients tick them; never delete.
 
 ## Portals (`11med-web`)
 
+- [ ] **FE-170 · Cancelled by the team.** An order's `cancellation.by` and a laboratory booking's
+  `cancellation.by` may be `team` once the admin desk cancels it (`POST portal/admin/orders/{id}/cancel`,
+  `.../lab-bookings/{id}/cancel`). Both clients' enums gain the value. (M17.2)
 - [ ] **FE-001 · Validation code.** Every 400 validation refusal is `VALIDATION_FAILED`, the app's
   spelling; the portals' mock answers `VALIDATION`. No screen branches on it, so only the mock and
   the handover's §8 table change. (M1)
@@ -30,6 +33,12 @@ milestone that introduced it. The clients tick them; never delete.
   current one. (M5.1)
 
 ## App (`11med`)
+
+- [ ] **FE-171 · A suspended account.** Every sign-in (`auth/login`, `auth/verify-otp`, social
+  sign-in) and `auth/refresh` answers 403 `ACCOUNT_SUSPENDED` for an account the team suspended;
+  its sessions end at once, so the next call is a 401 and the refresh then fails. Show a suspended
+  screen on that code instead of the sign-in error. An order's `cancellation.by` may be `team`
+  (FE-170). (M17.1)
 
 - [ ] **FE-111 · The store's lists are paged.** `GET /pharmacy/pharmacies`, `GET /pharmacy/drugs`
   and `GET /pharmacy/orders` answer `{ items, next_cursor, total }` (FE-003), in the same order the

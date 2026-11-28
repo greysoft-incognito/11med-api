@@ -9,4 +9,5 @@ enum LabCancelledBy: string
 {
     case Patient = 'patient';
     case Laboratory = 'laboratory';
+    case Team = 'team';
 }

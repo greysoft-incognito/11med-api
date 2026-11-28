@@ -47,13 +47,16 @@ by id in [human_todo.md](../human_todo.md).
   accepted in 5 minutes, or a session not joined in 10, expires and is refunded; a chat closes at
   the end of its window) and `consultations:payouts` at 02:00 every other day (doctors' payouts).
   Without the scheduler, consultations never expire and patients are never refunded for them.
+  Since M17 it runs `announcements:dispatch` every minute, which starts the team's scheduled
+  announcements; without it a scheduled announcement never goes out.
 
   ```
   * * * * * cd /var/www/11med-api && php artisan schedule:run >> /dev/null 2>&1
   ```
 
-- **Queue worker** (M2 onwards): every SMS, email, push (M7) and refund sent to Paystack (M9) is
-  queued, so without a worker nothing is sent.
+- **Queue worker** (M2 onwards): every SMS, email, push (M7), refund sent to Paystack (M9) and
+  announcement delivery (M17, up to 30 minutes for a large audience) is queued, so without a worker
+  nothing is sent.
   Run `php artisan queue:work` under Supervisor or systemd;
   `scripts/generate-supervisor-config.sh <user> [processes] [driver]` writes the Supervisor program.
 
@@ -145,9 +148,16 @@ Kept in the database (`laravel-dbconfig`), changed with Artisan, no deploy neede
 | --- | --- | --- |
 | `prefered_sms_channel` | `KUDISMS` (the kit's default is Twilio) | `php artisan dbconfig:set prefered_sms_channel KUDISMS` |
 
-The free tier's limits (3 medications, 1 caregiver, 7 days of history and readings) are code
-config in `config/elevenmed.php` (`free_tier`, `caregivers`), changed by a deploy, not here. Premium
-needs no service or credential: the team records it in the admin portal (M5).
+The free tier's limits (3 medications, 1 caregiver, 7 days of history and readings), the
+consultation commission, the phone-code and sign-in limits, and whether team accounts must use
+two-step verification are defaults in `config/elevenmed.php` (and their env variables). Since M17
+the team changes them in the admin portal's **Settings** page (permission `settings.edit`), with no
+deploy: each change is a `platform.<key>` row in the dbconfig `configurations` table, laid over the
+config on every request, command and queued job (`PlatformSettingsServiceProvider`), and audited.
+Resetting a setting removes its row and the config file's value stands again. Nothing to set up;
+`php artisan config:cache` does not freeze them. The app's own copy of the medication cap
+(`FREE_TIER_MAX_MEDICATIONS`) only words the limit screen; the server's value is the one enforced.
+Premium needs no service or credential: the team records it in the admin portal (M5).
 
 ## 5. Commands, once per server
 

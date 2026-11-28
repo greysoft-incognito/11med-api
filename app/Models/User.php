@@ -114,6 +114,7 @@ class User extends Authenticatable implements WalletOperations
             'last_attempt' => 'datetime',
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            'suspended_at' => 'datetime',
             'deactivated_at' => 'datetime',
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
@@ -164,6 +165,11 @@ class User extends Authenticatable implements WalletOperations
                 ->filter()
                 ->join(' '),
         );
+    }
+
+    public function isSuspended(): bool
+    {
+        return $this->suspended_at !== null;
     }
 
     public function hasTwoFactor(): bool

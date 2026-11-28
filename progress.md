@@ -59,6 +59,72 @@ Newest first. Never edit an old entry.
   account. Partners have no payout details today, so the brief's "except payout details" gates
   nothing yet.
 
+## 2026-12-01: M17 route list and the portal
+
+- The portal's mock now serves the 22 admin operations routes (11med-web `feat/admin-operations`);
+  `php artisan contract:routes` lists them in `tests/Contract/routes.json`, and none is pending.
+- `CONSULTATION_IN_PROGRESS` and `CONSULTATION_CLOSED` get their sentences; the other consultation
+  codes without one are ISS-170.
+
+## 2026-12-01: M17.4 Announcements
+
+- `GET portal/admin/announcements` (paged, newest first) and `POST .../preview` (the audience's
+  count, in SQL) need `announcements.view` or `announcements.send`; `POST portal/admin/announcements`
+  and `POST .../{id}/cancel` need `announcements.send`. Audiences: `app_users`, `patients`,
+  `doctors`, `pharmacies`, `laboratories`; suspended and team accounts are left out.
+- Sent now (`send_at: null`) or scheduled up to 90 days ahead; `announcements:dispatch` runs every
+  minute and starts what is due under `FOR UPDATE SKIP LOCKED`. `SendAnnouncement` walks the
+  audience 200 at a time and calls `Notifier::send()` with the new category `announcement`
+  (identical to M16's case), a per-announcement dedupe key, and push only when asked; a scheduled
+  one is withdrawn while it waits (422 `ANNOUNCEMENT_NOT_SCHEDULED` after). Audited
+  `announcement.sent`, `.scheduled`, `.cancelled`.
+- New table `announcements`. M17 done.
+
+## 2026-12-01: M17.3 Platform settings
+
+- `GET portal/admin/settings` (`settings.view`) lists every runtime setting, whole: key, group,
+  label, type (`integer`, `number`, `boolean`), current value, the config file's default, bounds,
+  and whether the team set it. `PUT portal/admin/settings/{key}` (`settings.edit`) sets one within
+  its bounds, or `null` to go back to the default; 404 `SETTING_NOT_FOUND`; audited
+  `setting.changed` with the value before and after.
+- `App\Enums\PlatformSetting` names each setting's config path: the free tier (medications,
+  history and readings days, caregivers free and premium), the consultation commission, the code
+  limits (lifetime, resends, window, attempts), the sign-in lock (failures, minutes) and
+  `two_factor.admin_required` (listed once M14 configures it). `PlatformSettings` stores them as
+  dbconfig rows in the `platform` group and lays them over the config at boot and before every
+  queued job, so every existing reader (`Entitlements`, `OneTimeCodes`, `LoginGuard`, `Earnings`,
+  `Payouts`) follows without change.
+
+## 2026-12-01: M17.2 Oversight of orders, lab bookings and consultations
+
+- `GET portal/admin/orders`, `lab-bookings` and `consultations` (`orders.view`, `bookings.view`,
+  `consultations.view`): every record, newest first, paged, `status` (or `open`) and `q` over
+  reference, patient name and phone, and pharmacy, laboratory or doctor name. Each has a detail
+  route. A lab booking leaves out its results link and the doctor's notes; a consultation its
+  complaint, conversation and prescription.
+- `POST .../{id}/cancel` with a reason (`orders.cancel`, `bookings.cancel`, `consultations.cancel`)
+  goes through each module's own rule and refund: `OrderBook::close()` (now shared with the
+  pharmacy's cancellation; refused once with the rider or on the counter), `BookingLifecycle::cancel()`
+  with the new `LabCancelledBy::Team` (only while booked), and `ConsultationLifecycle::cancelForTeam()`
+  (any time before it starts, no cut-off hour). Every route refunds through `Payments::refund()`,
+  tells the patient (and a doctor whose paid booking it was), and is audited. An order and a booking
+  record `cancellation.by: team`, a value both clients' contracts gain (FE-170).
+
+## 2026-12-01: M17.1 The user directory
+
+- `GET portal/admin/users` (`users.view`): patient and doctor accounts, newest first, paged, `q` over
+  name, phone (either spelling) and email, `role` and `status` (`active`, `suspended`) filters.
+  `GET portal/admin/users/{id}` adds counts of orders, lab bookings and consultations. Account data
+  only: no profile, medications, readings or guide text. Last active is the newest refresh token.
+- `POST .../suspend` with a reason (`users.manage`) sets `users.suspended_at`, ends every session
+  through M14's `Sessions::revokeAll()`, texts the person and dispatches `AccountSuspended`: a
+  doctor goes unavailable, leaves the directory (`DoctorProfile::listed()` skips suspended
+  accounts) and their unstarted bookings are withdrawn and refunded. `SessionTokens::issue()`
+  refuses a suspended account with 403 `ACCOUNT_SUSPENDED`, so every sign-in path and refresh does.
+  `POST .../reinstate`, `.../sign-out`, `.../verification` (`phone` or `email`) and
+  `.../password-reset` reuse `AppAccounts`, `EmailAddresses` and `Passwords`, inside the person's
+  own resend budget; the code never reaches the team. Every action calls `AuditLog::record()`.
+
 ## 2026-11-28: M16.1 Notifications for portal accounts and doctors
 
 - `NotificationCategory` gains `pharmacy_order`, `lab_booking`, `doctor_review`,

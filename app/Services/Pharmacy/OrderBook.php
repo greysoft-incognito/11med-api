@@ -131,31 +131,41 @@ class OrderBook
     {
         $order = DB::transaction(function () use ($pharmacy, $id, $reason) {
             $order = $this->locate($pharmacy, $id, lock: true);
-            $order->load(PatientOrders::RELATIONS);
 
-            if ($order->status === OrderStatus::Cancelled) {
-                throw ApiException::unprocessable('ORDER_CANCELLED');
-            }
-
-            if (in_array($order->status, [OrderStatus::Ready, OrderStatus::Completed], true)) {
-                throw ApiException::unprocessable('ORDER_STARTED');
-            }
-
-            $order->fill([
-                'status' => OrderStatus::Cancelled,
-                'cancelled_at' => now(),
-                'cancelled_by' => 'pharmacy',
-                'cancel_reason' => $reason,
-            ]);
-            $order->save();
-
-            $this->payments->refund($order);
-            $this->notices->cancelled($order);
+            $this->close($order, 'pharmacy', $reason);
 
             return $order;
         });
 
         return $this->orderPayments->attach($order->refresh()->load(PatientOrders::RELATIONS));
+    }
+
+    /**
+     * Cancels an order the caller holds locked, by the pharmacy or the team, refunds what was paid and
+     * tells the patient why. Refused once cancelled, and once with the rider or on the counter.
+     */
+    public function close(Order $order, string $by, string $reason): void
+    {
+        $order->load(PatientOrders::RELATIONS);
+
+        if ($order->status === OrderStatus::Cancelled) {
+            throw ApiException::unprocessable('ORDER_CANCELLED');
+        }
+
+        if (in_array($order->status, [OrderStatus::Ready, OrderStatus::Completed], true)) {
+            throw ApiException::unprocessable('ORDER_STARTED');
+        }
+
+        $order->fill([
+            'status' => OrderStatus::Cancelled,
+            'cancelled_at' => now(),
+            'cancelled_by' => $by,
+            'cancel_reason' => $reason,
+        ]);
+        $order->save();
+
+        $this->payments->refund($order);
+        $this->notices->cancelled($order);
     }
 
     private function own(Pharmacy $pharmacy): Builder

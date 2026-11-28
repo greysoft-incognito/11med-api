@@ -50,7 +50,9 @@ class OrderNotices
 
     public function cancelled(Order $order): void
     {
-        $this->send($order, __('pharmacy.push.cancelled.title'), __('pharmacy.push.cancelled.body', ['reference' => $order->reference, 'reason' => $order->cancel_reason]));
+        $key = $order->cancelled_by === 'team' ? 'pharmacy.push.team_cancelled' : 'pharmacy.push.cancelled';
+
+        $this->send($order, __("{$key}.title"), __("{$key}.body", ['reference' => $order->reference, 'reason' => $order->cancel_reason]));
     }
 
     /**

@@ -113,6 +113,13 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [~] 16.3 Doctor notifications in the app (11med)
 - [~] 16.4 Live counts and the foreground banner in the app (11med)
 
+## M17 Admin operations `[x]`
+
+- [x] 17.1 The user directory: search, account view, suspend and reinstate, force sign-out, resend codes
+- [x] 17.2 Oversight of orders, lab bookings and consultations, cancel with a reason and refund
+- [x] 17.3 Platform settings the team edits at runtime
+- [x] 17.4 Announcements to app and portal users
+
 ## M18 Partner staff and support `[~]`
 
 - [x] 18.1 Pharmacy and laboratory staff: owner at approval, invite, remove, hand over ownership
