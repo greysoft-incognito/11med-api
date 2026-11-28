@@ -88,3 +88,11 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 
 - [x] 13.1 The guide's conversation with the emergency check first, the admin summary
 - [!] 13.2 Staging and production running, scheduler and queue workers, both clients pointed at staging
+
+## M15 Admin RBAC and audit `[x]`
+
+- [x] 15.1 The `AdminPermission` catalogue, the default staff roles synced by `app:sync-roles`, every admin route gated by its permission, the session's effective permissions
+- [x] 15.2 Staff roles: list, create, edit, delete with the holders moved; the super admin role fixed
+- [x] 15.3 Staff: list, invite, roles and direct permissions, deactivate and reactivate; `app:create-admin` opens a super admin
+- [x] 15.4 The audit log: `AuditLog::record()` from every admin write, paged and filtered
+

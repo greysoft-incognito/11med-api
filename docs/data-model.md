@@ -130,4 +130,12 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
 | `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 
+### Admin RBAC and audit (M15)
+
+| Table | Notes |
+| --- | --- |
+| `roles` (Spatie) | Gains `uuid`, `is_staff`, `key` (the seeded defaults: `super-admin`, `verification`, `finance`, `support`, `catalogue`), `label` (unique among staff roles, case-insensitive) and `description`. Account roles keep `is_staff` false. A staff role is deleted for real, with its assignments |
+| `users` | Gains `deactivated_at`: a deactivated team account holds no permission and cannot sign in |
+| `audit_events` | Not soft deleted, never updated or deleted. `actor_id` (nulled if the account goes), `actor_name` as written, `action` (`<area>.<verb>`), `subject_type` (the model's snake name), `subject_id` (its public id), `meta` JSONB, `created_at`. Never holds medical data |
+
 Domain tables are added here as each milestone lands.
