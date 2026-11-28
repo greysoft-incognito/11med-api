@@ -40,6 +40,8 @@ enum AdminPermission: string
     case SettingsEdit = 'settings.edit';
     case AnnouncementsView = 'announcements.view';
     case AnnouncementsSend = 'announcements.send';
+    case DocumentsView = 'documents.view';
+    case DocumentsEdit = 'documents.edit';
 
     case StaffView = 'staff.view';
     case StaffManage = 'staff.manage';

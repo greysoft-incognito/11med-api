@@ -126,4 +126,5 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 18.2 Contact support: tickets for app and portal users, the team's queue
 - [x] 18.3 Re-consent when the policy version changes
 - [x] 18.4 Minimum app version per platform
+- [x] 18.5 Terms and privacy documents served by the API and edited by the team
 

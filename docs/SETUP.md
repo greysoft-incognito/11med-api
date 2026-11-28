@@ -171,6 +171,7 @@ php artisan dbconfig:set prefered_sms_channel KUDISMS
 php artisan app:create-admin you@example.com "Your Name"   # first super admin; prints its link
 php artisan db:seed --class=DrugClassSeeder --force        # the allergy classes (M10); safe to run again
 php artisan db:seed --class=LabCatalogueSeeder --force    # the starting test catalogue (M12)
+php artisan db:seed --class=DocumentSeeder --force        # the terms and privacy policies (M18.5); safe to run again
 ```
 
 The first admin signs in with the link `app:create-admin` prints and, while `ADMIN_2FA_REQUIRED`
@@ -187,6 +188,13 @@ super admin. After that, the super admin invites the team and manages roles from
 
 Run the `DrugClassSeeder` line again after a release that changes the seed (it adds what is
 missing and never removes a class).
+
+The terms and privacy policies (M18.5) are seeded from `resources/documents/*.md` as drafts
+pending legal review, with bracketed facts only the business can supply (company name and
+address, privacy contact, retention period). Fill those in from the admin portal's Terms and
+privacy page, which needs the `documents.edit` permission (the super admin holds it after the
+deploy's `app:sync-roles`). The seeder never overwrites a document that exists. Editing the text
+does not ask anyone to accept again; raise `CONSENT_POLICY_VERSION` for that.
 
 The test catalogue (M12) starts empty, and a laboratory can only price tests that are in it. The
 seeder adds the twenty tests the app's mock uses, only those missing, so running it again never

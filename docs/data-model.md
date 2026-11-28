@@ -162,6 +162,7 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | Table | Notes |
 | --- | --- |
 | `support_tickets` | A support conversation. `requester_id` (an app or partner portal account; cascades on erasure), `category` (`account`, `payment`, `order`, `lab_booking`, `consultation`, `technical`, `other`), `subject`, `status` (`open` waits for the team, `answered` for the requester, `closed`), optional `link_kind` (`order`, `lab_booking`, `consultation`) and `link_id` (the record's public uuid, checked against the owning module when opened), `assignee_id` (a team member who can reply), `last_activity_at` (the list order), `closed_at` |
+| `documents` | The terms and privacy documents the clients show: `slug` (`terms`, `privacy`, `partner-terms`, `partner-privacy`; partial unique index where not deleted), `title`, `body` (Markdown), `sort`, `updated_by` (the team member who last edited it, nulled if the account goes). Seeded by `DocumentSeeder`; no route adds or deletes one |
 | `support_messages` | `ticket_id` (cascades), `author_id`, `from_team`, `body` (encrypted with `APP_KEY`; may describe symptoms, never logged), `attachment_media_id` (a `support_attachment` upload, private), `sent_at` |
 
 Domain tables are added here as each milestone lands.
