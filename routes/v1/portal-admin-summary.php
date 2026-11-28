@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AdminPermission;
 use App\Enums\Role;
 use App\Http\Controllers\Desk\AdminSummaryController;
 use Illuminate\Support\Facades\Route;
@@ -9,5 +10,7 @@ Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
     ->prefix('portal/admin')
     ->name('portal.admin.')
     ->group(function () {
-        Route::get('summary', [AdminSummaryController::class, 'show'])->name('summary');
+        Route::get('summary', [AdminSummaryController::class, 'show'])
+            ->name('summary')
+            ->middleware(AdminPermission::middleware(AdminPermission::SummaryView));
     });

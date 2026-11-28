@@ -121,6 +121,9 @@ class PortalAccounts
 
     private function open(User $account): PortalSession
     {
+        if ($account->deactivated_at !== null) {
+            throw ApiException::forbidden('ACCOUNT_DEACTIVATED');
+        }
         $this->twoFactor->requireFor($account, AuthClient::Portal);
 
         $pair = $this->tokens->issue($account, AuthClient::Portal);

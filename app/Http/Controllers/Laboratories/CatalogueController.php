@@ -29,7 +29,7 @@ class CatalogueController extends Controller
 
     public function store(UpsertLabTestRequest $request): JsonResponse
     {
-        $test = $this->catalogue->create($request->validated());
+        $test = $this->catalogue->create($request->validated(), $request->user());
 
         return (new LabTestResource($test))
             ->response()
@@ -38,7 +38,7 @@ class CatalogueController extends Controller
 
     public function update(UpsertLabTestRequest $request, string $code): LabTestResource
     {
-        $test = $this->catalogue->update($code, $request->validated());
+        $test = $this->catalogue->update($code, $request->validated(), $request->user());
 
         return new LabTestResource($test);
     }

@@ -127,7 +127,6 @@ return [
 
     // Partner staff and support (M18)
     'NOT_OWNER' => 'Only the owner of this account can manage its staff.',
-    'STAFF_NOT_FOUND' => 'That person is not on your staff.',
     'STAFF_IS_OWNER' => 'The owner cannot be removed. Make someone else the owner first.',
     'STAFF_NOT_ACTIVE' => 'This person has not set a password yet, so they cannot be made the owner.',
     'TICKET_NOT_FOUND' => 'That support request is not here.',
@@ -135,6 +134,15 @@ return [
     'SUPPORT_LINK_NOT_FOUND' => 'That order, booking or consultation is not one of yours.',
     'POLICY_VERSION_OUTDATED' => 'These terms have been updated. Read the current version and accept it.',
     'ASSIGNEE_NOT_SUPPORT' => 'That team member cannot answer support requests.',
+
+    'STAFF_NOT_FOUND' => 'That person is not on this team.',
+    'ROLE_NOT_FOUND' => 'No role with that id.',
+    'ROLE_NAME_TAKEN' => 'Another role already has that name.',
+    'ROLE_PROTECTED' => 'The super admin role holds every permission and cannot be changed or deleted.',
+    'ROLE_IN_USE' => 'Team members still hold this role. Choose a role to move them to first.',
+    'PERMISSION_NOT_HELD' => 'You can only give or take away permissions you hold yourself.',
+    'LAST_SUPER_ADMIN' => 'This is the last active super admin. Make someone else super admin first.',
+    'ACCOUNT_DEACTIVATED' => 'This account has been deactivated. Ask your administrator.',
 
     'SESSION_NOT_FOUND' => 'That device is no longer signed in.',
     'TWO_FACTOR_REQUIRED' => 'Enter the code from your authenticator app to finish signing in.',

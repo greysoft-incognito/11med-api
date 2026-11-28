@@ -25,14 +25,19 @@ class AdminPartnerController extends Controller
 
     public function review(ReviewPartnerRequest $request, string $id): PartnerResource
     {
-        $partner = $this->organisations->review($id, $request->validated('decision'), $request->validated('notes'));
+        $partner = $this->organisations->review(
+            $id,
+            $request->validated('decision'),
+            $request->validated('notes'),
+            $request->user(),
+        );
 
         return new PartnerResource($partner);
     }
 
-    public function resendWelcome(string $id): PartnerResource
+    public function resendWelcome(Request $request, string $id): PartnerResource
     {
-        $partner = $this->organisations->resendWelcome($id);
+        $partner = $this->organisations->resendWelcome($id, $request->user());
 
         return new PartnerResource($partner);
     }

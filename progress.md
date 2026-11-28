@@ -59,6 +59,38 @@ Newest first. Never edit an old entry.
   account. Partners have no payout details today, so the brief's "except payout details" gates
   nothing yet.
 
+## 2026-11-28: M15 Admin RBAC and audit
+
+- Permissions are the unit (`App\Enums\AdminPermission`, 31 cases as `<area>.<action>`). A team
+  account keeps the `admin` account role and gets staff roles (Spatie roles marked `is_staff`, named
+  `staff:<key>` or `staff:<uuid>`, shown by `label`) and direct permissions; access is the union.
+  `StaffCatalogue::sync()`, run by `app:sync-roles` on every deploy, creates the permission rows,
+  creates the five defaults (Super admin, Verification, Finance, Support, Catalogue) on its first
+  run only, keeps the super admin on every permission and the kit's platform ones, and on that first
+  run makes every existing admin a super admin so nobody loses access.
+- Every `portal/admin/*` route names its permission (`AdminPermission::middleware()`, Spatie's
+  `permission:` alias); a test fails any admin route without one. The kit's platform permissions
+  left the `admin` role and travel with the super admin role only. `PortalAccountResource` carries
+  `permissions`, the effective list (empty for partners). `StaffAccess` implements the
+  `PermissionHolders` seam for M16.
+- Roles (`portal/admin/permissions`, `portal/admin/roles`): read whole, super admin first; create
+  and edit with name and permission set; delete moves holders to `reassign_to` in one SQL statement,
+  else 422 `ROLE_IN_USE`. The super admin role is 422 `ROLE_PROTECTED`; a duplicate name 409
+  `ROLE_NAME_TAKEN`.
+- Staff (`portal/admin/staff`): paged, searched by name or email, filtered by status and role;
+  invite opens the account and emails the seven-day first-password link (409 `EMAIL_TAKEN`);
+  access replaces roles and direct permissions; deactivate sets `users.deactivated_at` and ends
+  every session through the `Sessions` seam, and sign-in or set-password then answer 403
+  `ACCOUNT_DEACTIVATED`. 422 `LAST_SUPER_ADMIN` keeps one active super admin, checked under a lock
+  on the super admin role row. 422 `PERMISSION_NOT_HELD` refuses giving or taking away an admin
+  permission the actor does not hold, so only a super admin grants or removes super admin.
+  `app:create-admin` opens a super admin.
+- The audit log (`audit_events`, `GET portal/admin/audit`): written by `DatabaseAuditLog` inside the
+  writing transaction from doctor and document review, partner review and welcome, subscription
+  recording, payout settling, catalogue edits, and every staff and role change; never updated or
+  deleted; paged newest first and filtered by actor, action, subject and Lagos day. `meta` holds
+  decisions and ids, never medical data.
+
 ## 2026-11-28: M14 Account security
 
 - 14.1 `sign_ins` is one row per refresh family, named from `X-Device-Name` and `X-Device-Platform`
