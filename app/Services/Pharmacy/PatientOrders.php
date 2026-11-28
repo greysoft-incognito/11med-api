@@ -3,6 +3,7 @@
 namespace App\Services\Pharmacy;
 
 use App\Enums\OrderStatus;
+use App\Enums\PaymentStatus;
 use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
@@ -21,6 +22,7 @@ class PatientOrders
     public function __construct(
         private readonly OrderPayments $orderPayments,
         private readonly Payments $payments,
+        private readonly OrderNotices $notices,
     ) {}
 
     public function list(User $patient, ListQuery $list): Page
@@ -49,12 +51,16 @@ class PatientOrders
      */
     public function cancel(User $patient, string $id): Order
     {
-        $order = DB::transaction(function () use ($patient, $id) {
+        $seen = false;
+
+        $order = DB::transaction(function () use ($patient, $id, &$seen) {
             $order = $this->own($patient, $id, lock: true);
 
             if ($order->status !== OrderStatus::Placed) {
                 throw ApiException::unprocessable('ORDER_CONFIRMED');
             }
+
+            $seen = $order->payment_status === PaymentStatus::Paid || $order->isAtCounter();
 
             $order->fill([
                 'status' => OrderStatus::Cancelled,
@@ -68,6 +74,10 @@ class PatientOrders
 
             return $order;
         });
+
+        if ($seen) {
+            $this->notices->withdrawn($order);
+        }
 
         return $this->orderPayments->attach($order);
     }

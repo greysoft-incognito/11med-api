@@ -5,6 +5,7 @@ namespace App\Services\Partners;
 use App\Enums\MediaPurpose;
 use App\Enums\PartnerKind;
 use App\Enums\PartnerStatus;
+use App\Events\Partners\PartnerApplied;
 use App\Events\Partners\PartnerApproved;
 use App\Events\Partners\PartnerReinstated;
 use App\Events\Partners\PartnerSuspended;
@@ -49,7 +50,7 @@ class Organisations
 
             $licence = $this->media->claim(null, $input['licence_url'], MediaPurpose::PartnerLicence, 'licence_url');
 
-            return Organisation::create([
+            $organisation = Organisation::create([
                 'kind' => $input['kind'],
                 'name' => $input['name'],
                 'state' => $input['state'],
@@ -63,6 +64,10 @@ class Organisations
                 'status' => PartnerStatus::Pending,
                 'applied_at' => now(),
             ]);
+
+            PartnerApplied::dispatch($organisation);
+
+            return $organisation;
         });
     }
 

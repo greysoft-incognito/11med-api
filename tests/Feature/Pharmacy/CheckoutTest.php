@@ -141,6 +141,11 @@ class CheckoutTest extends TestCase
                 && $title === 'Payment received'
                 && str_starts_with($data['dedupe_key'], 'payment:PAY-'))
             ->andReturn(null);
+        $notifier->shouldReceive('toPermission');
+        $notifier->shouldReceive('toOrganisation')
+            ->twice()
+            ->withArgs(fn($organisation, NotificationCategory $category, string $title) => $category === NotificationCategory::PharmacyOrder
+                && str_starts_with($title, 'New order '));
         $this->app->instance(Notifier::class, $notifier);
 
         [$lagos] = $this->approvedPartner();

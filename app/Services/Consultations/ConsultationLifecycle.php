@@ -124,6 +124,7 @@ class ConsultationLifecycle
         });
 
         $this->refund($consultation);
+        $this->tellDoctor($consultation, 'patient_cancelled');
 
         return $consultation;
     }
@@ -145,15 +146,25 @@ class ConsultationLifecycle
                 return null;
             }
 
+            $unanswered = $current->status === ConsultationStatus::Pending;
+
             $current->status = ConsultationStatus::Expired;
             $current->expires_at = null;
             $current->save();
 
-            return $current;
+            return [$current, $unanswered];
         });
 
-        if ($expired !== null) {
-            $this->refund($expired);
+        if ($expired === null) {
+            return null;
+        }
+
+        [$expired, $unanswered] = $expired;
+
+        $this->refund($expired);
+
+        if ($unanswered) {
+            $this->tellDoctor($expired, 'request_expired');
         }
 
         return $expired;
@@ -239,6 +250,21 @@ class ConsultationLifecycle
     private function refund(Consultation $consultation): void
     {
         $this->payments->refund($consultation);
+    }
+
+    /**
+     * Only a doctor who was shown the request: one that was paid.
+     */
+    private function tellDoctor(Consultation $consultation, string $event): void
+    {
+        if (! $consultation->isPaid() || $consultation->doctor === null) {
+            return;
+        }
+
+        $this->notifier->send($consultation->doctor, NotificationCategory::Consultation, __("consultations.{$event}.title"), __("consultations.{$event}.body"), [
+            'target_id' => $consultation->uuid,
+            'dedupe_key' => "consultation_{$event}:{$consultation->uuid}",
+        ]);
     }
 
     private function tellPatient(Consultation $consultation, string $event, string $title, string $body): void

@@ -88,3 +88,10 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 
 - [x] 13.1 The guide's conversation with the emergency check first, the admin summary
 - [!] 13.2 Staging and production running, scheduler and queue workers, both clients pointed at staging
+
+## M16 Notifications everywhere `[~]`
+
+- [x] 16.1 Portal accounts' history, unread count and preferences; categories per role; pharmacy, laboratory and team events; `Notifier::toOrganisation` and `toPermission`; the doctor told of a cancellation and an unanswered request
+- [x] 16.2 The portal notification centre and bell (11med-web)
+- [~] 16.3 Doctor notifications in the app (11med)
+- [~] 16.4 Live counts and the foreground banner in the app (11med)

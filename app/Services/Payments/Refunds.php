@@ -6,6 +6,7 @@ use App\Enums\PaymentShareState;
 use App\Enums\PaymentStatus;
 use App\Enums\RefundStatus;
 use App\Events\Payments\PaymentAbandoned;
+use App\Events\Payments\RefundFailed;
 use App\Exceptions\ApiException;
 use App\Jobs\Payments\RequestRefund;
 use App\Models\Payment;
@@ -140,6 +141,8 @@ class Refunds
                 ->save();
 
             Log::error('Paystack refused a refund.', ['refund' => $refund->uuid]);
+
+            RefundFailed::dispatch($refund);
         });
     }
 

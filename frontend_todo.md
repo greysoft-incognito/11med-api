@@ -199,6 +199,18 @@ milestone that introduced it. The clients tick them; never delete.
   objects. `readPushPayload` should parse `data.body` when it is a JSON string, else accept an
   absent `target_id` as null. To confirm on a device once HT-006 is cleared. (M7.2)
 
+## Notifications everywhere (M16)
+
+- [ ] **FE-160 · Portal notification centre.** `GET portal/notifications` (paged, with
+  `unread_count` and `has_more`), `GET portal/notifications/unread-count`, `PATCH
+  portal/notifications/read-all`, `PATCH portal/notifications/{id}/read`, `GET` and `PATCH
+  portal/notifications/preferences`. 11med-web, built with M16.
+- [ ] **FE-161 · Categories per role.** The preferences list offers only the caller's categories:
+  a patient the eleven as before plus `announcement`, a doctor `consultation`, `account`,
+  `announcement`. Saving another role's category is 400 `VALIDATION_FAILED` under
+  `preferences.N.category`. The app's `zNotificationCategory` gains `announcement`. 11med, built
+  with M16.
+
 ## Both
 
 - [ ] **FE-005 · Routes no contract has yet.** Consent records (registration: FE-006 adds it to the body; profile sharing),
