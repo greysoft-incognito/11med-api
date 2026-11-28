@@ -17,21 +17,25 @@ class BookingRecords
     public function __construct(
         private readonly BookingLifecycle $lifecycle,
         private readonly MediaLibrary $media,
+        private readonly BookingNotices $notices,
     ) {}
 
     /**
+     * Marks the bookings paid and tells each laboratory of the ones that were not already.
+     *
      * @param  list<string>  $bookingIds
      */
     public function markPaid(array $bookingIds): void
     {
-        DB::transaction(function () use ($bookingIds) {
-            LabBooking::query()
-                ->whereIn('uuid', $bookingIds)
-                ->orderBy('id')
-                ->lockForUpdate()
-                ->get()
-                ->each(fn(LabBooking $booking) => $this->lifecycle->markPaid($booking));
-        });
+        $arrived = DB::transaction(fn() => LabBooking::query()
+            ->with('laboratory.organisation')
+            ->whereIn('uuid', $bookingIds)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get()
+            ->filter(fn(LabBooking $booking) => $this->lifecycle->markPaid($booking)));
+
+        $arrived->each(fn(LabBooking $booking) => $this->notices->arrived($booking));
     }
 
     /**

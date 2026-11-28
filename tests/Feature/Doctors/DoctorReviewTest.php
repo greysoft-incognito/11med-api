@@ -8,6 +8,7 @@ use App\Events\Doctors\DoctorDocumentReviewed;
 use App\Events\Doctors\DoctorReviewed;
 use App\Models\User;
 use App\Services\Notifications\Notifier;
+use App\Services\Notifications\SilentNotifier;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
 
@@ -213,7 +214,7 @@ class DoctorReviewTest extends TestCase
 
     public function test_the_doctor_is_told_of_each_decision_and_each_rejected_document(): void
     {
-        $sent = new class implements Notifier
+        $sent = new class extends SilentNotifier
         {
             /** @var list<array{int, string, string}> */
             public array $sent = [];

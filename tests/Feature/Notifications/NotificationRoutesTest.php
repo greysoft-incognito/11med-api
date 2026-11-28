@@ -161,11 +161,11 @@ class NotificationRoutesTest extends TestCase
         $response = $this->actingAs($user)
             ->getJson("api/v1/notifications/{$user->uuid}/preferences")
             ->assertOk()
-            ->assertJsonCount(count(NotificationCategory::cases()), 'data.preferences')
+            ->assertJsonCount(count(NotificationCategory::for(Role::Patient)), 'data.preferences')
             ->assertJsonPath('data.preferences.0', ['category' => 'medication_reminder', 'push' => true, 'sms' => false, 'in_app' => true]);
 
         $this->assertSame(
-            array_map(fn(NotificationCategory $category) => $category->value, NotificationCategory::cases()),
+            array_map(fn(NotificationCategory $category) => $category->value, NotificationCategory::for(Role::Patient)),
             array_column($response->json('data.preferences'), 'category'),
         );
     }
@@ -181,7 +181,7 @@ class NotificationRoutesTest extends TestCase
         $this->actingAs($user)
             ->patchJson("api/v1/notifications/{$user->uuid}/preferences", $body)
             ->assertOk()
-            ->assertJsonCount(count(NotificationCategory::cases()), 'data.preferences');
+            ->assertJsonCount(count(NotificationCategory::for(Role::Patient)), 'data.preferences');
 
         $this->actingAs($user)
             ->patchJson("api/v1/notifications/{$user->uuid}/preferences", ['preferences' => [

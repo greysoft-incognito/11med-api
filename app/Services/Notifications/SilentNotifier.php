@@ -2,7 +2,9 @@
 
 namespace App\Services\Notifications;
 
+use App\Enums\AdminPermission;
 use App\Enums\NotificationCategory;
+use App\Models\Organisation;
 use App\Models\User;
 
 /**
@@ -14,4 +16,8 @@ class SilentNotifier implements Notifier
     {
         return null;
     }
+
+    public function toOrganisation(Organisation $organisation, NotificationCategory $category, string $title, string $body, array $data = []): void {}
+
+    public function toPermission(AdminPermission $permission, NotificationCategory $category, string $title, string $body, array $data = []): void {}
 }

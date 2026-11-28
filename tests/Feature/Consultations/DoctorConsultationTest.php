@@ -129,6 +129,11 @@ class DoctorConsultationTest extends TestCase
             ->assertJsonPath('data.status', 'expired');
 
         $this->assertSame([$id], $this->payments->refunded);
+
+        $told = $this->notifier->to($doctor);
+
+        $this->assertSame('A consultation request expired', end($told)['title']);
+        $this->assertSame($id, end($told)['data']['target_id']);
     }
 
     public function test_an_accepted_session_not_joined_in_ten_minutes_expires_and_is_refunded(): void

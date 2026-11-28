@@ -34,6 +34,7 @@ class LabBookings
         private readonly BookingLifecycle $lifecycle,
         private readonly BookingPayments $bookingPayments,
         private readonly Payments $payments,
+        private readonly BookingNotices $notices,
     ) {}
 
     /**
@@ -150,7 +151,7 @@ class LabBookings
      */
     public function cancel(User $patient, string $bookingId): LabBooking
     {
-        DB::transaction(function () use ($patient, $bookingId) {
+        $booking = DB::transaction(function () use ($patient, $bookingId) {
             $booking = $this
                 ->owned($patient, $bookingId)
                 ->lockForUpdate()
@@ -161,7 +162,13 @@ class LabBookings
             }
 
             $this->lifecycle->cancel($booking, LabCancelledBy::Patient);
+
+            return $booking;
         });
+
+        if ($booking->paid_at !== null) {
+            $this->notices->withdrawn($booking);
+        }
 
         return $this->find($patient, $bookingId);
     }

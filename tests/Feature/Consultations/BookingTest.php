@@ -3,6 +3,7 @@
 namespace Tests\Feature\Consultations;
 
 use App\Enums\ConsentContext;
+use App\Enums\NotificationCategory;
 use App\Enums\Role;
 use App\Models\ConsentRecord;
 use App\Models\Consultation;
@@ -141,6 +142,11 @@ class BookingTest extends TestCase
             ->assertJsonPath('data.status', 'cancelled');
 
         $this->assertSame([$id], $this->payments->refunded);
+
+        $told = $this->notifier->to($doctor);
+
+        $this->assertSame(NotificationCategory::Consultation, end($told)['category']);
+        $this->assertSame('A patient cancelled a consultation', end($told)['title']);
 
         $this->actingAs($patient)
             ->postJson("api/v1/consultations/{$id}/cancel")
