@@ -125,4 +125,11 @@ return [
     'SNOOZE_LIMIT_REACHED' => 'You have used every snooze for this dose.',
     'READING_NOT_FOUND' => 'That reading is not here.',
     'SESSION_NOT_FOUND' => 'That device is no longer signed in.',
+    'TWO_FACTOR_REQUIRED' => 'Enter the code from your authenticator app to finish signing in.',
+    'TWO_FACTOR_CODE_INVALID' => 'That code is not correct. Check your authenticator app and try again.',
+    'TWO_FACTOR_CHALLENGE_INVALID' => 'That sign-in has expired. Sign in again.',
+    'TWO_FACTOR_ALREADY_ENABLED' => 'Two-step verification is already on.',
+    'TWO_FACTOR_NOT_ENABLED' => 'Two-step verification is not on.',
+    'TWO_FACTOR_NOT_STARTED' => 'Start two-step verification again to get a new key.',
+    'TWO_FACTOR_SETUP_REQUIRED' => 'Turn on two-step verification on your account page to use the team desk.',
 ];

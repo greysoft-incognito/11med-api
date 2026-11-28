@@ -23,6 +23,16 @@ return [
         'fixed_code' => env('OTP_FIXED_CODE'),
     ],
 
+    // Two-step verification (M14): an authenticator app with single-use recovery codes. Required for
+    // the team's accounts unless ADMIN_2FA_REQUIRED is false; optional for everyone else.
+    'two_factor' => [
+        'admin_required' => (bool) env('ADMIN_2FA_REQUIRED', true),
+        'issuer' => env('TWO_FACTOR_ISSUER', '11med'),
+        'challenge_minutes' => 5,
+        'challenge_attempts' => 5,
+        'recovery_codes' => 10,
+    ],
+
     // Failed sign-ins per phone number (app spec §2.1.4).
     'login' => [
         'lock_after' => 5,
