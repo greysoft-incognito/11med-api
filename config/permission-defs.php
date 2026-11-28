@@ -3,7 +3,7 @@
 use App\Enums\Role;
 use App\Models\User;
 
-// The kit's admin permissions. Only the team holds them.
+// The kit's platform permissions. Only the super admin holds them, through the gate.
 $permissions = [
     'dashboard',
     'transactions',
@@ -37,9 +37,10 @@ return [
     | Super Admin Role
     |--------------------------------------------------------------------------
     |
-    | This is the role that would be considered as the super admin role.
+    | This is the role that would be considered as the super admin role: the
+    | staff role every permission check passes for (App\Models\StaffRole).
     */
-    'super-admin-role' => 'admin',
+    'super-admin-role' => 'staff:super-admin',
     /*
     |--------------------------------------------------------------------------
     | Role List
@@ -83,6 +84,7 @@ return [
         'doctor' => $permissions,
         'pharmacy' => $permissions,
         'laboratory' => $permissions,
+        'admin' => $permissions,
     ],
     /*
     |--------------------------------------------------------------------------

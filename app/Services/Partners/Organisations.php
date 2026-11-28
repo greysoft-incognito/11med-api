@@ -15,6 +15,7 @@ use App\Http\Paging\Page;
 use App\Models\Organisation;
 use App\Models\User;
 use App\Notifications\Partners\PartnerStatusChanged;
+use App\Services\Audit\AuditLog;
 use App\Services\Identity\PortalAccounts;
 use App\Services\Media\MediaLibrary;
 use App\Support\PhoneNumber;
@@ -30,6 +31,7 @@ class Organisations
     public function __construct(
         private readonly MediaLibrary $media,
         private readonly PortalAccounts $accounts,
+        private readonly AuditLog $audit,
     ) {}
 
     /**
@@ -74,9 +76,9 @@ class Organisations
     /**
      * The team's decision: approve a pending application, suspend an approved partner, reinstate a suspended one.
      */
-    public function review(string $id, string $decision, ?string $notes): Organisation
+    public function review(string $id, string $decision, ?string $notes, ?User $by = null): Organisation
     {
-        return DB::transaction(function () use ($id, $decision, $notes) {
+        return DB::transaction(function () use ($id, $decision, $notes, $by) {
             $organisation = Organisation::query()
                 ->where('uuid', $id)
                 ->lockForUpdate()
@@ -92,6 +94,10 @@ class Organisations
                 'reinstated' => $this->reinstate($organisation),
             };
 
+            if ($by !== null) {
+                $this->audit->record($by, 'partner.reviewed', $organisation, ['decision' => $decision, 'notes' => $notes]);
+            }
+
             return $organisation;
         });
     }
@@ -99,9 +105,9 @@ class Organisations
     /**
      * Send an approved partner's contact a new welcome link while they have not set a password.
      */
-    public function resendWelcome(string $id): Organisation
+    public function resendWelcome(string $id, ?User $by = null): Organisation
     {
-        return DB::transaction(function () use ($id) {
+        return DB::transaction(function () use ($id, $by) {
             $organisation = Organisation::query()
                 ->where('uuid', $id)
                 ->lockForUpdate()
@@ -129,6 +135,10 @@ class Organisations
             }
 
             $this->accounts->welcome($account);
+
+            if ($by !== null) {
+                $this->audit->record($by, 'partner.welcome_resent', $organisation);
+            }
 
             return $organisation;
         });

@@ -8,6 +8,8 @@ use App\Exceptions\ApiException;
 use App\Http\Paging\ListQuery;
 use App\Http\Paging\Page;
 use App\Models\DoctorProfile;
+use App\Models\User;
+use App\Services\Audit\AuditLog;
 use App\Support\PhoneNumber;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,6 +23,7 @@ class DoctorApplications
 {
     public function __construct(
         private readonly DoctorVerification $verification,
+        private readonly AuditLog $audit,
     ) {}
 
     /**
@@ -75,27 +78,39 @@ class DoctorApplications
         return $profile->load(['user', 'photo', 'documents.media']);
     }
 
-    public function reviewDocument(string $doctorId, DocumentKind $kind, bool $accepted, ?string $reason): DoctorProfile
+    public function reviewDocument(string $doctorId, DocumentKind $kind, bool $accepted, ?string $reason, ?User $by = null): DoctorProfile
     {
         $profile = $this->find($doctorId);
 
-        DB::transaction(function () use ($profile, $kind, $accepted, $reason) {
+        DB::transaction(function () use ($profile, $kind, $accepted, $reason, $by) {
             $profile->newQuery()->lockForUpdate()->find($profile->id);
 
             $this->verification->reviewDocument($profile, $kind, $accepted, $reason);
+
+            if ($by !== null) {
+                $this->audit->record($by, 'doctor.document_reviewed', $profile, [
+                    'kind' => $kind->value,
+                    'decision' => $accepted ? 'accepted' : 'rejected',
+                    'reason' => $reason,
+                ]);
+            }
         });
 
         return $profile->load('documents.media');
     }
 
-    public function decide(string $doctorId, string $decision, ?string $notes): DoctorProfile
+    public function decide(string $doctorId, string $decision, ?string $notes, ?User $by = null): DoctorProfile
     {
         $profile = $this->find($doctorId);
 
-        DB::transaction(function () use ($profile, $decision, $notes) {
+        DB::transaction(function () use ($profile, $decision, $notes, $by) {
             $profile->newQuery()->lockForUpdate()->find($profile->id);
 
             $this->verification->decide($profile, $decision, $notes);
+
+            if ($by !== null) {
+                $this->audit->record($by, 'doctor.reviewed', $profile, ['decision' => $decision, 'notes' => $notes]);
+            }
         });
 
         return $profile;

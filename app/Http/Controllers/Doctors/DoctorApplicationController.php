@@ -38,14 +38,14 @@ class DoctorApplicationController extends Controller
     {
         $kind = DocumentKind::from($request->validated('kind'));
         $accepted = $request->validated('decision') === 'accepted';
-        $profile = $this->applications->reviewDocument($id, $kind, $accepted, $request->validated('reason'));
+        $profile = $this->applications->reviewDocument($id, $kind, $accepted, $request->validated('reason'), $request->user());
 
         return new DoctorApplicationResource($profile);
     }
 
     public function review(ReviewApplicationRequest $request, string $id): DoctorApplicationResource
     {
-        $profile = $this->applications->decide($id, $request->validated('decision'), $request->validated('notes'));
+        $profile = $this->applications->decide($id, $request->validated('decision'), $request->validated('notes'), $request->user());
 
         return new DoctorApplicationResource($profile);
     }

@@ -99,6 +99,13 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 - [x] 14.6 The app's settings (client side, 11med)
 - [x] 14.7 A portal account's name, email and password (with the portal's account page in 11med-web)
 
+## M15 Admin RBAC and audit `[x]`
+
+- [x] 15.1 The `AdminPermission` catalogue, the default staff roles synced by `app:sync-roles`, every admin route gated by its permission, the session's effective permissions
+- [x] 15.2 Staff roles: list, create, edit, delete with the holders moved; the super admin role fixed
+- [x] 15.3 Staff: list, invite, roles and direct permissions, deactivate and reactivate; `app:create-admin` opens a super admin
+- [x] 15.4 The audit log: `AuditLog::record()` from every admin write, paged and filtered
+
 ## M16 Notifications everywhere `[~]`
 
 - [x] 16.1 Portal accounts' history, unread count and preferences; categories per role; pharmacy, laboratory and team events; `Notifier::toOrganisation` and `toPermission`; the doctor told of a cancellation and an unanswered request
