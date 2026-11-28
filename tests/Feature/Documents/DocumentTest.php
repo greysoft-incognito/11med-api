@@ -5,6 +5,7 @@ namespace Tests\Feature\Documents;
 use App\Enums\AdminPermission;
 use App\Enums\Role;
 use App\Models\Document;
+use App\Models\DocumentVersion;
 use App\Models\User;
 use App\Services\Audit\AuditLog;
 use Database\Seeders\DocumentSeeder;
@@ -31,6 +32,8 @@ class DocumentTest extends TestCase
     public function test_the_seeder_writes_every_built_in_document_once(): void
     {
         $this->assertSame(Document::BUILT_IN, Document::query()->ordered()->pluck('slug')->all());
+        $this->assertSame([1, 1, 1, 1], Document::query()->ordered()->pluck('version')->all());
+        $this->assertSame(4, DocumentVersion::query()->where('version', 1)->count());
 
         Document::query()
             ->where('slug', Document::TERMS)
@@ -48,7 +51,8 @@ class DocumentTest extends TestCase
             ->assertOk()
             ->assertJsonPath('data.slug', 'partner-terms')
             ->assertJsonPath('data.title', 'Terms of service')
-            ->assertJsonStructure(['data' => ['id', 'slug', 'title', 'body', 'updated_at']]);
+            ->assertJsonPath('data.version', 1)
+            ->assertJsonStructure(['data' => ['id', 'slug', 'title', 'body', 'version', 'updated_at']]);
 
         $this->getJson('api/v1/documents/about')
             ->assertNotFound()
@@ -70,11 +74,42 @@ class DocumentTest extends TestCase
             ->putJson("api/v1/portal/admin/documents/{$id}", ['body' => "## What this covers\n\nThe new wording, long enough."])
             ->assertOk()
             ->assertJsonPath('data.title', 'Privacy policy')
+            ->assertJsonPath('data.version', 2)
             ->assertJsonPath('data.body', "## What this covers\n\nThe new wording, long enough.")
             ->assertJsonPath('data.updated_by_name', $team->full_name);
 
-        $this->getJson('api/v1/documents/privacy')->assertJsonPath('data.body', "## What this covers\n\nThe new wording, long enough.");
-        $this->assertSame(['document.updated'], $this->audit->actions());
+        $this->actingAs($team)
+            ->putJson("api/v1/portal/admin/documents/{$id}", ['title' => 'Our privacy policy'])
+            ->assertOk()
+            ->assertJsonPath('data.version', 3);
+
+        $this->getJson('api/v1/documents/privacy')
+            ->assertJsonPath('data.title', 'Our privacy policy')
+            ->assertJsonPath('data.body', "## What this covers\n\nThe new wording, long enough.");
+
+        $kept = DocumentVersion::query()
+            ->whereHas('document', fn($query) => $query->where('slug', Document::PRIVACY))
+            ->orderBy('version')
+            ->get();
+
+        $this->assertSame([1, 2, 3], $kept->pluck('version')->all());
+        $this->assertSame('Privacy policy', $kept[1]->title);
+        $this->assertSame($team->id, $kept[2]->created_by);
+        $this->assertSame(['document.updated', 'document.updated'], $this->audit->actions());
+    }
+
+    public function test_a_save_that_changes_nothing_is_not_a_new_version(): void
+    {
+        $team = $this->teamMember(AdminPermission::DocumentsEdit);
+        $document = Document::query()->where('slug', Document::TERMS)->sole();
+
+        $this->actingAs($team)
+            ->putJson("api/v1/portal/admin/documents/{$document->uuid}", ['title' => $document->title, 'body' => $document->body])
+            ->assertUnprocessable()
+            ->assertJsonPath('error.code', 'DOCUMENT_UNCHANGED');
+
+        $this->assertSame(1, $document->fresh()->version);
+        $this->assertSame([], $this->audit->actions());
     }
 
     public function test_an_edit_is_validated(): void

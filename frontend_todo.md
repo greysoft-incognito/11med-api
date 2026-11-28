@@ -236,3 +236,9 @@ milestone that introduced it. The clients tick them; never delete.
   `two_factor_enabled` and `two_factor_required` and sends the person to `/account`. (M14.2)
 - [x] **FE-142 · The device's name.** The app sends `X-Device-Name` and `X-Device-Platform` with each
   request so the devices list names the phone; without them the server reads the user agent. (M14.1)
+- [x] **FE-172 · Versioned terms from the API.** The terms and privacy policies are read from
+  `GET documents/{slug}` (`terms`, `privacy`, `partner-terms`, `partner-privacy`), each with a
+  `version` that goes up on every edit. `pending_policy_version` is now the pair's versions joined,
+  `<terms>.<privacy>` (`1.1`, then `2.1` after one edit to the terms), not a date; a consent
+  recorded at registration without one names that version too. Done in both clients on
+  `fix/terms-gate` (app #12, web #11). (M18.5)

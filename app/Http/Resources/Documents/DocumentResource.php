@@ -22,6 +22,7 @@ class DocumentResource extends ApiResource
             'slug' => $document->slug,
             'title' => $document->title,
             'body' => $document->body,
+            'version' => $document->version,
             'updated_at' => $this->iso($document->updated_at),
         ];
     }

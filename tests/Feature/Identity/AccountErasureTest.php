@@ -76,7 +76,7 @@ class AccountErasureTest extends TestCase
 
         $consent = ConsentRecord::sole();
         $this->assertNull($consent->user_id);
-        $this->assertSame('2026-07-01', $consent->policy_version);
+        $this->assertSame('1.1', $consent->policy_version);
 
         $erasure = AccountErasure::sole();
         $this->assertSame('patient', $erasure->role);

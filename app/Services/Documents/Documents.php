@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * The terms and privacy documents: read by anyone, edited by the team. The set is the built-in
- * documents the clients link to by slug, so it is read whole.
+ * documents the clients link to by slug, so it is read whole. Every edit publishes a new version,
+ * and the versions of an account's pair make the policy version it is asked to accept.
  */
 class Documents
 {
@@ -47,7 +48,47 @@ class Documents
     }
 
     /**
-     * Changes the title or body; a field left out keeps what the document has.
+     * The policy version of a pair of documents, their versions joined in order (`3.2`), or null
+     * while one of them has not been written.
+     *
+     * @param  list<string>  $slugs
+     */
+    public function policyVersion(array $slugs): ?string
+    {
+        $versions = Document::query()
+            ->whereIn('slug', $slugs)
+            ->pluck('version', 'slug');
+
+        if ($versions->count() !== count($slugs)) {
+            return null;
+        }
+
+        return implode('.', array_map(fn(string $slug) => $versions[$slug], $slugs));
+    }
+
+    /**
+     * Writes a document as version 1.
+     */
+    public function create(string $slug, string $title, string $body, int $sort): Document
+    {
+        return DB::transaction(function () use ($slug, $title, $body, $sort) {
+            $document = Document::create([
+                'slug' => $slug,
+                'title' => $title,
+                'body' => $body,
+                'version' => 1,
+                'sort' => $sort,
+            ]);
+
+            $this->keepVersion($document);
+
+            return $document;
+        });
+    }
+
+    /**
+     * Publishes the title or body as the next version; a field left out keeps what the document
+     * has. A save that changes nothing is refused, since a new version asks everyone to accept it.
      *
      * @param  array{title?: string, body?: string}  $details
      */
@@ -59,19 +100,35 @@ class Documents
                 ->lockForUpdate()
                 ->first() ?? throw ApiException::notFound(Document::NOT_FOUND);
 
-            $changed = array_keys($details);
+            $document->fill(array_map(trim(...), $details));
+            $changed = array_keys($document->getDirty());
+
+            if ($changed === []) {
+                throw ApiException::unprocessable('DOCUMENT_UNCHANGED');
+            }
 
             $document->fill([
-                ...array_map(trim(...), $details),
+                'version' => $document->version + 1,
                 'updated_by' => $actor->id,
             ]);
             $document->save();
 
-            $this->audit->record($actor, 'document.updated', $document, ['slug' => $document->slug, 'fields' => $changed]);
+            $this->keepVersion($document);
+            $this->audit->record($actor, 'document.updated', $document, ['slug' => $document->slug, 'version' => $document->version, 'fields' => $changed]);
 
             return $document;
         });
 
         return $document->load('editor');
+    }
+
+    private function keepVersion(Document $document): void
+    {
+        $document->versions()->create([
+            'version' => $document->version,
+            'title' => $document->title,
+            'body' => $document->body,
+            'created_by' => $document->updated_by,
+        ]);
     }
 }

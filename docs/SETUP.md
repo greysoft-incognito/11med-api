@@ -94,7 +94,6 @@ and push) runs in the workers, so skipping the restart leaves them on the old va
 | `APPLE_BUNDLE_ID` | `ng.elevenmed.app` | The audience Apple sign-in tokens are checked against | M2 |
 | `PORTALS_URL` | `http://localhost:3000` | Where the portals live, e.g. the deployed portal's `https://…` origin with no trailing path. Reset and welcome emails link to `PORTALS_URL/set-password?token=…`, so on a server it must be set or the links point at localhost | M2 |
 | `CORS_ALLOWED_ORIGINS` | `PORTALS_URL` | Browser origins allowed to call the API, comma separated, e.g. the staging and local portals. The app is native and needs none | M13 |
-| `CONSENT_POLICY_VERSION` | `2026-07-01` | The terms and privacy policy version in force. Recorded when the app sends no consent record, and since M18 every patient, doctor, pharmacy and laboratory account that has not accepted this exact version is asked to accept it before going on. Change it only when the published terms change, and publish the new terms first; then `php artisan config:cache` | M2, M18 |
 | `MEDIA_PUBLIC_DISK` | `public` | Disk for photos and store pictures. Point at an `s3` disk with public read once the bucket exists (HT-005) | M3 |
 | `MEDIA_PRIVATE_DISK` | `local` | Disk for attachments, lab results and licences. A private `s3` disk once the bucket exists | M3 |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
@@ -193,8 +192,13 @@ The terms and privacy policies (M18.5) are seeded from `resources/documents/*.md
 pending legal review, with bracketed facts only the business can supply (company name and
 address, privacy contact, retention period). Fill those in from the admin portal's Terms and
 privacy page, which needs the `documents.edit` permission (the super admin holds it after the
-deploy's `app:sync-roles`). The seeder never overwrites a document that exists. Editing the text
-does not ask anyone to accept again; raise `CONSENT_POLICY_VERSION` for that.
+deploy's `app:sync-roles`). The seeder never overwrites a document that exists.
+
+Every save there publishes a new version of that document, and the version people accept is the
+pair's versions joined (`terms.privacy`, `2.1` after one edit to the terms). So each save asks
+every account that reads that pair (app users for `terms` and `privacy`, pharmacies and
+laboratories for the partner pair) to accept again before going on. There is no
+`CONSENT_POLICY_VERSION` any more; remove it from `.env` if it is set.
 
 The test catalogue (M12) starts empty, and a laboratory can only price tests that are in it. The
 seeder adds the twenty tests the app's mock uses, only those missing, so running it again never

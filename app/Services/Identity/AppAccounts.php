@@ -26,6 +26,7 @@ class AppAccounts
         private readonly LoginGuard $guard,
         private readonly SessionTokens $tokens,
         private readonly TwoFactorChallenges $twoFactor,
+        private readonly PolicyConsent $policy,
     ) {}
 
     /**
@@ -54,7 +55,7 @@ class AppAccounts
             ConsentRecord::create([
                 'user_id' => $user->id,
                 'context' => $context,
-                'policy_version' => $data['consent']['policy_version'] ?? config('elevenmed.consent.policy_version'),
+                'policy_version' => $data['consent']['policy_version'] ?? $this->policy->recordable(Role::from($data['role'])),
                 'accepted_at' => $data['consent']['accepted_at'] ?? now(),
                 'recorded_at' => now(),
             ]);

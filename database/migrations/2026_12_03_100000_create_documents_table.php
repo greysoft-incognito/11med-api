@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('slug', 60);
             $table->string('title', 120);
             $table->text('body');
+            $table->unsignedInteger('version')->default(1);
             $table->unsignedSmallInteger('sort')->default(0);
             $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestampsTz();

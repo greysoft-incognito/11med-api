@@ -13,8 +13,13 @@ Newest first. Never edit an old entry.
   them at `GET portal/admin/documents`, `GET` and `PUT portal/admin/documents/{id}` (title and body
   only; none is added or deleted), under the new permissions `documents.view` and `documents.edit`,
   audited as `document.updated`.
-- Acceptance is unchanged (M18.3): an edit shows at once, and people are asked to accept again only
-  when `CONSENT_POLICY_VERSION` changes.
+- Every edit is a new version (owner's call): `documents.version` goes up by one and the text is
+  kept in `document_versions`. A save that changes nothing is 422 `DOCUMENT_UNCHANGED`.
+- The policy version an account accepts (M18.3) is now its pair's versions joined, `terms.privacy`
+  for app accounts and `partner-terms.partner-privacy` for partners (`1.1` when seeded), read by
+  `PolicyConsent` through `Documents::policyVersion()`. Each edit therefore asks that pair's
+  readers to accept again. `CONSENT_POLICY_VERSION` is removed; a consent recorded while a pair is
+  unwritten names `unpublished`.
 
 ## 2026-12-02: M18.4 Minimum app version
 
