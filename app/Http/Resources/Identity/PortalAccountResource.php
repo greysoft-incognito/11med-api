@@ -4,10 +4,12 @@ namespace App\Http\Resources\Identity;
 
 use App\Http\Resources\ApiResource;
 use App\Models\User;
+use App\Services\Staff\StaffAccess;
 use Illuminate\Http\Request;
 
 /**
- * `zPortalAccount`. A pharmacy's or laboratory's account carries its organisation; the team's carries none.
+ * `zPortalAccount`. A pharmacy's or laboratory's account carries its organisation; the team's carries none
+ * and lists the admin permissions it holds.
  *
  * @property User $resource
  */
@@ -17,6 +19,7 @@ class PortalAccountResource extends ApiResource
     {
         $account = $this->resource;
         $organisation = $account->organisation;
+        $permissions = app(StaffAccess::class)->permissionsOf($account);
 
         return [
             'id' => $account->uuid,
@@ -25,6 +28,7 @@ class PortalAccountResource extends ApiResource
             'role' => $account->role()?->value,
             'organisation_id' => $organisation?->uuid,
             'organisation_name' => $organisation?->name,
+            'permissions' => $permissions,
             'created_at' => $this->iso($account->created_at),
         ];
     }

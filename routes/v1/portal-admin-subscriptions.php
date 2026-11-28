@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AdminPermission;
 use App\Enums\Role;
 use App\Http\Controllers\Subscriptions\AdminSubscriptionController;
 use Illuminate\Support\Facades\Route;
@@ -9,6 +10,10 @@ Route::middleware(['auth:sanctum', 'role:' . Role::Admin->value])
     ->prefix('portal/admin/subscriptions')
     ->name('portal.admin.subscriptions.')
     ->group(function () {
-        Route::get('/', [AdminSubscriptionController::class, 'index'])->name('index');
-        Route::post('/', [AdminSubscriptionController::class, 'store'])->name('store');
+        Route::get('/', [AdminSubscriptionController::class, 'index'])
+            ->name('index')
+            ->middleware(AdminPermission::middleware(AdminPermission::SubscriptionsView));
+        Route::post('/', [AdminSubscriptionController::class, 'store'])
+            ->name('store')
+            ->middleware(AdminPermission::middleware(AdminPermission::SubscriptionsRecord));
     });

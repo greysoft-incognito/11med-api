@@ -112,6 +112,7 @@ class User extends Authenticatable implements WalletOperations
             'last_attempt' => 'datetime',
             'email_verified_at' => 'datetime',
             'phone_verified_at' => 'datetime',
+            'deactivated_at' => 'datetime',
         ];
     }
 
@@ -218,15 +219,23 @@ class User extends Authenticatable implements WalletOperations
     }
 
     /**
-     * The user's one role.
+     * The user's one account role. A team account also holds staff roles, which are not one.
      */
     public function role(): ?Role
     {
-        $name = $this->relationLoaded('roles')
-            ? $this->roles->first()?->name
-            : $this->getRoleNames()->first();
+        $names = $this->relationLoaded('roles')
+            ? $this->roles->pluck('name')
+            : $this->getRoleNames();
 
-        return $name === null ? null : Role::tryFrom($name);
+        foreach ($names as $name) {
+            $role = Role::tryFrom($name);
+
+            if ($role !== null) {
+                return $role;
+            }
+        }
+
+        return null;
     }
 
     /**

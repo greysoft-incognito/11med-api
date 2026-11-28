@@ -124,4 +124,13 @@ return [
     'DOSE_NOT_ANSWERED' => 'That dose has not been answered.',
     'SNOOZE_LIMIT_REACHED' => 'You have used every snooze for this dose.',
     'READING_NOT_FOUND' => 'That reading is not here.',
+
+    'STAFF_NOT_FOUND' => 'No team member with that id.',
+    'ROLE_NOT_FOUND' => 'No role with that id.',
+    'ROLE_NAME_TAKEN' => 'Another role already has that name.',
+    'ROLE_PROTECTED' => 'The super admin role holds every permission and cannot be changed or deleted.',
+    'ROLE_IN_USE' => 'Team members still hold this role. Choose a role to move them to first.',
+    'PERMISSION_NOT_HELD' => 'You can only give or take away permissions you hold yourself.',
+    'LAST_SUPER_ADMIN' => 'This is the last active super admin. Make someone else super admin first.',
+    'ACCOUNT_DEACTIVATED' => 'This account has been deactivated. Ask your administrator.',
 ];
