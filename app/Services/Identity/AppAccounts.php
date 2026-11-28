@@ -164,7 +164,7 @@ class AppAccounts
     /**
      * Refuse a number a verified account holds; remove one an unverified sign-up left behind.
      */
-    private function releaseUnverified(string $phone): void
+    public function releaseUnverified(string $phone): void
     {
         $holder = User::where('phone', $phone)->first();
 

@@ -136,6 +136,7 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | --- | --- |
 | `sign_ins` | Not soft deleted (a credential). One per sign-in: `family` (the refresh-token family, unique), `client`, `install_id`, `device_key` (SHA-256 of the install id, or of the browser's user agent), `device_name` and `platform` as the client named them or as read from the user agent, `signed_in_at`, `last_used_at` (moved on each refresh), `ended_at` (set when the family is revoked). Cascades on erasure; pruned a month after it ends |
 | `users` (extended) | `two_factor_secret` and `two_factor_recovery_codes` (SHA-256 of each code), both encrypted with `APP_KEY`; `two_factor_confirmed_at` (on once set); `two_factor_last_step` (the authenticator time step last spent, so a code is never accepted twice) |
+| `users` (extended) | `pending_phone`: the number an app account is moving to until the code sent there comes back; its code's `otp_codes.target` is `phone-change:<user uuid>`, so the resend budget is per account whichever numbers are tried |
 | `two_factor_challenges` | Not soft deleted (a credential). A sign-in waiting on its second step: `token_hash` (SHA-256), `client`, `install_id`, `attempts` (five wrong codes end it), `expires_at` (five minutes), `used_at`. Cascades on erasure; pruned a day after it lapses |
 
 Domain tables are added here as each milestone lands.
