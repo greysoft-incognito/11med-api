@@ -4,6 +4,7 @@ use App\Exceptions\ApiExceptionRenderer;
 use App\Http\Middleware\Authenticate;
 use App\Http\Middleware\EnsureEmailIsVerified;
 use App\Http\Middleware\RedirectIfAuthenticated;
+use App\Http\Middleware\RequireAdminTwoFactor;
 use App\Services\ExceptionHandler;
 use Faker\Factory;
 use Faker\Generator;
@@ -80,6 +81,7 @@ return Application::configure(basePath: dirname(__DIR__))
             EnsureFrontendRequestsAreStateful::class,
             ThrottleRequests::class . ':api',
             SubstituteBindings::class,
+            RequireAdminTwoFactor::class,
         ]);
 
         $middleware->alias([

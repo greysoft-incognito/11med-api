@@ -4,6 +4,7 @@ namespace App\Http\Resources\Identity;
 
 use App\Http\Resources\ApiResource;
 use App\Models\User;
+use App\Services\Identity\TwoFactor\TwoFactorPolicy;
 use App\Services\Staff\StaffAccess;
 use Illuminate\Http\Request;
 
@@ -30,6 +31,8 @@ class PortalAccountResource extends ApiResource
             'organisation_name' => $organisation?->name,
             'permissions' => $permissions,
             'created_at' => $this->iso($account->created_at),
+            'two_factor_enabled' => $account->hasTwoFactor(),
+            'two_factor_required' => app(TwoFactorPolicy::class)->required($account),
         ];
     }
 }

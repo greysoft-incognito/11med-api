@@ -70,7 +70,7 @@ and push) runs in the workers, so skipping the restart leaves them on the old va
 | Variable | Value |
 | --- | --- |
 | `APP_ENV` | `staging` or `production` |
-| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. It also encrypts guide messages (M13), which become unreadable too: start over clears them. It also encrypts doctors' payout account numbers (M8), which a changed key would lose: doctors would have to enter them again before a payout |
+| `APP_KEY` | `php artisan key:generate`, once per server. It also encrypts QR tokens (M4): changing it makes every saved code unreadable, so patients would have to revoke and reissue. It also encrypts guide messages (M13), which become unreadable too: start over clears them. It also encrypts doctors' payout account numbers (M8), which a changed key would lose: doctors would have to enter them again before a payout. It also encrypts two-step verification secrets (M14): a changed key turns two-step verification off in effect for everyone who had it, and an operator must clear those accounts as section 5 says |
 | `APP_DEBUG` | `false` |
 | `APP_URL` | The API's public `https://` address. Upload URLs and signed file links are built from it (M3) |
 | `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | PostgreSQL. `DB_CONNECTION=pgsql` |
@@ -99,6 +99,9 @@ and push) runs in the workers, so skipping the restart leaves them on the old va
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
 | `REPORT_DISK` | `local` | Disk for compliance report PDFs, served by a 15-minute signed link and deleted after a day. A private `s3` disk once the bucket exists (HT-005); never a public one | M6 |
 
+| `DATA_EXPORT_DISK` | `local` | Disk for "download my data" zips (M14): the person's whole record, kept 48 hours and served only by signed links. A private `s3` disk once the bucket exists (HT-005); never a public one. The queue worker builds them, writing temporary files under `storage/app/tmp` | M14 |
+| `ADMIN_2FA_REQUIRED` | `true` | The team's accounts must turn on two-step verification (an authenticator app) before any admin route answers; until then they get 403 `TWO_FACTOR_SETUP_REQUIRED` and the portal sends them to their account page. `false` makes it optional for admins too. Pharmacy, laboratory, patient and doctor accounts may always choose it | M14 |
+| `TWO_FACTOR_ISSUER` | `11med` | The name an authenticator app shows beside the code | M14 |
 | `GUIDE_RETENTION_DAYS` | `30` | Guide conversations idle this many days are deleted by the scheduler, with their messages (HT-130) | M13 |
 | `PAYSTACK_SECRET_KEY` | none | Paystack's secret key (`sk_test_…` on staging, `sk_live_…` on production). It also verifies the webhook's signature. Never give it to a client (HT-007) | M9 |
 | `PAYSTACK_CALLBACK_URL` | `elevenmed://pay` | Where Paystack's page sends the patient back; `?reference=` is added per payment. The app's pay screen (app CLAUDE.md, "Deep links"). See ISS-090 | M9 |
@@ -157,6 +160,13 @@ php artisan app:create-admin you@example.com "Your Name"   # first super admin; 
 php artisan db:seed --class=DrugClassSeeder --force        # the allergy classes (M10); safe to run again
 php artisan db:seed --class=LabCatalogueSeeder --force    # the starting test catalogue (M12)
 ```
+
+The first admin signs in with the link `app:create-admin` prints and, while `ADMIN_2FA_REQUIRED`
+is on, is asked to set up an authenticator app (Google Authenticator, Microsoft Authenticator,
+1Password and the like) from the account page before the desk opens. Keep the recovery codes it
+shows: if every admin loses their phone, an operator on the server can clear one account's
+two-step verification with `php artisan tinker` and
+`User::where('email', 'you@example.com')->first()->forceFill(['two_factor_secret' => null, 'two_factor_recovery_codes' => null, 'two_factor_confirmed_at' => null])->save();`.
 
 Team access (M15): the deploy's `app:sync-roles` also syncs the admin permissions and creates the
 five default staff roles the first time it runs, making every team account that already exists a

@@ -8,6 +8,7 @@ use App\Exceptions\ApiException;
 use App\Models\PasswordLink;
 use App\Models\User;
 use App\Notifications\Identity\PortalPasswordLink;
+use App\Services\Identity\TwoFactor\TwoFactorChallenges;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -21,6 +22,7 @@ class PortalAccounts
 {
     public function __construct(
         private readonly SessionTokens $tokens,
+        private readonly TwoFactorChallenges $twoFactor,
     ) {}
 
     public function signIn(string $email, string $password): PortalSession
@@ -122,6 +124,7 @@ class PortalAccounts
         if ($account->deactivated_at !== null) {
             throw ApiException::forbidden('ACCOUNT_DEACTIVATED');
         }
+        $this->twoFactor->requireFor($account, AuthClient::Portal);
 
         $pair = $this->tokens->issue($account, AuthClient::Portal);
 
