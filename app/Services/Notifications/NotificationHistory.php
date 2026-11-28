@@ -20,11 +20,7 @@ class NotificationHistory
         $this->ensureSelf($caller, $userId);
 
         $mine = AppNotification::query()->where('user_id', $caller->id);
-
-        $unread = $mine
-            ->clone()
-            ->whereNull('read_at')
-            ->count();
+        $unread = $this->unreadCount($caller);
 
         $page = $list->paginate(
             $mine
@@ -33,6 +29,14 @@ class NotificationHistory
         );
 
         return new NotificationList($page, $unread);
+    }
+
+    public function unreadCount(User $user): int
+    {
+        return AppNotification::query()
+            ->where('user_id', $user->id)
+            ->whereNull('read_at')
+            ->count();
     }
 
     /**

@@ -66,7 +66,7 @@ All three cascade on account erasure.
 
 | Table | Notes |
 | --- | --- |
-| `app_notifications` | A user's notification history (`zNotification`): `category`, `title`, `body`, `target_id` (the record a tap opens), `read_at` (the first read), an optional `dedupe_key` unique per user among live rows, so a repeated event writes nothing. Indexed `(user_id, created_at, id)` for the newest-first page and partially on unread rows for the count. Missed-dose titles name the medicine: never logged. Erasure removes the rows with the user |
+| `app_notifications` | A user's notification history (`zNotification`), app and portal accounts alike (M16): `category`, `title`, `body`, `target_id` (the record a tap opens), `read_at` (the first read), an optional `dedupe_key` unique per user among live rows, so a repeated event writes nothing. Indexed `(user_id, created_at, id)` for the newest-first page and partially on unread rows for the count. Missed-dose titles name the medicine: never logged. Erasure removes the rows with the user |
 | `notification_preferences` | A saved choice per category: `push`, `sms`, `in_app`, `(user_id, category)` unique among live rows. A category with no row is on, SMS off |
 
 ### Doctors (M8)

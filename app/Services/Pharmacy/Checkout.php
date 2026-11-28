@@ -29,6 +29,7 @@ class Checkout
         private readonly Cart $cart,
         private readonly Payments $payments,
         private readonly OrderPayments $orderPayments,
+        private readonly OrderNotices $notices,
     ) {}
 
     /**
@@ -68,6 +69,10 @@ class Checkout
 
             return $orders;
         });
+
+        if ($channel === PaymentChannel::Counter) {
+            $orders->each(fn(Order $order) => $this->notices->arrived($order));
+        }
 
         return $this->orderPayments->attach($orders);
     }

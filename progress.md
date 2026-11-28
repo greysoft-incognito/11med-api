@@ -2,6 +2,25 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-11-28: M16.1 Notifications for portal accounts and doctors
+
+- `NotificationCategory` gains `pharmacy_order`, `lab_booking`, `doctor_review`,
+  `partner_application`, `payment_alert` and `announcement` (the last for M17), and
+  `NotificationCategory::for(Role)`: the preferences list and its validation offer each role only
+  its own categories. A doctor's list is now `consultation`, `account`, `announcement` (FE-161).
+- `Notifier` works for portal accounts (the row only; a push is queued for app accounts alone)
+  and gains `toOrganisation()` and `toPermission()`, which walk their audience 200 at a time;
+  `toPermission()` reads M15's `PermissionHolders` (stand-in: every admin until M15 lands).
+- Routes `portal/notifications` (paged), `unread-count`, `read-all`, `{id}/read` and
+  `preferences` (`routes/v1/portal-notifications.php`, FE-160).
+- Events: a paid order and a counter pickup reach the pharmacy's accounts (`OrderNotices::arrived`),
+  the patient's cancellation of one it could see follows (`withdrawn`); a paid booking and its
+  cancellation reach the laboratory's (`BookingNotices`); `DoctorSubmitted`, `PartnerApplied` and
+  `RefundFailed` tell the team by permission (`TellTheTeam`). A doctor is told when a patient
+  cancels a paid consultation and when a paid request expires unanswered.
+- A failed payout is not alerted: the team marks it failed itself.
+- No migration, no new setting.
+
 ## 2026-11-28: M15 Admin RBAC and audit
 
 - Permissions are the unit (`App\Enums\AdminPermission`, 31 cases as `<area>.<action>`). A team

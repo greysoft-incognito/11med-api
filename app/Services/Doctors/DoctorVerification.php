@@ -7,6 +7,7 @@ use App\Enums\DocumentStatus;
 use App\Enums\VerificationStatus;
 use App\Events\Doctors\DoctorDocumentReviewed;
 use App\Events\Doctors\DoctorReviewed;
+use App\Events\Doctors\DoctorSubmitted;
 use App\Exceptions\ApiException;
 use App\Models\DoctorProfile;
 
@@ -41,6 +42,8 @@ class DoctorVerification
         $profile->verification_notes = null;
         $profile->submitted_at = now();
         $profile->save();
+
+        DoctorSubmitted::dispatch($profile);
     }
 
     public function isQueued(DoctorProfile $profile): bool

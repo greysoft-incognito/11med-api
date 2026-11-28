@@ -60,8 +60,12 @@ class RefundTest extends TestCase
         $this->assertSame('refunded', $this->statusOf($reference));
     }
 
-    public function test_a_refund_paystack_refuses_leaves_the_share_paid(): void
+    public function test_a_refund_paystack_refuses_leaves_the_share_paid_and_tells_the_team(): void
     {
+        $admin = User::factory()
+            ->portal(Role::Admin)
+            ->create();
+
         [$first, , $reference] = $this->paidCheckout();
 
         app(Refunds::class)->refund($first);
@@ -71,6 +75,11 @@ class RefundTest extends TestCase
         $this->assertSame('paid', $this->summary($first)['status']);
         $this->assertDatabaseHas('payment_refunds', ['status' => 'failed']);
         $this->assertDatabaseHas('payment_targets', ['target_id' => $first->id, 'state' => 'refund_failed']);
+        $this->assertDatabaseHas('app_notifications', [
+            'user_id' => $admin->id,
+            'category' => 'payment_alert',
+            'target_id' => Payment::query()->where('reference', $reference)->value('uuid'),
+        ]);
     }
 
     public function test_a_refund_is_never_more_than_the_share(): void
