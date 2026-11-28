@@ -130,4 +130,8 @@ return [
     'STAFF_NOT_FOUND' => 'That person is not on your staff.',
     'STAFF_IS_OWNER' => 'The owner cannot be removed. Make someone else the owner first.',
     'STAFF_NOT_ACTIVE' => 'This person has not set a password yet, so they cannot be made the owner.',
+    'TICKET_NOT_FOUND' => 'That support request is not here.',
+    'TICKET_CLOSED' => 'This support request is closed. Start a new one if you still need help.',
+    'SUPPORT_LINK_NOT_FOUND' => 'That order, booking or consultation is not one of yours.',
+    'ASSIGNEE_NOT_SUPPORT' => 'That team member cannot answer support requests.',
 ];

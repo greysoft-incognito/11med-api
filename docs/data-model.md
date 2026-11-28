@@ -130,4 +130,11 @@ complaint emptied and the review dropped. Erasing a doctor nulls `doctor_id` and
 | `guide_conversations` | Not soft deleted. One per patient (`user_id` unique, cascades on erasure), `started_at`, `last_message_at` (indexed; idle 30 days is pruned daily). Starting over deletes the row |
 | `guide_messages` | Not soft deleted. `conversation_id` (cascades), `sender` (`user`, `guide`), `body` (encrypted with `APP_KEY`), `actions` and `suggestions` JSONB, `urgency`, `sent_at`. The newest 100 per conversation are kept. Medical data: never logged |
 
+### Partner staff and support (M18)
+
+| Table | Notes |
+| --- | --- |
+| `support_tickets` | A support conversation. `requester_id` (an app or partner portal account; cascades on erasure), `category` (`account`, `payment`, `order`, `lab_booking`, `consultation`, `technical`, `other`), `subject`, `status` (`open` waits for the team, `answered` for the requester, `closed`), optional `link_kind` (`order`, `lab_booking`, `consultation`) and `link_id` (the record's public uuid, checked against the owning module when opened), `assignee_id` (a team member who can reply), `last_activity_at` (the list order), `closed_at` |
+| `support_messages` | `ticket_id` (cascades), `author_id`, `from_team`, `body` (encrypted with `APP_KEY`; may describe symptoms, never logged), `attachment_media_id` (a `support_attachment` upload, private), `sent_at` |
+
 Domain tables are added here as each milestone lands.

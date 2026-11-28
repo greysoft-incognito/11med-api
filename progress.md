@@ -2,6 +2,27 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-02: M18.2 Contact support
+
+- Patients, doctors, pharmacies and laboratories: `GET` and `POST support/tickets`,
+  `GET support/tickets/{id}`, `GET` and `POST support/tickets/{id}/messages`, each seeing only
+  their own tickets (another's is 404 `TICKET_NOT_FOUND`). A ticket has a category, a subject, a
+  first message, an optional `support_attachment` upload (new private media purpose, images or
+  PDF) and an optional link to an order, lab booking or consultation, checked by `SupportLinks`
+  against the owning module's own finder (422 `SUPPORT_LINK_NOT_FOUND` on `link.id`). A follow-up
+  reopens an answered ticket; a closed one refuses with 422 `TICKET_CLOSED`. Writes share the
+  `support` limiter, 30 an hour per account.
+- The team: `GET portal/admin/support/tickets` (paged, newest activity first, filters `status`,
+  `category`, `assigned=me|unassigned`, `q` over subject and the requester's name, email and phone),
+  `GET .../{id}` and `.../{id}/messages` need `support.view` or `support.reply`; `POST .../{id}/assign`
+  (a holder of `support.reply` through `PermissionHolders`, or null; 422 `ASSIGNEE_NOT_SUPPORT`),
+  `POST .../{id}/messages` and `POST .../{id}/close` need `support.reply`. Each write calls
+  `AuditLog::record()` (`support.ticket.assigned`, `.replied`, `.closed`, no message text). A reply
+  tells the requester through `Notifier::send()` in the new `support` notification category, with
+  the ticket id as the target and no message text in the title or body.
+- Message bodies are encrypted at rest. Erasing the requester removes their tickets and messages.
+- The admin routes rely on M15 seeding the `support.*` permissions; until then only the tests grant them.
+
 ## 2026-12-02: M18.1 Partner staff
 
 - `organisations.owner_id`: approval makes the contact's account the owner; the migration gives

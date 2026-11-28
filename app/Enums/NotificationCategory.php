@@ -18,4 +18,5 @@ enum NotificationCategory: string
     case Order = 'order';
     case LabRequest = 'lab_request';
     case LabResult = 'lab_result';
+    case Support = 'support';
 }

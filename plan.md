@@ -92,7 +92,7 @@ one pull request from `feat/<milestone>`. Status: `[ ]` not started, `[~]` in pr
 ## M18 Partner staff and support `[~]`
 
 - [x] 18.1 Pharmacy and laboratory staff: owner at approval, invite, remove, hand over ownership
-- [ ] 18.2 Contact support: tickets for app and portal users, the team's queue
+- [x] 18.2 Contact support: tickets for app and portal users, the team's queue
 - [ ] 18.3 Re-consent when the policy version changes
 - [ ] 18.4 Minimum app version per platform
 

@@ -99,6 +99,11 @@ return [
         'accept_attempts_per_hour' => 10,
     ],
 
+    // Support (M18): tickets and follow-ups one account may send an hour.
+    'support' => [
+        'messages_per_hour' => 30,
+    ],
+
     // Partners (portal handover §6): applications per address an hour.
     'partners' => [
         'applications_per_hour' => 5,
