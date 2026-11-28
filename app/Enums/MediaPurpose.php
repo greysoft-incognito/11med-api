@@ -19,6 +19,7 @@ enum MediaPurpose: string
     case LaboratoryCover = 'laboratory_cover';
     case LabResults = 'lab_results';
     case PartnerLicence = 'partner_licence';
+    case SupportAttachment = 'support_attachment';
 
     public const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -38,6 +39,7 @@ enum MediaPurpose: string
             self::DrugImage, self::PharmacyLogo, self::PharmacyCover => [Role::Pharmacy],
             self::LaboratoryLogo, self::LaboratoryCover, self::LabResults => [Role::Laboratory],
             self::PartnerLicence => [],
+            self::SupportAttachment => [Role::Patient, Role::Doctor, Role::Pharmacy, Role::Laboratory],
         };
     }
 
@@ -56,17 +58,17 @@ enum MediaPurpose: string
     {
         return match ($this) {
             self::LabResults => self::DOCUMENT_TYPES,
-            self::MessageAttachment, self::PartnerLicence => [...self::IMAGE_TYPES, ...self::DOCUMENT_TYPES],
+            self::MessageAttachment, self::PartnerLicence, self::SupportAttachment => [...self::IMAGE_TYPES, ...self::DOCUMENT_TYPES],
             default => self::IMAGE_TYPES,
         };
     }
 
     /**
-     * Medical files, a doctor's verification documents and licences are served by signed, short-lived URLs; store pictures are public.
+     * Medical files, a doctor's verification documents, licences and support attachments are served by signed, short-lived URLs; store pictures are public.
      */
     public function isPrivate(): bool
     {
-        return in_array($this, [self::DoctorDocument, self::MessageAttachment, self::LabResults, self::PartnerLicence], true);
+        return in_array($this, [self::DoctorDocument, self::MessageAttachment, self::LabResults, self::PartnerLicence, self::SupportAttachment], true);
     }
 
     public static function isImage(string $contentType): bool

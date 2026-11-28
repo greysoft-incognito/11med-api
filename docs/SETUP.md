@@ -94,12 +94,14 @@ and push) runs in the workers, so skipping the restart leaves them on the old va
 | `APPLE_BUNDLE_ID` | `ng.elevenmed.app` | The audience Apple sign-in tokens are checked against | M2 |
 | `PORTALS_URL` | `http://localhost:3000` | Where the portals live, e.g. the deployed portal's `https://…` origin with no trailing path. Reset and welcome emails link to `PORTALS_URL/set-password?token=…`, so on a server it must be set or the links point at localhost | M2 |
 | `CORS_ALLOWED_ORIGINS` | `PORTALS_URL` | Browser origins allowed to call the API, comma separated, e.g. the staging and local portals. The app is native and needs none | M13 |
-| `CONSENT_POLICY_VERSION` | `2026-07-01` | The policy version recorded when the app sends no consent record | M2 |
+| `CONSENT_POLICY_VERSION` | `2026-07-01` | The terms and privacy policy version in force. Recorded when the app sends no consent record, and since M18 every patient, doctor, pharmacy and laboratory account that has not accepted this exact version is asked to accept it before going on. Change it only when the published terms change, and publish the new terms first; then `php artisan config:cache` | M2, M18 |
 | `MEDIA_PUBLIC_DISK` | `public` | Disk for photos and store pictures. Point at an `s3` disk with public read once the bucket exists (HT-005) | M3 |
 | `MEDIA_PRIVATE_DISK` | `local` | Disk for attachments, lab results and licences. A private `s3` disk once the bucket exists | M3 |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT` | none | The bucket, for the `s3` disk (HT-005) | M3 |
 | `EMERGENCY_URL` | `https://11med.ng/profile/view` | The public page a QR code opens: the portals' `/profile/view` (HT-012) | M4 |
 | `APP_DOWNLOAD_URL` | `https://11med.ng/app` | The store link in a caregiver invitation SMS (HT-012) | M4 |
+| `APP_MIN_VERSION_IOS`, `APP_MIN_VERSION_ANDROID` | `1.0.0` | The oldest app version (`X.Y.Z`, the app's `version`) each platform still serves. A build below it shows an update screen and nothing else on launch and on return to the foreground. Raise it only once the newer build is live in that store | M18 |
+| `APP_STORE_URL_IOS`, `APP_STORE_URL_ANDROID` | `APP_DOWNLOAD_URL` | The App Store and Google Play pages the update screen opens | M18 |
 | `REPORT_DISK` | `local` | Disk for compliance report PDFs, served by a 15-minute signed link and deleted after a day. A private `s3` disk once the bucket exists (HT-005); never a public one | M6 |
 
 | `DATA_EXPORT_DISK` | `local` | Disk for "download my data" zips (M14): the person's whole record, kept 48 hours and served only by signed links. A private `s3` disk once the bucket exists (HT-005); never a public one. The queue worker builds them, writing temporary files under `storage/app/tmp` | M14 |

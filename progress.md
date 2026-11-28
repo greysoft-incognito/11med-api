@@ -2,6 +2,63 @@
 
 Newest first. Never edit an old entry.
 
+## 2026-12-02: M18.4 Minimum app version
+
+- `GET app/version` (public) answers `{ ios, android }`, each `{ minimum_version, update_url }`,
+  from `elevenmed.app_versions` (`APP_MIN_VERSION_IOS`, `APP_MIN_VERSION_ANDROID`, default `1.0.0`;
+  `APP_STORE_URL_IOS`, `APP_STORE_URL_ANDROID`, falling back to `APP_DOWNLOAD_URL`). The app
+  compares its own version on launch and foreground. The server does not refuse older builds.
+
+## 2026-12-02: M18.3 Re-consent
+
+- `PolicyConsent` reads the version in force (`CONSENT_POLICY_VERSION`). The app's `zAccount` and
+  the portals' `zPortalAccount` carry `pending_policy_version`: the version when the account has no
+  consent record for exactly it, else null. The team's accounts are never asked.
+- `POST auth/consent` (patient, doctor) and `POST portal/auth/consent` (pharmacy, laboratory) take
+  `{ policy_version }`, write a `consent_records` row with context `policy-update` and answer the
+  account. A version other than the one in force is 422 `POLICY_VERSION_OUTDATED`; accepting twice
+  writes once.
+- The clients hold the gate: the app and the portals show the terms before anything else while the
+  field is set. The server does not refuse other routes meanwhile.
+
+## 2026-12-02: M18.2 Contact support
+
+- Patients, doctors, pharmacies and laboratories: `GET` and `POST support/tickets`,
+  `GET support/tickets/{id}`, `GET` and `POST support/tickets/{id}/messages`, each seeing only
+  their own tickets (another's is 404 `TICKET_NOT_FOUND`). A ticket has a category, a subject, a
+  first message, an optional `support_attachment` upload (new private media purpose, images or
+  PDF) and an optional link to an order, lab booking or consultation, checked by `SupportLinks`
+  against the owning module's own finder (422 `SUPPORT_LINK_NOT_FOUND` on `link.id`). A follow-up
+  reopens an answered ticket; a closed one refuses with 422 `TICKET_CLOSED`. Writes share the
+  `support` limiter, 30 an hour per account.
+- The team: `GET portal/admin/support/tickets` (paged, newest activity first, filters `status`,
+  `category`, `assigned=me|unassigned`, `q` over subject and the requester's name, email and phone),
+  `GET .../{id}` and `.../{id}/messages` need `support.view` or `support.reply`; `POST .../{id}/assign`
+  (a holder of `support.reply` through `PermissionHolders`, or null; 422 `ASSIGNEE_NOT_SUPPORT`),
+  `POST .../{id}/messages` and `POST .../{id}/close` need `support.reply`. Each write calls
+  `AuditLog::record()` (`support.ticket.assigned`, `.replied`, `.closed`, no message text). A reply
+  tells the requester through `Notifier::send()` in the new `support` notification category, with
+  the ticket id as the target and no message text in the title or body.
+- Message bodies are encrypted at rest. Erasing the requester removes their tickets and messages.
+- The admin routes rely on M15 seeding the `support.*` permissions; until then only the tests grant them.
+
+## 2026-12-02: M18.1 Partner staff
+
+- `organisations.owner_id`: approval makes the contact's account the owner; the migration gives
+  existing partners the account with the contact's email, or their first. The portal session's
+  `zPortalAccount` carries `is_owner`.
+- `GET portal/staff` (paged, every member of the pharmacy or laboratory), `POST portal/staff`
+  (invite by name and email: a portal account of the partner's kind, sent the seven-day welcome
+  link), `DELETE portal/staff/{id}` (sessions revoked through the `Sessions` seam, the account soft
+  deleted and its username released, so the address can be invited again) and
+  `POST portal/staff/{id}/owner`. `PartnerStaff` is the service; `Organisations::transferOwnership()`
+  writes the owner. Refusals: 403 `NOT_OWNER` for a member who is not the owner, 404
+  `STAFF_NOT_FOUND` for another partner's account, 409 `EMAIL_TAKEN`, 422 `STAFF_IS_OWNER` (remove)
+  and `STAFF_NOT_ACTIVE` (ownership needs a member who has set a password).
+- Staff reach every existing portal route, since those already resolve the organisation from the
+  account. Partners have no payout details today, so the brief's "except payout details" gates
+  nothing yet.
+
 ## 2026-12-01: M17 route list and the portal
 
 - The portal's mock now serves the 22 admin operations routes (11med-web `feat/admin-operations`);

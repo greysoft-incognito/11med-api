@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\Role;
+use App\Http\Controllers\Identity\PolicyConsentController;
 use App\Http\Controllers\Identity\PortalAuthController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,4 +20,8 @@ Route::prefix('portal/auth')->name('portal.auth.')->group(function () {
     Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values(Role::portal()))])
         ->get('session', [PortalAuthController::class, 'session'])
         ->name('session');
+
+    Route::middleware(['auth:sanctum', 'role:' . implode('|', Role::values([Role::Pharmacy, Role::Laboratory]))])
+        ->post('consent', [PolicyConsentController::class, 'portal'])
+        ->name('consent');
 });
